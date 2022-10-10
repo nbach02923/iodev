@@ -24,6 +24,8 @@ public class IORouteConfig {
                         .uri("lb://humanresources-service"))
                     .route("iosecurity", r -> r.path("/api/authenticate/**", "/api/taikhoans/**", "/api/vaitros")
                         .uri("lb://iosecurity-service"))
+                    .route("cors", r -> r.path("/api/cms/cors")
+                        .uri("lb://contestmanagementsystem-service"))
                     .route("contestmanagementsystem", r -> r.path("/api/cuocthis/**", "/api/danhsachthis/**", "/api/doanthis/**", "/api/doithis/**", "/api/huanluyenviens/**", "/api/khoithis/**", "/api/thisinhs/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://contestmanagementsystem-service"))
