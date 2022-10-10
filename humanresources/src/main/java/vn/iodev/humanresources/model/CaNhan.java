@@ -1,0 +1,183 @@
+package vn.iodev.humanresources.model;
+
+import java.sql.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import vn.iodev.humanresources.utils.RandomUtil;
+
+@Entity
+@Table(name = "T_CaNhan")
+public class CaNhan {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getHoTen() {
+        return hoTen;
+    }
+
+    public void setHoTen(String hoTen) {
+        this.hoTen = hoTen;
+    }
+
+    public int getGioiTinh() {
+        return gioiTinh;
+    }
+
+    public void setGioiTinh(int gioiTinh) {
+        this.gioiTinh = gioiTinh;
+    }
+
+    public Date getNgaySinh() {
+        return ngaySinh;
+    }
+
+    public void setNgaySinh(Date ngaySinh) {
+        this.ngaySinh = ngaySinh;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSoDienThoai() {
+        return soDienThoai;
+    }
+
+    public void setSoDienThoai(String soDienThoai) {
+        this.soDienThoai = soDienThoai;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getLinkedIn() {
+        return linkedIn;
+    }
+
+    public void setLinkedIn(String linkedIn) {
+        this.linkedIn = linkedIn;
+    }
+
+    public String getGithub() {
+        return github;
+    }
+
+    public void setGithub(String github) {
+        this.github = github;
+    }
+
+    public String getGoogle() {
+        return google;
+    }
+
+    public void setGoogle(String google) {
+        this.google = google;
+    }
+
+    public int getTinhTrang() {
+        return tinhTrang;
+    }
+
+    public void setTinhTrang(int tinhTrang) {
+        this.tinhTrang = tinhTrang;
+    }
+
+    public long getThoiGianTao() {
+        return thoiGianTao;
+    }
+
+    public void setThoiGianTao(long thoiGianTao) {
+        this.thoiGianTao = thoiGianTao;
+    }
+
+    public long getThoiGianCapNhat() {
+        return thoiGianCapNhat;
+    }
+
+    public void setThoiGianCapNhat(long thoiGianCapNhat) {
+        this.thoiGianCapNhat = thoiGianCapNhat;
+    }
+
+    @Id
+    private String id;
+
+    @Column(name = "hoTen", nullable = false)
+    private String hoTen;
+
+    @Column(name = "gioiTinh", nullable = false)
+    private int gioiTinh;
+
+    @Column(name = "ngaySinh", nullable = true)
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private Date ngaySinh;
+
+    @Column(name = "email", nullable = false)
+    @Email
+    private String email;
+
+    @Column(name = "soDienThoai", nullable = true)
+    private String soDienThoai;
+
+    @Column(name = "avatar", nullable = true)
+    private String avatar;
+
+    @Column(name = "linkedIn", nullable = true)
+    private String linkedIn;
+
+    @Column(name = "github", nullable = true)
+    private String github;
+
+    @Column(name = "google", nullable = true)
+    private String google;
+
+    @Column(name = "tinhTrang", nullable = false)
+    private int tinhTrang;
+
+    @Column(name = "thoiGianTao", nullable = false)
+    private long thoiGianTao;
+
+    @Column(name = "thoiGianCapNhat", nullable = false)
+    private long thoiGianCapNhat;
+
+    public CaNhan() {}
+
+    public CaNhan(String hoTen, int gioiTinh, Date ngaySinh, String email, String soDienThoai, String avatar, String linkedIn, String github, String google) {
+        this.hoTen = hoTen;
+        this.gioiTinh = gioiTinh;
+        this.ngaySinh = ngaySinh;
+        this.email = email;
+        this.soDienThoai = soDienThoai;
+        this.avatar = avatar;
+        this.linkedIn = linkedIn;
+        this.github = github;
+        this.google = google;
+        this.thoiGianTao = System.currentTimeMillis();
+        this.thoiGianCapNhat = System.currentTimeMillis();
+        this.tinhTrang = 0;
+        this.id = RandomUtil.generateRandomEID(this);
+    }
+}
