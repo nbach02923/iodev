@@ -1,12 +1,15 @@
 package vn.iodev.contestmanagementsystem.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,17 +21,33 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import vn.iodev.contestmanagementsystem.config.CMSConfiguration;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.FileIO;
+import vn.iodev.contestmanagementsystem.payload.FileIOResponse;
+import vn.iodev.contestmanagementsystem.payload.ResponseMessage;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
+import vn.iodev.contestmanagementsystem.repository.FileIORepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
+import vn.iodev.contestmanagementsystem.service.FileStorageService;
 
 @RestController
 @RequestMapping("/api")
 public class CuocThiController {
     @Autowired
     CuocThiRepository cuocThiRepository;
+
+    @Autowired
+    FileStorageService storageService;
+
+    @Autowired
+    FileIORepository fileIORepository;
+
+    @Autowired
+    CMSConfiguration configuration;
 
     @GetMapping("/cuocthis")
     public List<CuocThi> getAllCuocThis(@RequestParam(defaultValue = "1") int page, 
@@ -68,8 +87,7 @@ public class CuocThiController {
                                                             cuocThi.getNgayBatDau(), 
                                                             cuocThi.getNgayKetThuc(), 
                                                             cuocThi.getThongTinMoTa(), 
-                                                            cuocThi.getWebsite(), 
-                                                            cuocThi.getHinhAnh()));
+                                                            cuocThi.getWebsite()));
                 return new ResponseEntity<>(_cuocThi, HttpStatus.CREATED);
             }
             else {
@@ -134,10 +152,98 @@ public class CuocThiController {
         }
     }
 
+    @PutMapping("/cuocthis/{id}/hinhanhs")
+    public ResponseEntity<ResponseMessage> updateHinhAnhCuocThi(@PathVariable("id") String id, @RequestParam("hinhAnhs") MultipartFile[] hinhAnhFiles,
+        @RequestHeader("vaiTros") String vaiTros) {
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
+        if (cuocThiData.isPresent()) {
+            CuocThi _cuocThi = cuocThiData.get();
+            for (MultipartFile hinhAnhFile : hinhAnhFiles) {
+                try {
+                    FileIO fileIO = storageService.store(hinhAnhFile, _cuocThi);
+                    fileIORepository.save(fileIO);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } 
+            }
+          
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage("Update hinhAnhs successfully!"));
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/cuocthis/{id}/hinhanhs")
+    public ResponseEntity<List<FileIOResponse>> getHinhAnhsCuocThi(@PathVariable("id") String id,
+        @RequestHeader("vaiTros") String vaiTros) {
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
+        String baseUrl = configuration.getGatewayUrl();
+
+        if (cuocThiData.isPresent()) {
+            List<FileIOResponse> files = storageService.getAllFilesByCuocThiId(id).map(fileIO -> {
+                String fileDownloadUri = String.format("%s/api/files/cuocthis/%s/hinhanhs/%s", baseUrl, id, fileIO.getId());
+          
+                return new FileIOResponse(
+                    fileIO.getId(),
+                    fileIO.getName(),
+                    fileDownloadUri,
+                    fileIO.getType(),
+                    fileIO.getData().length);
+              }).collect(Collectors.toList());
+          
+            return ResponseEntity.status(HttpStatus.OK).body(files);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(value = "/files/cuocthis/{cuocThiId}/hinhanhs/{id}", produces = {
+        MediaType.IMAGE_JPEG_VALUE,
+        MediaType.IMAGE_PNG_VALUE,
+        MediaType.IMAGE_GIF_VALUE
+    })
+    public ResponseEntity<byte[]> getFile(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("id") String id) {
+        if (!cuocThiRepository.existsById(cuocThiId)) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        FileIO fileIO = storageService.getFile(id);
+
+        return ResponseEntity.ok()
+            // .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toChuc.getLogoFileName() + "\"")
+            .body(fileIO.getData());
+    }
+    
+    @DeleteMapping("/cuocthis/{cuocThiId}/hinhanhs/{id}")
+    public ResponseEntity<HttpStatus> deleteHinhAnhCuocThi(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        if (!cuocThiRepository.existsById(cuocThiId)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        try {
+            fileIORepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @DeleteMapping("/cuocthis/{id}")
     public ResponseEntity<HttpStatus> deleteCuocThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         try {
             cuocThiRepository.deleteById(id);

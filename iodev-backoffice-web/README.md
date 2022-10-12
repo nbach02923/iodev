@@ -1,4 +1,4 @@
-# iodev-admin-web
+# iodev-backoffice-web
 
 ## Project setup
 ```

@@ -3,10 +3,10 @@ package vn.iodev.humanresources.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
-import vn.iodev.humanresources.config.HumanResourcesConfiguration;
-import vn.iodev.humanresources.utils.RandomUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity(name = "T_ToChuc")
 @Table(name = "T_ToChuc")
@@ -39,7 +39,29 @@ public class ToChuc {
     private String web;
 
     @Column(name = "logo", nullable = true)
-    private String logo;
+    @Lob
+    @JsonIgnore
+    private byte[] logo;
+
+    public byte[] getLogo() {
+        return logo;
+    }
+
+    public void setLogo(byte[] logo) {
+        this.logo = logo;
+    }
+
+    @Column(name = "logoFileName", nullable = true)
+    @JsonIgnore
+    private String logoFileName;
+
+    public String getLogoFileName() {
+        return logoFileName;
+    }
+
+    public void setLogoFileName(String logoFileName) {
+        this.logoFileName = logoFileName;
+    }
 
     @Column(name = "tinhTrang", nullable = false)
     private int tinhTrang;
@@ -50,7 +72,7 @@ public class ToChuc {
     @Column(name = "thoiGianCapNhat", nullable = false)
     private long thoiGianCapNhat;
 
-    public ToChuc(String tenGoi, String tiengAnh, String tenVietTat, String loaiToChuc, String diaChiHoatDong, String viTriDiaLy, String email, String web, String logo, int tinhTrang, long thoiGianTao, long thoiGianCapNhat) {
+    public ToChuc(String tenGoi, String tiengAnh, String tenVietTat, String loaiToChuc, String diaChiHoatDong, String viTriDiaLy, String email, String web, int tinhTrang, long thoiGianTao, long thoiGianCapNhat) {
         this.tenGoi = tenGoi;
         this.tiengAnh = tiengAnh;
         this.tenVietTat = tenVietTat;
@@ -59,7 +81,6 @@ public class ToChuc {
         this.viTriDiaLy = viTriDiaLy;
         this.email = email;
         this.web = web;
-        this.logo = logo;
         this.tinhTrang = tinhTrang;
         this.thoiGianTao = thoiGianTao;
         this.thoiGianCapNhat = thoiGianCapNhat;
@@ -74,8 +95,7 @@ public class ToChuc {
         String diaChiHoatDong,
         String viTriDiaLy,
         String email,
-        String web,
-        String logo) {
+        String web) {
             this.tenGoi = tenGoi;
             this.tiengAnh = tiengAnh;
             this.tenVietTat = tenVietTat;
@@ -84,10 +104,8 @@ public class ToChuc {
             this.viTriDiaLy = viTriDiaLy;
             this.email = email;
             this.web = web;
-            this.logo = logo;
             this.thoiGianTao = System.currentTimeMillis();
             this.thoiGianCapNhat =  System.currentTimeMillis();
-            this.id = RandomUtil.generateRandomNumeric(HumanResourcesConfiguration.getInstance().getToChucIdLength());
             this.tinhTrang = 0;
         }
     public String getId() {
@@ -147,14 +165,6 @@ public class ToChuc {
 
     public void setWeb(String web) {
         this.web = web;
-    }
-
-    public String getLogo() {
-        return logo;
-    }
-
-    public void setLogo(String logo) {
-        this.logo = logo;
     }
 
     public int getTinhTrang() {

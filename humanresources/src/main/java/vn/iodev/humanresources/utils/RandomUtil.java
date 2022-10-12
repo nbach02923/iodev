@@ -1,10 +1,8 @@
 package vn.iodev.humanresources.utils;
 
+import java.sql.Date;
 import java.util.Calendar;
 import java.util.Random;
-
-import vn.iodev.humanresources.config.HumanResourcesConfiguration;
-import vn.iodev.humanresources.model.CaNhan;
 
 public class RandomUtil {
     public static String generateRandomAlphanumeric(int length) {
@@ -34,14 +32,14 @@ public class RandomUtil {
       return generatedString;
     }
 
-    public static String generateRandomEID(CaNhan caNhan) {
+    public static String generateRandomEID(Date ngaySinh, int gioiTinh, int length) {
       Calendar cal = Calendar.getInstance();
-      cal.setTime(caNhan.getNgaySinh());
+      cal.setTime(ngaySinh);
       int year = cal.get(Calendar.YEAR);
       String maGioiTinh = "";
       String maNamSinh = String.valueOf(year % 100);
       if (1900 <= year && year <= 1999) {
-        if (caNhan.getGioiTinh() == 0) {
+        if (gioiTinh == 0) {
           maGioiTinh = "0";
         }
         else {
@@ -49,7 +47,7 @@ public class RandomUtil {
         }
       }
       else if (2000 <= year && year <= 2099) {
-        if (caNhan.getGioiTinh() == 0) {
+        if (gioiTinh == 0) {
           maGioiTinh = "2";
         }
         else {
@@ -57,7 +55,7 @@ public class RandomUtil {
         }
       }
       else if (2100 <= year && year <= 2199) {
-        if (caNhan.getGioiTinh() == 0) {
+        if (gioiTinh == 0) {
           maGioiTinh = "4";
         }
         else {
@@ -65,7 +63,7 @@ public class RandomUtil {
         }
       }
       else if (2200 <= year && year <= 2299) {
-        if (caNhan.getGioiTinh() == 0) {
+        if (gioiTinh == 0) {
           maGioiTinh = "6";
         }
         else {
@@ -73,7 +71,7 @@ public class RandomUtil {
         }
       }
       else if (2300 <= year && year <= 2399) {
-        if (caNhan.getGioiTinh() == 0) {
+        if (gioiTinh == 0) {
           maGioiTinh = "8";
         }
         else {
@@ -81,6 +79,6 @@ public class RandomUtil {
         }
       }
 
-      return maGioiTinh + maNamSinh + generateRandomNumeric(HumanResourcesConfiguration.getInstance().getCaNhanIdLength());
+      return maGioiTinh + maNamSinh + generateRandomNumeric(length);
     }
 }

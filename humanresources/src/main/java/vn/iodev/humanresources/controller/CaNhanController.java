@@ -1,5 +1,6 @@
 package vn.iodev.humanresources.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -67,7 +69,8 @@ public class CaNhanController {
             if (_caNhanCuData.isPresent()) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
-            CaNhan pCaNhan = new CaNhan(caNhan.getHoTen(), caNhan.getGioiTinh(), caNhan.getNgaySinh(), caNhan.getEmail(), caNhan.getSoDienThoai(), caNhan.getAvatar(), caNhan.getLinkedIn(), caNhan.getGithub(), caNhan.getGoogle());
+            CaNhan pCaNhan = new CaNhan(caNhan.getHoTen(), caNhan.getGioiTinh(), caNhan.getNgaySinh(), caNhan.getEmail(), caNhan.getSoDienThoai(), caNhan.getLinkedIn(), caNhan.getGithub(), caNhan.getGoogle());
+            pCaNhan.setId(RandomUtil.generateRandomEID(pCaNhan.getNgaySinh(), pCaNhan.getGioiTinh(), configuration.getCaNhanIdLength()));
             int nOfIdGeneratedRetry = configuration.getnOfIdGeneratedRetry();
             int i = 0;
             while (i < nOfIdGeneratedRetry) {
@@ -76,7 +79,7 @@ public class CaNhanController {
                     break;
                 }
                 else {
-                    pCaNhan.setId(RandomUtil.generateRandomEID(pCaNhan));
+                    pCaNhan.setId(RandomUtil.generateRandomEID(pCaNhan.getNgaySinh(), pCaNhan.getGioiTinh(), configuration.getCaNhanIdLength()));
                 }
                 i++;
             }
@@ -140,6 +143,49 @@ public class CaNhanController {
         }
         else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/canhans/{id}/avatar")
+    public ResponseEntity<CaNhan> updateCaNhanAvatar(@PathVariable("id") String id, @RequestParam("avatar") MultipartFile avatarFile) {
+        Optional<CaNhan> caNhanData = caNhanRepository.findById(id);
+        String fileName = StringUtils.cleanPath(avatarFile.getOriginalFilename());
+
+        if (caNhanData.isPresent()) {
+            CaNhan caNhan = caNhanData.get();
+            try {
+                caNhan.setAvatar(avatarFile.getBytes());
+                caNhan.setAvatarFileName(fileName);
+
+                CaNhan saveCaNhan = caNhanRepository.save(caNhan);
+                return new ResponseEntity<>(saveCaNhan, HttpStatus.OK);
+            } catch (IOException e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping(value = "/files/canhans/{id}/avatar", produces = {
+        MediaType.IMAGE_JPEG_VALUE,
+        MediaType.IMAGE_PNG_VALUE,
+        MediaType.IMAGE_GIF_VALUE
+    })
+    public ResponseEntity<byte[]> getCaNhanAvatar(@PathVariable String id) {
+        if (!caNhanRepository.existsById(id)) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        Optional<CaNhan> caNhanData = caNhanRepository.findById(id);
+        if (caNhanData.isPresent()) {
+            CaNhan caNhan = caNhanData.get();
+            return ResponseEntity.ok()
+                // .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toChuc.getLogoFileName() + "\"")
+                .body(caNhan.getAvatar());
+        }
+        else {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

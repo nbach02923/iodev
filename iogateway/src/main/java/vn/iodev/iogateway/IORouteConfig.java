@@ -19,6 +19,8 @@ public class IORouteConfig {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
+                    .route("humanresources", r -> r.path("/api/files/tochucs/**", "/api/files/canhans/**")
+                        .uri("lb://humanresources-service"))
                     .route("humanresources", r -> r.path("/api/tochucs/**", "/api/canhans/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://humanresources-service"))
@@ -26,7 +28,9 @@ public class IORouteConfig {
                         .uri("lb://iosecurity-service"))
                     .route("cors", r -> r.path("/api/cms/cors")
                         .uri("lb://contestmanagementsystem-service"))
-                    .route("contestmanagementsystem", r -> r.path("/api/cuocthis/**", "/api/danhsachthis/**", "/api/doanthis/**", "/api/doithis/**", "/api/huanluyenviens/**", "/api/khoithis/**", "/api/thisinhs/**")
+                    .route("contestmanagementsystem", r -> r.path("/api/files/cuocthis/**")
+                        .uri("lb://contestmanagementsystem-service"))
+                    .route("contestmanagementsystem", r -> r.path("/api/cuocthis/**", "/api/danhsachthis/**", "/api/doanthis/**", "/api/doithis/**", "/api/huanluyenviens/**", "/api/khoithis/**", "/api/thisinhs/**", "/api/danhmucs/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://contestmanagementsystem-service"))
                 .build();

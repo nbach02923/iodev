@@ -1,5 +1,6 @@
 package vn.iodev.humanresources.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.humanresources.config.HumanResourcesConfiguration;
 import vn.iodev.humanresources.exception.ResourceNotFoundException;
 import vn.iodev.humanresources.helper.ExcelHelper;
@@ -32,6 +35,7 @@ import org.springframework.util.StringUtils;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class ToChucController {
     @Autowired
     private ToChucRepository toChucRepository;
@@ -65,8 +69,10 @@ public class ToChucController {
             if (_toChucCuData.isPresent()) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
-            ToChuc pToChuc = new ToChuc(toChuc.getTenGoi(), toChuc.getTiengAnh(), toChuc.getTenVietTat(), toChuc.getLoaiToChuc(), toChuc.getDiaChiHoatDong(), toChuc.getViTriDiaLy(), toChuc.getEmail(), toChuc.getWeb(), toChuc.getLogo());
+            ToChuc pToChuc = new ToChuc(toChuc.getTenGoi(), toChuc.getTiengAnh(), toChuc.getTenVietTat(), toChuc.getLoaiToChuc(), toChuc.getDiaChiHoatDong(), toChuc.getViTriDiaLy(), toChuc.getEmail(), toChuc.getWeb());
             int nOfIdGeneratedRetry = configuration.getnOfIdGeneratedRetry();
+            pToChuc.setId(RandomUtil.generateRandomNumeric(configuration.getToChucIdLength()));
+
             int i = 0;
             while (i < nOfIdGeneratedRetry) {
                 _toChucCuData = toChucRepository.findById(pToChuc.getId());
@@ -149,6 +155,48 @@ public class ToChucController {
         }
     }
 
+    @PutMapping("/tochucs/{id}/logo")
+    public ResponseEntity<ToChuc> updateToChucLogo(@PathVariable("id") String id, @RequestParam("logo") MultipartFile logoFile) {
+        Optional<ToChuc> toChucData = toChucRepository.findById(id);
+        String fileName = StringUtils.cleanPath(logoFile.getOriginalFilename());
+        if (toChucData.isPresent()) {
+            ToChuc toChuc = toChucData.get();
+            try {
+                toChuc.setLogo(logoFile.getBytes());
+                toChuc.setLogoFileName(fileName);
+
+                ToChuc saveToChuc = toChucRepository.save(toChuc);
+                return new ResponseEntity<>(saveToChuc, HttpStatus.OK);
+            } catch (IOException e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
+    @GetMapping(value = "/files/tochucs/{id}/logo", produces = {
+        MediaType.IMAGE_JPEG_VALUE,
+        MediaType.IMAGE_PNG_VALUE,
+        MediaType.IMAGE_GIF_VALUE
+    })
+    public ResponseEntity<byte[]> getToChucLogo(@PathVariable String id) {
+        if (!toChucRepository.existsById(id)) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        Optional<ToChuc> toChucData = toChucRepository.findById(id);
+        if (toChucData.isPresent()) {
+            ToChuc toChuc = toChucData.get();
+            return ResponseEntity.ok()
+                // .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toChuc.getLogoFileName() + "\"")
+                .body(toChuc.getLogo());
+        }
+        else {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
     @DeleteMapping("/tochucs/{id}")
     public ResponseEntity<HttpStatus> deleteToChuc(@PathVariable("id") String id) {
         try {

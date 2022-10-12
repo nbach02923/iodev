@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -161,7 +162,7 @@ public class CuocThi {
     @Column(name = "website", nullable = true)
     private String website;
 
-    @Column(name = "hinhAnh", nullable = true)
+    @Transient
     private String hinhAnh;
 
     @Column(name = "tinhTrang")
@@ -178,8 +179,7 @@ public class CuocThi {
         Date ngayBatDau,
         Date ngayKetThuc,
         String thongTinMoTa,
-        String website,
-        String hinhAnh
+        String website
         ) {
             this.tenGoi = tenGoi;
             this.tiengAnh = tiengAnh;
@@ -191,7 +191,6 @@ public class CuocThi {
             this.ngayKetThuc = ngayKetThuc;
             this.thongTinMoTa = thongTinMoTa;
             this.website = website;
-            this.hinhAnh = hinhAnh;
             this.tinhTrang = 1;
         }
 }

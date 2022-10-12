@@ -77,10 +77,10 @@ public class ExcelService {
                     int i = 0;
                     int nOfIdGeneratedRetry = configuration.getnOfIdGeneratedRetry();
                     while (i < nOfIdGeneratedRetry) {
-                        cn.setId(RandomUtil.generateRandomEID(cn));
+                        cn.setId(RandomUtil.generateRandomEID(cn.getNgaySinh(), cn.getGioiTinh(), configuration.getCaNhanIdLength()));
                         caNhanData = caNhanRepository.findById(cn.getId());
                         if (caNhanData.isPresent()) {
-                            cn.setId(RandomUtil.generateRandomEID(cn));
+                            cn.setId(RandomUtil.generateRandomEID(cn.getNgaySinh(), cn.getGioiTinh(), configuration.getCaNhanIdLength()));
                         }
                         else {
                             break;

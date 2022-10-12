@@ -5,14 +5,14 @@ import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import vn.iodev.humanresources.utils.RandomUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "T_CaNhan")
@@ -63,14 +63,6 @@ public class CaNhan {
 
     public void setSoDienThoai(String soDienThoai) {
         this.soDienThoai = soDienThoai;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
     }
 
     public String getLinkedIn() {
@@ -143,7 +135,29 @@ public class CaNhan {
     private String soDienThoai;
 
     @Column(name = "avatar", nullable = true)
-    private String avatar;
+    @Lob
+    @JsonIgnore
+    private byte[] avatar;
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
+    }
+
+    @Column(name = "avatarFileName", nullable = true)
+    @JsonIgnore
+    private String avatarFileName;
+    
+    public String getAvatarFileName() {
+        return avatarFileName;
+    }
+
+    public void setAvatarFileName(String avatarFileName) {
+        this.avatarFileName = avatarFileName;
+    }
 
     @Column(name = "linkedIn", nullable = true)
     private String linkedIn;
@@ -165,19 +179,17 @@ public class CaNhan {
 
     public CaNhan() {}
 
-    public CaNhan(String hoTen, int gioiTinh, Date ngaySinh, String email, String soDienThoai, String avatar, String linkedIn, String github, String google) {
+    public CaNhan(String hoTen, int gioiTinh, Date ngaySinh, String email, String soDienThoai, String linkedIn, String github, String google) {
         this.hoTen = hoTen;
         this.gioiTinh = gioiTinh;
         this.ngaySinh = ngaySinh;
         this.email = email;
         this.soDienThoai = soDienThoai;
-        this.avatar = avatar;
         this.linkedIn = linkedIn;
         this.github = github;
         this.google = google;
         this.thoiGianTao = System.currentTimeMillis();
         this.thoiGianCapNhat = System.currentTimeMillis();
         this.tinhTrang = 0;
-        this.id = RandomUtil.generateRandomEID(this);
     }
 }

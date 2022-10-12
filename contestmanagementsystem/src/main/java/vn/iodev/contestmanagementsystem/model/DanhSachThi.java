@@ -1,6 +1,9 @@
 package vn.iodev.contestmanagementsystem.model;
 
+import java.util.Map;
+
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,6 +17,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import vn.iodev.contestmanagementsystem.converter.BangDiemThiConverter;
 
 @Entity(name = "T_DanhSachThi")
 @Table(name = "T_DanhSachThi")
@@ -74,14 +79,6 @@ public class DanhSachThi {
         this.thuTuXepHang = thuTuXepHang;
     }
 
-    public String getBangDiemThi() {
-        return bangDiemThi;
-    }
-
-    public void setBangDiemThi(String bangDiemThi) {
-        this.bangDiemThi = bangDiemThi;
-    }
-
     public String getHangGiaiThuong() {
         return hangGiaiThuong;
     }
@@ -133,7 +130,8 @@ public class DanhSachThi {
     private Integer thuTuXepHang;
 
     @Column(name = "bangDiemThi", nullable = true)
-    private String bangDiemThi;
+    @Convert(converter = BangDiemThiConverter.class)
+    private Map<String, Object> bangDiemThi;
 
     @Column(name = "hangGiaiThuong", nullable = true)
     private String hangGiaiThuong;
@@ -169,7 +167,7 @@ public class DanhSachThi {
         String soBaoDanh,
         Integer ketQuaSoLoai,
         Integer thuTuXepHang,
-        String bangDiemThi,
+        Map<String, Object> bangDiemThi,
         String hangGiaiThuong
     ) {
         this.thiSinhId = thiSinhId;
@@ -192,5 +190,13 @@ public class DanhSachThi {
 
     public void setDanhSachThiId(long danhSachThiId) {
         this.danhSachThiId = danhSachThiId;
+    }
+
+    public Map<String, Object> getBangDiemThi() {
+        return bangDiemThi;
+    }
+
+    public void setBangDiemThi(Map<String, Object> bangDiemThi) {
+        this.bangDiemThi = bangDiemThi;
     }
 }
