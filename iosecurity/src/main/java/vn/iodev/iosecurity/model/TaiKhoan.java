@@ -143,6 +143,14 @@ public class TaiKhoan {
         this.vaiTros = vaiTros;
     }
 
+    public void addVaiTro(VaiTro vaiTro) {
+        this.vaiTros.add(vaiTro);
+    }
+
+    public void removeVaiTro(VaiTro vaiTro) {
+        this.vaiTros.remove(vaiTro);
+    }
+    
     public TaiKhoan() {}
     
     public TaiKhoan(String email,

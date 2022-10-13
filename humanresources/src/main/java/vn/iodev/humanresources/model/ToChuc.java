@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,6 +34,7 @@ public class ToChuc {
     private String viTriDiaLy;
  
     @Column(name = "email", nullable = true, unique = true)
+    @Email
     private String email;
 
     @Column(name = "web", nullable = true)

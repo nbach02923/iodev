@@ -156,7 +156,7 @@ public class CuocThiController {
     public ResponseEntity<ResponseMessage> updateHinhAnhCuocThi(@PathVariable("id") String id, @RequestParam("hinhAnhs") MultipartFile[] hinhAnhFiles,
         @RequestHeader("vaiTros") String vaiTros) {
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);

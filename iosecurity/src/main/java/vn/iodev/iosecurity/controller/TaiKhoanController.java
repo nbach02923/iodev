@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +32,9 @@ import vn.iodev.iosecurity.payload.CaNhanResponse;
 import vn.iodev.iosecurity.payload.ToChucResponse;
 import vn.iodev.iosecurity.repository.TaiKhoanRepository;
 import vn.iodev.iosecurity.repository.VaiTroRepository;
+import vn.iodev.iosecurity.service.EmailService;
 import vn.iodev.iosecurity.service.HumanResourceService;
+import vn.iodev.iosecurity.utils.RandomUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -47,6 +50,15 @@ public class TaiKhoanController {
 
     @Autowired
     HumanResourceService humanResourceService;
+
+    @Autowired
+    EmailService emailService;
+
+    @Value("${io.app.activecode.length:8}")
+    private int activeCodeLength;
+
+    @Value("${io.app.active.expired:24}")
+    private int activeExpired;
 
     @GetMapping("/taikhoans")
     public ResponseEntity<List<TaiKhoan>> getAllTaiKhoans(@RequestParam(required = false) String email, @RequestParam(required = false) Integer tinhTrang) {
@@ -127,6 +139,10 @@ public class TaiKhoanController {
                 }
             }
             TaiKhoan taiKhoanMoi = new TaiKhoan(taiKhoan.getEmail(), taiKhoan.getId(), taiKhoan.getLoaiTaiKhoan(), passwordEncoder.encode(taiKhoan.getMatKhau()));
+            taiKhoanMoi.setMaKichHoat(RandomUtil.generateRandomAlphanumeric(activeCodeLength));
+            long nowTime = System.currentTimeMillis();
+            taiKhoanMoi.setThoiHanKichHoat(nowTime + activeExpired * 60 * 60 * 1000);
+
             if (taiKhoan.getVaiTros() == null || taiKhoan.getVaiTros().size() == 0) {
                 Optional<VaiTro> vtNdData = vaiTroRepository.findByTen(EVaiTro.VAITRO_NGUOIDUNG);
 
@@ -148,8 +164,11 @@ public class TaiKhoanController {
 
             TaiKhoan _taiKhoan = taiKhoanRepository
                 .save(taiKhoanMoi);
+            emailService.sendActiveUserHtmlMail(_taiKhoan);
+
             return new ResponseEntity<>(_taiKhoan, HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -190,7 +209,14 @@ public class TaiKhoanController {
     @DeleteMapping("/taikhoans/{email}")
     public ResponseEntity<HttpStatus> deleteTaiKhoan(@PathVariable("email") String email) {
         try {
-            taiKhoanRepository.deleteById(email);
+            Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
+            if (taiKhoanData.isPresent()) {
+                TaiKhoan taiKhoan = taiKhoanData.get();
+                for (VaiTro vaiTro : taiKhoan.getVaiTros()) {
+                    taiKhoan.removeVaiTro(vaiTro);
+                }
+                taiKhoanRepository.delete(taiKhoan);
+            }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -198,12 +224,32 @@ public class TaiKhoanController {
     }
 
     @PutMapping("/taikhoans/{id}/kichhoat")
-    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email) {
+    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email, @RequestParam("maKichHoat") String maKichHoat) {
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {
             TaiKhoan _taiKhoan = taiKhoanData.get();
-            _taiKhoan.setTinhTrang(LoaiTinhTrang.DA_KICH_HOAT);
+            long now = System.currentTimeMillis();
+            if (_taiKhoan.getMaKichHoat().equals(maKichHoat) && now < _taiKhoan.getThoiHanKichHoat()) {
+                _taiKhoan.setTinhTrang(LoaiTinhTrang.DA_KICH_HOAT);
+                return new ResponseEntity<>(taiKhoanRepository.save(_taiKhoan), HttpStatus.OK);
+            }
+            else {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/taikhoans/{id}/dongtaikhoan")
+    public ResponseEntity<TaiKhoan> dongTaiKhoan(@PathVariable("id") String email) {
+        Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
+
+        if (taiKhoanData.isPresent()) {
+            TaiKhoan _taiKhoan = taiKhoanData.get();
+            _taiKhoan.setTinhTrang(LoaiTinhTrang.DONG_TAI_KHOAN);
+            
             return new ResponseEntity<>(taiKhoanRepository.save(_taiKhoan), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
