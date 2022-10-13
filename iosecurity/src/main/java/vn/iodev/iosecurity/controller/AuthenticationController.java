@@ -54,6 +54,6 @@ public class AuthenticationController {
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-        return new LoginResponse(jwt, vaiTros);
+        return new LoginResponse(jwt, vaiTros, userDetails.getTaiKhoan().getId());
     }
 }

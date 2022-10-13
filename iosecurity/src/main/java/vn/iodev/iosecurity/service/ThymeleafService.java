@@ -1,7 +1,6 @@
 package vn.iodev.iosecurity.service;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
@@ -48,14 +47,9 @@ public class ThymeleafService {
         return templateResolver;
     }
 
-    public String getContent(String templateName, HashMap<String, String> variables) {
+    public String getContent(String templateName, HashMap<String, Object> variables) {
         final Context context = new Context();
-
-        for(Map.Entry<String, String> entry : variables.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            context.setVariable(key, value);
-        }
+        context.setVariables(variables);
 
         return templateEngine.process(templateName, context);
     }

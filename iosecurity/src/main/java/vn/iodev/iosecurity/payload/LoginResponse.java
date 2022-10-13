@@ -17,6 +17,12 @@ public class LoginResponse {
         this.vaiTros = vaiTros;
     }
 
+    public LoginResponse(String accessToken, List<String> vaiTros, String id) {
+        this.accessToken = accessToken;
+        this.vaiTros = vaiTros;
+        this.id = id;
+    }
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -32,6 +38,14 @@ public class LoginResponse {
     private String accessToken;
     private String tokenType = "Bearer ";
     private List<String> vaiTros;
+    private String id;
+    
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
     public List<String> getVaiTros() {
         return vaiTros;
     }

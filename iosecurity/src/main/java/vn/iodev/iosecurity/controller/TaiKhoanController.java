@@ -1,6 +1,7 @@
 package vn.iodev.iosecurity.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +24,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import vn.iodev.iosecurity.IOConstants;
 import vn.iodev.iosecurity.model.ELoaiTaiKhoan;
 import vn.iodev.iosecurity.model.EVaiTro;
 import vn.iodev.iosecurity.model.LoaiTinhTrang;
+import vn.iodev.iosecurity.model.MailQueue;
+import vn.iodev.iosecurity.model.QueueStatus;
 import vn.iodev.iosecurity.model.TaiKhoan;
 import vn.iodev.iosecurity.model.VaiTro;
 import vn.iodev.iosecurity.payload.CaNhanResponse;
 import vn.iodev.iosecurity.payload.ToChucResponse;
+import vn.iodev.iosecurity.repository.MailQueueRepository;
 import vn.iodev.iosecurity.repository.TaiKhoanRepository;
 import vn.iodev.iosecurity.repository.VaiTroRepository;
 import vn.iodev.iosecurity.service.EmailService;
 import vn.iodev.iosecurity.service.HumanResourceService;
+import vn.iodev.iosecurity.service.ThymeleafService;
 import vn.iodev.iosecurity.utils.RandomUtil;
 
 @RestController
@@ -59,6 +65,12 @@ public class TaiKhoanController {
 
     @Value("${io.app.active.expired:24}")
     private int activeExpired;
+
+    @Autowired
+    ThymeleafService thymeleafService;
+
+    @Autowired
+    MailQueueRepository mailQueueRepository;
 
     @GetMapping("/taikhoans")
     public ResponseEntity<List<TaiKhoan>> getAllTaiKhoans(@RequestParam(required = false) String email, @RequestParam(required = false) Integer tinhTrang) {
@@ -89,7 +101,6 @@ public class TaiKhoanController {
     @GetMapping("/taikhoans/{email}")
     public ResponseEntity<TaiKhoan> getTaiKhoanById(@PathVariable("email") String email) {
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
-
         if (taiKhoanData.isPresent()) {
             return new ResponseEntity<>(taiKhoanData.get(), HttpStatus.OK);
         } else {
@@ -164,7 +175,14 @@ public class TaiKhoanController {
 
             TaiKhoan _taiKhoan = taiKhoanRepository
                 .save(taiKhoanMoi);
-            emailService.sendActiveUserHtmlMail(_taiKhoan);
+            HashMap<String, Object> activeVariables = new HashMap<>();
+            activeVariables.put("MaKichHoat", taiKhoan.getMaKichHoat());
+                
+            String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
+            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
+            mailQueueRepository.save(mailQueue);
+            
+            // emailService.sendActiveUserHtmlMail(_taiKhoan);
 
             return new ResponseEntity<>(_taiKhoan, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -249,7 +267,7 @@ public class TaiKhoanController {
         if (taiKhoanData.isPresent()) {
             TaiKhoan _taiKhoan = taiKhoanData.get();
             _taiKhoan.setTinhTrang(LoaiTinhTrang.DONG_TAI_KHOAN);
-            
+
             return new ResponseEntity<>(taiKhoanRepository.save(_taiKhoan), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

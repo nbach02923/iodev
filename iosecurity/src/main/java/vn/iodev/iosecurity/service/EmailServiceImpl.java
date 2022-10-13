@@ -2,13 +2,22 @@ package vn.iodev.iosecurity.service;
 
 import org.springframework.stereotype.Service;
 
+import vn.iodev.iosecurity.IOConstants;
 import vn.iodev.iosecurity.mail.EmailDetails;
+import vn.iodev.iosecurity.model.MailQueue;
 import vn.iodev.iosecurity.model.TaiKhoan;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +28,22 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class EmailServiceImpl implements EmailService {
-    private static final String ACTIVE_USER_MAIL_TEMPLATE = "mail-active-user-template";
+    private static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=\"utf-8\"";
     @Autowired 
     private JavaMailSender javaMailSender;
  
     @Value("${spring.mail.username}") 
     private String sender;
  
+    @Value("${spring.mail.host}")
+    private String host;
+    @Value("${spring.mail.port}")
+    private String port;
+    @Value("${spring.mail.username}")
+    private String email;
+    @Value("${spring.mail.password}")
+    private String password;
+
     @Autowired
     ThymeleafService thymeleafService;
     
@@ -54,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage mimeMessage
             = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
- 
+        
         try {
             mimeMessageHelper
                 = new MimeMessageHelper(mimeMessage, true);
@@ -82,21 +100,34 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public String sendActiveUserHtmlMail(TaiKhoan taiKhoan) {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", port);
+
+        Session session = Session.getInstance(props,
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(email, password);
+                    }
+                });
+        Message message = new MimeMessage(session);
+
         try {
-            SimpleMailMessage mailMessage
-                = new SimpleMailMessage();
- 
-            mailMessage.setFrom(sender);
-            mailMessage.setTo(taiKhoan.getEmail());
-            HashMap<String, String> activeVariables = new HashMap<>();
+            message.setFrom(new InternetAddress(sender));
+            message.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(taiKhoan.getEmail())});
+
+            HashMap<String, Object> activeVariables = new HashMap<>();
             activeVariables.put("MaKichHoat", taiKhoan.getMaKichHoat());
             
-            String msgBody = thymeleafService.getContent(ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
+            String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
 
-            mailMessage.setText(msgBody);
-            mailMessage.setSubject("Xin chào mừng đến với hệ thống IO");
- 
-            javaMailSender.send(mailMessage);
+            message.setContent(msgBody, CONTENT_TYPE_TEXT_HTML);
+            message.setSubject(IOConstants.ACTIVE_USER_MAIL_SUBJECT);
+            
+            Transport.send(message);
             return "Mail Sent Successfully...";
         }
  
@@ -104,4 +135,36 @@ public class EmailServiceImpl implements EmailService {
             return "Error while Sending Mail";
         }
     }
+
+    @Override
+    public String sendHtmlMailQueue(MailQueue mailQueue) {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", port);
+
+        Session session = Session.getInstance(props,
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(email, password);
+                    }
+                });
+        Message message = new MimeMessage(session);
+
+        try {
+            message.setFrom(new InternetAddress(sender));
+            message.setRecipients(Message.RecipientType.TO, new InternetAddress[]{new InternetAddress(mailQueue.getRecipient())});
+
+            message.setContent(mailQueue.getMsgBody(), CONTENT_TYPE_TEXT_HTML);
+            message.setSubject(mailQueue.getSubject());
+            
+            Transport.send(message);
+            return "Mail Sent Successfully...";
+        }
+ 
+        catch (Exception e) {
+            return "Error while Sending Mail";
+        }    }
 }
