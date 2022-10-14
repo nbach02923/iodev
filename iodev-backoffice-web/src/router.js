@@ -10,7 +10,7 @@ import DangNhap from './components/auth/DangNhap.vue'
 Vue.use(Router);
 
 export const router = new Router({
-  mode: 'history',
+  // mode: 'history',
   routes: [
     {
       path: '/cuocthi',
