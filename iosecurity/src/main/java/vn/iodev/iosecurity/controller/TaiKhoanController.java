@@ -242,7 +242,20 @@ public class TaiKhoanController {
     }
 
     @PutMapping("/taikhoans/{id}/kichhoat")
-    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email, @RequestParam("maKichHoat") String maKichHoat) {
+    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email) {
+        Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
+
+        if (taiKhoanData.isPresent()) {
+            TaiKhoan _taiKhoan = taiKhoanData.get();
+            _taiKhoan.setTinhTrang(LoaiTinhTrang.DA_KICH_HOAT);
+            return new ResponseEntity<>(taiKhoanRepository.save(_taiKhoan), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/auth/{id}/verify-email")
+    public ResponseEntity<TaiKhoan> verifyEmail(@PathVariable("id") String email, @RequestParam("maKichHoat") String maKichHoat) {
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {

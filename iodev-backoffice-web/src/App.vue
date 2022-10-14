@@ -1,84 +1,90 @@
 <template>
-   <div id="app">
-     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-       <a href class="navbar-brand" @click.prevent>IO Back Office</a>
-       <div class="navbar-nav mr-auto">
-         <li class="nav-item">
-           <router-link to="/home" class="nav-link">
-             <font-awesome-icon icon="home" />Trang chủ
-           </router-link>
-         </li>
-         <li v-if="showAdminBoard" class="nav-item">
-           <router-link to="/admin" class="nav-link">Bảng quản trị</router-link>
-         </li>
-         <li v-if="showModeratorBoard" class="nav-item">
-           <router-link to="/mod" class="nav-link">Moderator Board</router-link>
-         </li>
-         <li class="nav-item">
-           <router-link v-if="currentUser" to="/user" class="nav-link">Người dùng</router-link>
-         </li>
-       </div>
- 
-       <div v-if="!currentUser" class="navbar-nav ml-auto">
-         <li class="nav-item">
-           <router-link to="/register" class="nav-link">
-             <font-awesome-icon icon="user-plus" />Đăng ký
-           </router-link>
-         </li>
-         <li class="nav-item">
-           <router-link to="/login" class="nav-link">
-             <font-awesome-icon icon="sign-in-alt" />Đăng nhập
-           </router-link>
-         </li>
-       </div>
- 
-       <div v-if="currentUser" class="navbar-nav ml-auto">
-         <li class="nav-item">
-           <router-link to="/profile" class="nav-link">
-             <font-awesome-icon icon="user" />
-             {{ currentUser.username }}
-           </router-link>
-         </li>
-         <li class="nav-item">
-           <a class="nav-link" href @click.prevent="logOut">
-             <font-awesome-icon icon="sign-out-alt" />Đăng xuất
-           </a>
-         </li>
-       </div>
-     </nav>
- 
-     <div class="container">
-       <router-view />
-     </div>
-   </div>
- </template>
- 
- <script>
- export default {
-   computed: {
-     currentUser() {
-       return this.$store.state.auth.user;
-     },
-     showAdminBoard() {
-       if (this.currentUser && this.currentUser.roles) {
-         return this.currentUser.roles.includes('ROLE_ADMIN');
-       }
- 
-       return false;
-     },
-     showModeratorBoard() {
-       if (this.currentUser && this.currentUser.roles) {
-         return this.currentUser.roles.includes('ROLE_MODERATOR');
-       }
- 
-       return false;
-     }
-   },
-   methods: {
-     logOut() {
-       this.$store.dispatch('auth/logout');
-       this.$router.push('/login');
-     }
-   }
- };
- </script>
+  <v-app id="inspire">
+    <v-navigation-drawer
+      v-model="drawer"
+      v-if="loggedIn"
+      app
+      >
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title class="text-h6">
+            Quản trị hệ thống
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            Hội tin học Việt Nam
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+
+      <v-list
+        dense
+        nav
+      >
+        <v-list-item
+          v-for="item in menuFilters"
+          :key="item.title"
+          :to="item.to"
+        >
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content v-if="item.tag == 'logOut'" @click="logOut()">
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+
+          <v-list-item-content v-if="item.tag != 'logOut'">
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar app>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+
+      <v-toolbar-title>IODEV System</v-toolbar-title>
+    </v-app-bar>
+
+    <v-main>
+      <router-view></router-view>
+    </v-main>
+  </v-app>
+</template>
+<script>
+export default {
+    name: 'App',
+    components: {
+    },
+    data: () => ({
+      drawer: null,
+      items: [
+        { title: 'Cuộc thi', icon: 'mdi-view-dashboard', to:'/cuocthi', requiredLoggedIn: true },
+        { title: 'Khối thi', icon: 'mdi-image', to:'/khoithi', requiredLoggedIn: true },
+        { title: 'Tài khoản', icon: 'mdi-account', to:'/taikhoan', requiredLoggedIn: true },
+        { title: 'Đăng nhập', icon: 'mdi-login', to:'/dangnhap', requiredLoggedIn: false },
+        { title: 'Đăng xuất', icon: 'mdi-logout', to:'/dangnhap', requiredLoggedIn: true, tag: 'logOut' },
+        { title: 'Giới thiệu', icon: 'mdi-help-box', to:'/gioithieu', requiredLoggedIn: true },
+      ],
+    }),
+    computed: {
+      menuFilters() {
+        return this.items.filter(item => (item.requiredLoggedIn == true && this.loggedIn) || (item.requiredLoggedIn == false && !this.loggedIn))
+      },
+      loggedIn() {
+        return this.$store.state.auth.status.loggedIn;
+      }
+    },
+    methods: {
+      logOut() {
+        this.$store.dispatch('auth/logout');
+        this.$router.push('/dangnhap');
+      }
+    },
+    created () {
+      document.title = "Quản trị IO";
+    }
+};
+</script>

@@ -58,7 +58,7 @@ public class WebSecurityConfig {
         http.cors().and().csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .authorizeRequests()
-                .antMatchers("/api/authenticate/**").permitAll()
+                .antMatchers("/api/authenticate/**", "/api/auth/**").permitAll()
                 .antMatchers("/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
                 .antMatchers("/api/vaitros/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
             .anyRequest().authenticated();
