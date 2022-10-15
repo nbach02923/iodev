@@ -21,7 +21,7 @@
               <v-spacer></v-spacer>
               <v-dialog
               v-model="dialog"
-              max-width="640px"
+              max-width="680px"
               >
               <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -124,6 +124,7 @@
                           <v-text-field
                           v-model="editedItem.ngayBatDau"
                           label="Ngày bắt đầu"
+                          type="date"
                           ></v-text-field>
                       </v-col>
                       <v-col
@@ -133,7 +134,8 @@
                       >
                           <v-text-field
                           v-model="editedItem.ngayKetThuc"
-                          label="Ngày kết thúc"                   
+                          label="Ngày kết thúc"   
+                          type="date"                
                           ></v-text-field>
                       </v-col>
                     </v-row>
@@ -204,16 +206,18 @@
                 <v-container>
                   <v-row>
                     <v-col
-                      v-for="n in 9"
-                      :key="n"
+                      v-for="(hinhAnh, index) in hinhAnhCuocThis"
+                      :key="index"
                       class="d-flex child-flex"
                       cols="4"
                     >
                       <v-img
-                        :src="`https://picsum.photos/500/300?image=${n * 5 + 10}`"
-                        :lazy-src="`https://picsum.photos/10/6?image=${n * 5 + 10}`"
+                        :src="`${hinhAnh.url}`"
+                        :lazy-src="`${hinhAnh.url}`"
                         aspect-ratio="1"
                         class="grey lighten-2"
+                        @contextmenu="showHinhAnhMenu($event, hinhAnh)"
+                        @click="selectedHinhAnhDeleted = null"
                       >
                         <template v-slot:placeholder>
                           <v-row
@@ -241,6 +245,7 @@
                         bottom
                         right
                         fab
+                        @click="dialogFileUpload = true"
                         >
                           <v-icon>mdi-plus</v-icon>
                           </v-btn>
@@ -297,14 +302,16 @@
                         label="Hình ảnh"
                         filled
                         prepend-icon="mdi-camera"
+                        v-model="hinhAnhs"
+                        ref="hinhAnhCuocThi"
                       ></v-file-input>
                      </v-col>
                   </v-row>
                 </v-container>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text>Huỷ bỏ</v-btn>
-                  <v-btn color="blue darken-1" text>Đồng ý</v-btn>
+                  <v-btn color="blue darken-1" text @click="closeFileUpload">Huỷ bỏ</v-btn>
+                  <v-btn color="blue darken-1" text @click="fileUploadConfirm">Đồng ý</v-btn>
                   <v-spacer></v-spacer>
                 </v-card-actions>
               </v-card>
@@ -342,14 +349,30 @@
         </v-btn>
         </template>
     </v-data-table>
+    <v-menu
+      v-model="showHinhAnhOptionsMenu"
+      :position-x="x"
+      :position-y="y"
+      absolute
+      offset-y
+    >
+      <v-list>
+        <v-list-item
+          v-for="(item, index) in hinhAnhMenuItems"
+          :key="index"
+          @click="item.action"
+        >
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
     </v-container>
 </template>
 <script>
-import CuocThiSevice from '../../services/cms/cuocthi.service';
+import CuocThiService from '../../services/cms/cuocthi.service';
 import CuocThi from '../../models/cms/cuocthi';
 import DanhMucService from '../../services/cms/danhmuc.service';
 import ToChucService from '../../services/humanresources/tochuc.service';
-import cuocthiService from '../../services/cms/cuocthi.service';
 
     export default {
         name: "CuocThi",
@@ -363,7 +386,16 @@ import cuocthiService from '../../services/cms/cuocthi.service';
                 dialog: false,
                 dialogDelete: false,
                 dialogHinhAnhCuocThi: false,
-                dialogFileUpload: true,
+                dialogFileUpload: false,
+                showHinhAnhOptionsMenu: false,
+                x: 0,
+                y: 0,
+                hinhAnhMenuItems: [
+                  { title: 'Xoá hình ảnh', action: this.deleteHinhAnhCuocThi }
+                ],
+                hinhAnhs: null,
+                hinhAnhCuocThis: [],
+                selectedHinhAnhDeleted: null,
                 headers: [
                   {
                     text: 'Tên cuộc thi',
@@ -400,6 +432,22 @@ import cuocthiService from '../../services/cms/cuocthi.service';
             };
         },
         methods: {
+            showHinhAnhMenu (e, item) {
+              this.selectedHinhAnhDeleted = item
+              e.preventDefault()
+              this.showHinhAnhOptionsMenu = false
+              this.x = e.clientX
+              this.y = e.clientY
+              this.$nextTick(() => {
+                this.showHinhAnhOptionsMenu = true
+              })
+            },
+            deleteHinhAnhCuocThi: async function() {
+              if (this.selectedHinhAnhDeleted) {
+                await CuocThiService.xoaHinhAnhCuocThi(this.editedItem.id, this.selectedHinhAnhDeleted.id)
+                await this.readHinhAnhCuocThis()
+              }
+            },
             deleteItem (item) {
               this.editedIndex = this.cuocThis.indexOf(item)
               this.editedItem = Object.assign({}, item)
@@ -407,14 +455,27 @@ import cuocthiService from '../../services/cms/cuocthi.service';
             },
 
             deleteItemConfirm () {
-              cuocthiService.xoaCuocThi(this.editedItem.id);
+              CuocThiService.xoaCuocThi(this.editedItem.id);
               this.cuocThis.splice(this.editedIndex, 1)
               this.closeDelete()
             },
 
-            editHinhAnhCuocThi (item) {
+            closeFileUpload () {
+              this.dialogFileUpload = false
+            },
+
+            fileUploadConfirm: async function() {
+              let formData = new FormData()
+              formData.append("hinhAnhs", this.hinhAnhs);
+              await CuocThiService.uploadHinhAnhs(this.editedItem.id, formData);
+              this.dialogFileUpload = false
+              this.readHinhAnhCuocThis()
+            },
+
+            editHinhAnhCuocThi: async function(item) {
               this.editedIndex = this.cuocThis.indexOf(item)
               this.editedItem = Object.assign({}, item)
+              await this.readHinhAnhCuocThis()
               this.dialogHinhAnhCuocThi = true;
             },
 
@@ -445,8 +506,20 @@ import cuocthiService from '../../services/cms/cuocthi.service';
                 this.editedIndex = -1
               })
             },
-
+            padTo2Digits(num) {
+              return num.toString().padStart(2, '0');
+            },
+            formatDate(date) {
+              return [
+                this.padTo2Digits(date.getDate()),
+                this.padTo2Digits(date.getMonth() + 1),
+                date.getFullYear(),
+              ].join('-');
+            },
             save: async function () {
+              let ngayBatDauDate = new Date(this.editedItem.ngayBatDau.replaceAll('/', '-'));
+              let ngayKetThucDate = new Date(this.editedItem.ngayKetThuc.replaceAll('/', '-'));
+
               var cuocThiRequest = {
                 tenGoi: this.editedItem.tenGoi,
                 tiengAnh: this.editedItem.tiengAnh,
@@ -454,22 +527,26 @@ import cuocthiService from '../../services/cms/cuocthi.service';
                 lanToChuc: this.editedItem.lanToChuc,
                 donViToChuc: this.editedItem.donViToChuc,
                 toChucId: this.editedItem.toChucId,
-                ngayBatDau: this.editedItem.ngayBatDau,
-                ngayKetThuc: this.editedItem.ngayKetThuc,
+                ngayBatDau: this.formatDate(ngayBatDauDate),
+                ngayKetThuc: this.formatDate(ngayKetThucDate),
                 website: this.editedItem.website,
                 thongTinMoTa: this.editedItem.thongTinMoTa
               };
               console.log(cuocThiRequest);
-              await CuocThiSevice.themCuocThi(cuocThiRequest);
+              await CuocThiService.themCuocThi(cuocThiRequest);
               this.close()
             },
             readCuocThis: async function() {
-                const data = await CuocThiSevice.getDanhSachCuocThi();
+                const data = await CuocThiService.getDanhSachCuocThi();
                 this.cuocThis = data;
             },
             readSerieCuocThis: async function() {
                 const data = await DanhMucService.getDanhSachDanhMuc("C_SERIECUOCTHI");
                 this.serieCuocThis = data;
+            },
+            readHinhAnhCuocThis: async function() {
+              const data = await CuocThiService.getDanhSachHinhAnhs(this.editedItem.id);
+                this.hinhAnhCuocThis = data;
             },
             createCuocThi: async function() {       
                 this.responseSuccess = true;
@@ -520,3 +597,10 @@ import cuocthiService from '../../services/cms/cuocthi.service';
         },
    };
 </script>
+<style scoped>
+.portrait.v-card {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+}
+</style>
