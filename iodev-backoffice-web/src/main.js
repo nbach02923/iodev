@@ -19,8 +19,8 @@ import {
 
 import vuetify from './plugins/vuetify'
 
-//axios.defaults.baseURL = "http://localhost:8080/api"
-axios.defaults.baseURL = "http://103.9.211.82:8080/api"
+axios.defaults.baseURL = "http://localhost:8080/api"
+// axios.defaults.baseURL = "http://103.9.211.82:8080/api"
 
 library.add(faHome, faUser, faUserPlus, faSignInAlt, faSignOutAlt);
 

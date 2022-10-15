@@ -12,7 +12,7 @@
         <template v-slot:top>
         <v-toolbar
             flat
-        >
+          >
             <v-toolbar-title>IO tài khoản</v-toolbar-title>
             <v-divider
               class="mx-4"
@@ -43,56 +43,83 @@
                 <v-card-text>
                 <v-container>
                     <v-row>
-                    <v-col
-                        cols="12"
-                        sm="6"
-                        md="4"
-                    >
-                        <v-text-field
-                        v-model="editedItem.name"
-                        label="Dessert name"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col
-                        cols="12"
-                        sm="6"
-                        md="4"
-                    >
-                        <v-text-field
-                        v-model="editedItem.calories"
-                        label="Calories"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col
-                        cols="12"
-                        sm="6"
-                        md="4"
-                    >
-                        <v-text-field
-                        v-model="editedItem.fat"
-                        label="Fat (g)"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col
-                        cols="12"
-                        sm="6"
-                        md="4"
-                    >
-                        <v-text-field
-                        v-model="editedItem.carbs"
-                        label="Carbs (g)"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col
-                        cols="12"
-                        sm="6"
-                        md="4"
-                    >
-                        <v-text-field
-                        v-model="editedItem.protein"
-                        label="Protein (g)"
-                        ></v-text-field>
-                    </v-col>
+                      <v-col
+                          cols="12"
+                          sm="6"
+                          md="6"
+                      >
+                          <v-text-field
+                          v-model="editedItem.email"
+                          label="Email"
+                          ></v-text-field>
+                      </v-col>
+                      <v-col
+                          cols="12"
+                          sm="6"
+                          md="6"
+                      >
+                          <v-text-field
+                          v-model="editedItem.matKhau"
+                          label="Mật khẩu"
+                          type="password"
+                          ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col
+                          cols="12"
+                          sm="6"
+                          md="6"
+                        >
+                        <v-select
+                          :items="loaiTaiKhoans"
+                          item-text="text"
+                          item-value="value"
+                          label="Loại tài khoản"
+                          v-model="editedItem.loaiTaiKhoan"
+                          @change="(selection) => cboLoaiTaiKhoanChanged(selection)"
+                        ></v-select>
+                      </v-col>
+                      <v-col
+                          cols="12"
+                          sm="6"
+                          md="6"
+                        >
+                        <v-select
+                          :items="caNhans"
+                          item-text="hoTen"
+                          item-value="id"
+                          label="Chọn cá nhân"
+                          v-model="editedItem.id"
+                          v-if="editedItem.loaiTaiKhoan == 1"
+                        ></v-select>
+                        <v-select
+                          :items="toChucs"
+                          item-text="tenGoi"
+                          item-value="id"
+                          label="Chọn tổ chức"
+                          v-model="editedItem.id"
+                          v-if="editedItem.loaiTaiKhoan == 0"
+                        ></v-select>                       
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col
+                            cols="12"
+                            sm="12"
+                            md="12"
+                          >                       
+                          <v-combobox
+                            v-model="editedItem.vaiTros"
+                            item-text="tenVaiTro"
+                            item-value="maVaiTro"
+                            :items="vaiTros"
+                            label="Vai trò"
+                            multiple
+                            outlined
+                            dense
+                          ></v-combobox>
+                        </v-col>
                     </v-row>
                 </v-container>
                 </v-card-text>
@@ -104,25 +131,47 @@
                     text
                     @click="close"
                 >
-                    Cancel
+                    Huỷ bỏ
                 </v-btn>
                 <v-btn
                     color="blue darken-1"
                     text
                     @click="save"
                 >
-                    Save
+                    Lưu lại
                 </v-btn>
                 </v-card-actions>
             </v-card>
             </v-dialog>
-            <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-dialog v-model="dialogDelete" max-width="640px">
             <v-card>
-                <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                <v-card-title class="text-h5">Bạn có chắc chắn muốn xoá tài khoản?</v-card-title>
                 <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                <v-btn color="blue darken-1" text @click="closeDelete">Huỷ bỏ</v-btn>
+                <v-btn color="blue darken-1" text @click="deleteItemConfirm">Đồng ý</v-btn>
+                <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+            </v-dialog>
+            <v-dialog v-model="dialogActive" max-width="640px">
+            <v-card>
+                <v-card-title class="text-h5">Bạn có chắc chắn muốn kích hoạt tài khoản?</v-card-title>
+                <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeActive">Huỷ bỏ</v-btn>
+                <v-btn color="blue darken-1" text @click="activeUserConfirm">Đồng ý</v-btn>
+                <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+            </v-dialog>
+            <v-dialog v-model="dialogDeActive" max-width="640px">
+            <v-card>
+                <v-card-title class="text-h5">Bạn có chắc chắn muốn đóng tài khoản?</v-card-title>
+                <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeDeActive">Huỷ bỏ</v-btn>
+                <v-btn color="blue darken-1" text @click="deActiveUserConfirm">Đồng ý</v-btn>
                 <v-spacer></v-spacer>
                 </v-card-actions>
             </v-card>
@@ -133,9 +182,16 @@
         <v-icon
             small
             class="mr-2"
-            @click="editItem(item)"
+            @click="deActiveItem(item)"
         >
-            mdi-pencil
+            mdi-account-lock
+        </v-icon>
+        <v-icon
+            small
+            class="mr-2"
+            @click="activeItem(item)"
+        >
+            mdi-account-lock-open
         </v-icon>
         <v-icon
             small
@@ -147,9 +203,9 @@
         <template v-slot:no-data>
         <v-btn
             color="primary"
-            @click="initialize"
+            @click="readTaiKhoans"
         >
-            Reset
+            Làm mới
         </v-btn>
         </template>
     </v-data-table>
@@ -157,12 +213,18 @@
 </template>
 <script>
 import TaiKhoanService from '../../services/authenticate/taikhoan.service';
+import CaNhanService from '../../services/humanresources/canhan.service';
+import ToChucService from '../../services/humanresources/tochuc.service';
+import moment from 'moment';
+
     export default {
         name: "TaiKhoan",
         data() {
             return {
                 dialog: false,
                 dialogDelete: false,
+                dialogDeActive: false,
+                dialogActive: false,
                 headers: [
                   {
                     text: 'Email',
@@ -171,14 +233,25 @@ import TaiKhoanService from '../../services/authenticate/taikhoan.service';
                     value: 'email',
                   },
                   { text: 'ID', value: 'id' },
-                  { text: 'Loại tài khoản', value: 'loaiTaiKhoan' },
-                  { text: 'Mật khẩu', value: 'matKhau' },
+                  { text: 'Loại tài khoản', value: 'loaiTaiKhoanStr' },
                   { text: 'Mã kích hoạt', value: 'maKichHoat' },
-                  { text: 'Thời hạn kích hoạt', value: 'thoiHanKichHoat' },
-                  { text: 'Thời gian tạo', value: 'thoiGianTao' },
+                  { text: 'Thời hạn kích hoạt', value: 'thoiHanKichHoatStr' },
+                  { text: 'Thời gian tạo', value: 'thoiGianTaoStr' },
+                  { text: 'Tình trạng', value: 'tinhTrangStr' },
                   { text: 'Hành động', value: 'actions', sortable: false },
                 ],
+                loaiTaiKhoans: [
+                  { value: 0, text: 'TK tổ chức' },
+                  { value: 1, text: 'TK cá nhân' }
+                ],
                 taiKhoans: [],
+                caNhans: [],
+                toChucs: [],
+                vaiTros: [
+                  { tenVaiTro: "Quản trị hệ thống", maVaiTro: "VAITRO_QUANTRIHETHONG" },
+                  { tenVaiTro: "Quản trị tổ chức", maVaiTro: "VAITRO_QUANTRITOCHUC" },
+                  { tenVaiTro: "Người dùng", maVaiTro: "VAITRO_NGUOIDUNG" },
+                ],
                 editedIndex: -1,
                 editedItem: {
                   email: '',
@@ -203,7 +276,31 @@ import TaiKhoanService from '../../services/authenticate/taikhoan.service';
 
             deleteItemConfirm () {
               this.taiKhoans.splice(this.editedIndex, 1)
+              this.xoaTaiKhoan(this.editedItem);
               this.closeDelete()
+            },
+
+            deActiveItem (item) {
+              this.editedIndex = this.taiKhoans.indexOf(item)
+              this.editedItem = Object.assign({}, item)
+              this.dialogDeActive = true
+            },
+
+            deActiveUserConfirm () {
+              this.taiKhoans.splice(this.editedIndex, 1)
+              this.closeDeActive()
+            },
+
+            activeItem (item) {
+              this.editedIndex = this.taiKhoans.indexOf(item)
+              this.editedItem = Object.assign({}, item)
+              this.dialogActive = true
+            },
+
+            activeUserConfirm () {
+              this.kichHoatTaiKhoan(this.editedItem);
+              this.readTaiKhoans();
+              this.closeActive()
             },
 
             close () {
@@ -222,17 +319,91 @@ import TaiKhoanService from '../../services/authenticate/taikhoan.service';
               })
             },
 
-            save () {
+            closeDeActive () {
+              this.dialogDeActive = false
+              this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem)
+                this.editedIndex = -1
+              })
+            },
+
+            closeActive () {
+              this.dialogActive = false
+              this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem)
+                this.editedIndex = -1
+              })
+            },
+
+            save: async function () {
               if (this.editedIndex > -1) {
                 Object.assign(this.taiKhoans[this.editedIndex], this.editedItem)
               } else {
                 this.taiKhoans.push(this.editedItem)
               }
+              var savedVaiTros = [];
+              if (this.editedItem.vaiTros) {
+                for (var vt of this.editedItem.vaiTros) {
+                  savedVaiTros.push({ ten: vt.maVaiTro });
+                }
+              }
+              var taiKhoan = {
+                email: this.editedItem.email,
+                matKhau: this.editedItem.matKhau,
+                loaiTaiKhoan: this.editedItem.loaiTaiKhoan,
+                id: this.editedItem.id,
+                vaiTros: savedVaiTros
+              }
+              await TaiKhoanService.themTaiKhoan(taiKhoan);
+
               this.close()
             },
             readTaiKhoans: async function() {
               const data = await TaiKhoanService.getDanhSachTaiKhoan(0);
-              this.taiKhoans = data;
+              this.taiKhoans = this.convertTaiKhoanTable(data);
+            },
+            kichHoatTaiKhoan: async function(tk) {
+              await TaiKhoanService.kichHoatTaiKhoan(tk.email);
+            },
+            xoaTaiKhoan: async function(tk) {
+              await TaiKhoanService.xoaTaiKhoan(tk.email);
+            },
+            readCaNhans: async function() {
+              const data = await CaNhanService.getDanhSachCaNhan();
+              this.caNhans = data;
+            },
+            readToChucs: async function() {
+              const data = await ToChucService.getDanhSachToChuc();
+              this.toChucs = data;
+            },
+            convertTaiKhoanTable (lstTaiKhoan) {
+              var convertArr = [];
+              for (var i = 0; i < lstTaiKhoan.length; i++) {
+                var taiKhoan = {
+                  email: lstTaiKhoan[i].email,
+                  id: lstTaiKhoan[i].id,
+                  loaiTaiKhoanStr: lstTaiKhoan[i].loaiTaiKhoan == 0 ? "TK tổ chức" : "TK cá nhân",
+                  tinhTrangStr: lstTaiKhoan[i].tinhTrang == 0 ? "Chờ kích hoạt" : (lstTaiKhoan[i].tinhTrang == 1 ? "Đã kích hoạt" : "Đóng tài khoản"),
+                  thoiHanKichHoatStr: moment(lstTaiKhoan[i].thoiHanKichHoat).format('DD-MM-yyyy'),
+                  thoiHanKichHoat: lstTaiKhoan[i].thoiHanKichHoat,
+                  thoiGianTao: lstTaiKhoan[i].thoiGianTao,
+                  vaiTrosStr: '',
+                  thoiGianTaoStr: moment(lstTaiKhoan[i].thoiGianTao).format('DD-MM-yyyy'),
+                  loaiTaiKhoan: lstTaiKhoan[i].loaiTaiKhoan,
+                  tinhTrang: lstTaiKhoan[i].tinhTrang,
+                  maKichHoat: lstTaiKhoan[i].maKichHoat
+                };
+                convertArr.push(taiKhoan);
+              }
+              return convertArr;
+            },
+            cboLoaiTaiKhoanChanged(selection) {
+              if (selection == 0) {
+                this.readToChucs();
+              }
+              else {
+                this.readCaNhans();
+              }
             }
           },
           mounted() {
@@ -241,25 +412,24 @@ import TaiKhoanService from '../../services/authenticate/taikhoan.service';
             }    
             this.readTaiKhoans();
           },
-        computed: {
+          computed: {
             formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
+              return this.editedIndex === -1 ? 'Cấp mới tài khoản' : 'Sửa tài khoản'
+            },
             currentUser() {
-                return this.$store.state.auth.user;
+              return this.$store.state.auth.user;
             }
-        },
-        watch: {
-      dialog (val) {
-        val || this.close()
+          },
+          watch: {
+            dialog (val) {
+              val || this.close()
+            },
+            dialogDelete (val) {
+              val || this.closeDelete()
+            },
+          },
+      created () {
+      
       },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
-    },
-
-    created () {
-      this.initialize()
-    },
    };
 </script>

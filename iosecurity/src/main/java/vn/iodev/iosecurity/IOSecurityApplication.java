@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import vn.iodev.iosecurity.model.EVaiTro;
+import vn.iodev.iosecurity.model.LoaiTinhTrang;
 import vn.iodev.iosecurity.model.TaiKhoan;
 import vn.iodev.iosecurity.model.VaiTro;
 import vn.iodev.iosecurity.repository.TaiKhoanRepository;
@@ -69,6 +70,7 @@ public class IOSecurityApplication implements CommandLineRunner {
         taiKhoan.setMatKhau(passwordEncoder.encode("123456"));
         taiKhoan.setId("SUPERADMIN");
         taiKhoan.setLoaiTaiKhoan(1);
+        taiKhoan.setTinhTrang(LoaiTinhTrang.DA_KICH_HOAT);
 
         vtNdData = vaiTroRepository.findByTen(EVaiTro.VAITRO_QUANTRIHETHONG);
         

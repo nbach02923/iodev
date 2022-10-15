@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.iosecurity.IOConstants;
 import vn.iodev.iosecurity.model.ELoaiTaiKhoan;
 import vn.iodev.iosecurity.model.EVaiTro;
@@ -44,6 +45,7 @@ import vn.iodev.iosecurity.utils.RandomUtil;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class TaiKhoanController {
     @Autowired
     TaiKhoanRepository taiKhoanRepository;
@@ -244,7 +246,7 @@ public class TaiKhoanController {
     @PutMapping("/taikhoans/{id}/kichhoat")
     public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email) {
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
-
+        log.info("User email: " + email);
         if (taiKhoanData.isPresent()) {
             TaiKhoan _taiKhoan = taiKhoanData.get();
             _taiKhoan.setTinhTrang(LoaiTinhTrang.DA_KICH_HOAT);

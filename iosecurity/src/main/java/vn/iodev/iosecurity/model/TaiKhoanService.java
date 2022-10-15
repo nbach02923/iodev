@@ -19,6 +19,9 @@ public class TaiKhoanService implements UserDetailsService {
         if (taiKhoan == null) {
             throw new UsernameNotFoundException(username);    
         }
+        else if (taiKhoan.getTinhTrang() == LoaiTinhTrang.CHO_KICH_HOAT || taiKhoan.getTinhTrang() == LoaiTinhTrang.DONG_TAI_KHOAN) {
+            throw new UsernameNotFoundException(username);
+        }
         return IOUserDetails.build(taiKhoan);
     }
     

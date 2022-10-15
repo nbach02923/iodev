@@ -7,6 +7,20 @@ class CuocThiService {
       return response.data;
     });
   }
+  themCuocThi(cuocThi) {
+    return axios
+        .post('/cuocthis', cuocThi, { headers: authHeader() } )
+        .then(response => {
+          return response.data;
+        });
+  }
+  xoaCuocThi(id) {
+    return axios
+        .delete('/cuocthis/' + id, { headers: authHeader() })
+        .then(response => {
+          return response.data;
+        });
+  }
 }
 
 export default new CuocThiService();
