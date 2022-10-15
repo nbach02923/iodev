@@ -252,7 +252,7 @@
 
                 </v-card>
                 <v-card-text>
-                  
+
                 </v-card-text>
               <v-card>
                 <v-card-actions>
@@ -284,6 +284,30 @@
                 <v-spacer></v-spacer>
                 </v-card-actions>
             </v-card>
+            </v-dialog>
+            <v-dialog
+              v-model="dialogFileUpload"
+              max-width="520px">
+              <v-card>
+                <v-card-title class="text-h5">Tải lên hình ảnh cuộc thi</v-card-title>
+                <v-container>
+                  <v-row>
+                    <v-col>
+                      <v-file-input
+                        label="Hình ảnh"
+                        filled
+                        prepend-icon="mdi-camera"
+                      ></v-file-input>
+                     </v-col>
+                  </v-row>
+                </v-container>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text>Huỷ bỏ</v-btn>
+                  <v-btn color="blue darken-1" text>Đồng ý</v-btn>
+                  <v-spacer></v-spacer>
+                </v-card-actions>
+              </v-card>
             </v-dialog>
         </v-toolbar>
         </template>
@@ -339,6 +363,7 @@ import cuocthiService from '../../services/cms/cuocthi.service';
                 dialog: false,
                 dialogDelete: false,
                 dialogHinhAnhCuocThi: false,
+                dialogFileUpload: true,
                 headers: [
                   {
                     text: 'Tên cuộc thi',
