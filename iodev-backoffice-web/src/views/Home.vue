@@ -15,6 +15,9 @@
       };
     },
     mounted() {
-    }
+      if (!this.currentUser) {
+        this.$router.push('/dangnhap');
+      }     
+    },
   };
   </script>

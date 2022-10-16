@@ -288,6 +288,12 @@ import CuocThiService from '../../services/cms/cuocthi.service';
               this.closeDelete()
             },
 
+            editItem (item) {
+              this.editedIndex = this.cuocThis.indexOf(item)
+              this.editedItem = Object.assign({}, item)
+              this.dialog = true
+            },
+
             close () {
               this.dialog = false
               this.$nextTick(() => {
@@ -330,6 +336,7 @@ import CuocThiService from '../../services/cms/cuocthi.service';
                     data[i].vongSoLoaiStr = data[i].vongSoLoai ? "Có" : "Không";
                     data[i].thiTapTheStr = data[i].thiTapThe ? "Có" : "Không";
                     data[i].thiSangTaoStr = data[i].thiSangTao ? "Có" : "Không";
+                    data[i].cuocThiId = cuocThiId;
                 }
                 this.khoiThis = data;
             },

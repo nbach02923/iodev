@@ -33,7 +33,7 @@ export const router = new Router({
       component: DangNhap
     },
     {
-      path: '/home',
+      path: '/',
       component: Home
     },
     {

@@ -19,6 +19,13 @@ class KhoiThiService {
           return response.data;
         });
   }
+  suaKhoiThi(khoiThi) {
+    return axios
+        .put('/khoithis/' + khoiThi.id, khoiThi, { headers: authHeader() } )
+        .then(response => {
+          return response.data;
+        });
+  }
   xoaKhoiThi(id) {
     return axios
         .delete('/khoithis/' + id, { headers: authHeader() })
