@@ -67,32 +67,32 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    getThongKeHoSo ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let config = {
-          method: 'get',
-          url: state.apiSso + '/o/rest/v2/statistics/dossiers/todo',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data: {},
-          params: filter.data
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error)
-        })
-      })
-    },
     collectionCreate ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let dataPost = JSON.stringify(filter.data)
         let config = {
           method: 'post',
           url: '/api/' + filter.collectionName,
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data : dataPost
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error.response)
+        })
+      })
+    },
+    collectionCreateChild ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let dataPost = JSON.stringify(filter.data)
+        let config = {
+          method: 'post',
+          url: '/api/' + filter.collectionName + '/' + filter.collectionId + '/' + filter.collectionChildName,
           headers: { 
             'Accept': 'application/json', 
             'Content-Type': 'application/json'
@@ -508,31 +508,6 @@ export default new Vuex.Store({
         })
       })
     },
-    // getRefreshTokenKeyCloak ({commit, state}, filter) {
-    //   return new Promise((resolve, reject) => {
-    //     let settings = {
-    //       "url": state.apiSso + '/flex/oauth2/refreshtoken',
-    //       "method": "POST",
-    //       "headers": {
-    //         'Authorization': 'Basic ZmxleDpzc28=',
-    //         'secret': state.secretLogin,
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //       },
-    //       "data": {
-    //         "refresh_token": filter.code,
-    //         "redirect_uri": filter.redirect_uri
-    //       }
-    //     };
-        
-    //     $.ajax(settings).done(function (response) {
-    //       let serializable = response
-    //       resolve(serializable)
-    //     }).fail(function (response) {
-    //       reject(response)
-    //     })
-    //   })
-    // },
     loadDataSource ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let apiGet = filter.api
