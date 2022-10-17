@@ -48,6 +48,38 @@ public class DanhMucController {
         return danhMucs;
     }
     
+    @GetMapping("/danhmucs/{loaiDanhMuc}/{maDanhMuc}")
+    public ResponseEntity<DanhMuc> getDanhMuc(
+        @PathVariable(value = "loaiDanhMuc") String loaiDanhMuc,
+        @PathVariable(value = "maDanhMuc") String maDanhMuc,
+        @RequestHeader("id") String id,
+        @RequestHeader("email") String email,
+        @RequestHeader("vaiTros") String vaiTros) {
+        log.info("LoaiDanhMuc: " + loaiDanhMuc + ", maDanhMuc: " + maDanhMuc);
+        try {
+            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+                if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
+                    return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                }
+                else {
+                    Optional<DanhMuc> dmData = danhMucRepository.findById(new DanhMucId(loaiDanhMuc, maDanhMuc));
+                    if (dmData.isPresent()) {                       
+                        return new ResponseEntity<>(dmData.get(), HttpStatus.OK);
+                    }
+                    else {
+                        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                    }
+                }
+            }
+            else {
+                return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            }
+        }
+        catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/danhmucs")
     public ResponseEntity<DanhMuc> createDanhMuc(
         @RequestBody DanhMuc danhMuc,
@@ -90,7 +122,7 @@ public class DanhMucController {
                             _danhMuc.setGiaTri(danhMuc.getGiaTri());
                         }
                         danhMucRepository.save(_danhMuc);
-                        return new ResponseEntity<>(_danhMuc, HttpStatus.NO_CONTENT);
+                        return new ResponseEntity<>(_danhMuc, HttpStatus.OK);
                     }
                     else {
                         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

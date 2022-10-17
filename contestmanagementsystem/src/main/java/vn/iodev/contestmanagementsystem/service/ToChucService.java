@@ -26,6 +26,17 @@ public class ToChucService {
         return toChucs;
     }
 
+    public ToChucResponse getToChucById(String id) {
+        ServiceInstance serviceInstance = loadBalancer.choose(IOServiceEndpoint.HUMANRESOURCES_SERVICE_ID);
+        String url = serviceInstance.getUri().toString();
+        url = url + "/api/tochucs/{id}";
+        
+        RestTemplate restTemplate = new RestTemplate();
+        ToChucResponse toChuc = restTemplate.getForObject(url,ToChucResponse.class, id);
+
+        return toChuc;
+    }
+
     public ToChucResponse createToChuc(ToChucResponse tcr) {
         ServiceInstance serviceInstance = loadBalancer.choose(IOServiceEndpoint.HUMANRESOURCES_SERVICE_ID);
         String url = serviceInstance.getUri().toString();

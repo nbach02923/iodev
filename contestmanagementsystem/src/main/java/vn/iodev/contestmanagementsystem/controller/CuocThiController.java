@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+import javax.validation.ValidationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,19 +26,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.config.CMSConfiguration;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.FileIO;
 import vn.iodev.contestmanagementsystem.payload.FileIOResponse;
 import vn.iodev.contestmanagementsystem.payload.ResponseMessage;
+import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
 import vn.iodev.contestmanagementsystem.repository.FileIORepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
 import vn.iodev.contestmanagementsystem.service.FileStorageService;
+import vn.iodev.contestmanagementsystem.service.ToChucService;
+import vn.iodev.contestmanagementsystem.validator.CuocThiValidator;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class CuocThiController {
     @Autowired
     CuocThiRepository cuocThiRepository;
@@ -48,6 +56,9 @@ public class CuocThiController {
 
     @Autowired
     CMSConfiguration configuration;
+
+    @Autowired
+    ToChucService toChucService;
 
     @GetMapping("/cuocthis")
     public List<CuocThi> getAllCuocThis(@RequestParam(defaultValue = "1") int page, 
@@ -70,14 +81,27 @@ public class CuocThiController {
         return ResponseEntity.ok().body(cuocThi);
     }
 
+    private void validateRelationConstraint(CuocThi cuocThi) throws Exception {
+        if (cuocThi.getLanToChuc() != null && cuocThi.getLanToChuc() < 0) {
+            throw new ValidationException("LanToChuc must greater than 0");
+        }
+        if (cuocThi.getToChucId() != null) {
+            ToChucResponse toChuc = toChucService.getToChucById(cuocThi.getToChucId());
+            if (toChuc != null && toChuc.getTenGoi() != null && cuocThi.getDonViToChuc() == null) {
+                cuocThi.setDonViToChuc(toChuc.getTenGoi());
+            } 
+        }
+    }
     @PostMapping("/cuocthis")
     public ResponseEntity<CuocThi> createCuocThi(
-        @RequestBody CuocThi cuocThi,
+        @Valid @RequestBody CuocThi cuocThi,
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+                validateRelationConstraint(cuocThi);
+                CuocThiValidator.getInstance().validate(cuocThi);
                 CuocThi _cuocThi = cuocThiRepository.save(new CuocThi(cuocThi.getTenGoi(), 
                                                             cuocThi.getTiengAnh(), 
                                                             cuocThi.getSerieCuocThi(), 
@@ -91,10 +115,11 @@ public class CuocThiController {
                 return new ResponseEntity<>(_cuocThi, HttpStatus.CREATED);
             }
             else {
-                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
             }
         }
         catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -107,45 +132,63 @@ public class CuocThiController {
         }
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
         if (cuocThiData.isPresent()) {
-            CuocThi _cuocThi = cuocThiData.get();
-            if (cuocThi.getTenGoi() != null) {
-                _cuocThi.setTenGoi(cuocThi.getTenGoi());
+            try {
+                validateRelationConstraint(cuocThi);
+                CuocThiValidator.getInstance().validate(cuocThi);
+
+                CuocThi _cuocThi = cuocThiData.get();
+                if (cuocThi.getTenGoi() != null) {
+                    _cuocThi.setTenGoi(cuocThi.getTenGoi());
+                }
+                if (cuocThi.getTiengAnh() != null) {
+                    _cuocThi.setTiengAnh(cuocThi.getTiengAnh());
+                }
+                if (cuocThi.getSerieCuocThi() != null) {
+                    _cuocThi.setSerieCuocThi(cuocThi.getSerieCuocThi());
+                }
+                if (cuocThi.getLanToChuc() != null) {
+                    if (cuocThi.getLanToChuc() < 0) {
+                        throw new ValidationException("LanToChuc must greater than 0");
+                    }
+                    _cuocThi.setLanToChuc(cuocThi.getLanToChuc());
+                }
+                if (cuocThi.getDonViToChuc() != null) {
+                    _cuocThi.setDonViToChuc(cuocThi.getDonViToChuc());
+                }
+                if (cuocThi.getToChucId() != null) {
+                    if (cuocThi.getToChucId() != null) {
+                        ToChucResponse toChuc = toChucService.getToChucById(cuocThi.getToChucId());
+                        if (toChuc != null && toChuc.getTenGoi() != null && cuocThi.getDonViToChuc() == null) {
+                            _cuocThi.setDonViToChuc(toChuc.getTenGoi());
+                            _cuocThi.setToChucId(cuocThi.getToChucId());
+                        } 
+                    }
+                }
+                if (cuocThi.getNgayBatDau() != null) {
+                    _cuocThi.setNgayBatDau(cuocThi.getNgayBatDau());
+                }
+                if (cuocThi.getNgayKetThuc() != null) {
+                    _cuocThi.setNgayKetThuc(cuocThi.getNgayKetThuc());
+                }
+                if (cuocThi.getThongTinMoTa() != null) {
+                    _cuocThi.setThongTinMoTa(cuocThi.getThongTinMoTa());
+                }
+                if (cuocThi.getWebsite() != null) {
+                    _cuocThi.setWebsite(cuocThi.getWebsite());
+                }
+                if (cuocThi.getHinhAnh() != null) {
+                    _cuocThi.setHinhAnh(cuocThi.getHinhAnh());
+                }
+                if (cuocThi.getTinhTrang() != null) {
+                    _cuocThi.setTinhTrang(cuocThi.getTinhTrang());
+                }
+                
+                return new ResponseEntity<>(cuocThiRepository.save(_cuocThi), HttpStatus.OK);
             }
-            if (cuocThi.getTiengAnh() != null) {
-                _cuocThi.setTiengAnh(cuocThi.getTiengAnh());
+            catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if (cuocThi.getSerieCuocThi() != null) {
-                _cuocThi.setSerieCuocThi(cuocThi.getSerieCuocThi());
-            }
-            if (cuocThi.getLanToChuc() != null) {
-                _cuocThi.setLanToChuc(cuocThi.getLanToChuc());
-            }
-            if (cuocThi.getDonViToChuc() != null) {
-                _cuocThi.setDonViToChuc(cuocThi.getDonViToChuc());
-            }
-            if (cuocThi.getToChucId() != null) {
-                _cuocThi.setToChucId(cuocThi.getToChucId());
-            }
-            if (cuocThi.getNgayBatDau() != null) {
-                _cuocThi.setNgayBatDau(cuocThi.getNgayBatDau());
-            }
-            if (cuocThi.getNgayKetThuc() != null) {
-                _cuocThi.setNgayKetThuc(cuocThi.getNgayKetThuc());
-            }
-            if (cuocThi.getThongTinMoTa() != null) {
-                _cuocThi.setThongTinMoTa(cuocThi.getThongTinMoTa());
-            }
-            if (cuocThi.getWebsite() != null) {
-                _cuocThi.setWebsite(cuocThi.getWebsite());
-            }
-            if (cuocThi.getHinhAnh() != null) {
-                _cuocThi.setHinhAnh(cuocThi.getHinhAnh());
-            }
-            if (cuocThi.getTinhTrang() != null) {
-                _cuocThi.setTinhTrang(cuocThi.getTinhTrang());
-            }
-            
-            return new ResponseEntity<>(cuocThiRepository.save(_cuocThi), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

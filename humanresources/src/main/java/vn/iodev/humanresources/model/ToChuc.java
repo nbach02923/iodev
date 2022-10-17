@@ -6,6 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -66,6 +68,8 @@ public class ToChuc {
     }
 
     @Column(name = "tinhTrang", nullable = false)
+    @Min(0)
+    @Max(1)
     private int tinhTrang;
 
     @Column(name = "thoiGianTao", nullable = false)

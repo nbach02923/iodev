@@ -24,14 +24,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.netflix.config.validation.ValidationException;
+
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.ImportResponse;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.repository.ThiSinhRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
+import vn.iodev.contestmanagementsystem.service.CaNhanService;
 import vn.iodev.contestmanagementsystem.service.ExcelService;
 
 @RestController
@@ -44,8 +49,14 @@ public class ThiSinhController {
     CuocThiRepository cuocThiRepository;
 
     @Autowired
+    DoanThiRepository doanThiRepository;
+
+    @Autowired
     ExcelService fileService;
-    
+
+    @Autowired
+    CaNhanService caNhanService;
+
     @GetMapping("/thisinhs")
     public List<ThiSinh> getAllThiSinhs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(name = "tuKhoa", defaultValue = "") String tuKhoa, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String doanThiId) {
         Pageable paging = PageRequest.of(page - 1, size);
@@ -74,19 +85,33 @@ public class ThiSinhController {
         return new ResponseEntity<>(lstThiSinh, HttpStatus.OK);
     }
 
+    private void validateRelationConstraint(ThiSinh thiSinh) throws Exception {
+        if (thiSinh.getCaNhanId() != null) {
+            caNhanService.getCaNhanById(thiSinh.getCaNhanId());
+        }
+        if (thiSinh.getDoanThiId() != null) {
+            Optional<DoanThi> doanThi = doanThiRepository.findById(thiSinh.getDoanThiId());
+            if (!doanThi.isPresent()) {
+                throw new ValidationException("DoanThi is not exists!");
+            }
+        }
+    }
+
     @PostMapping("/cuocthis/{cuocThiId}/thisinhs")
     public ResponseEntity<ThiSinh> createThiSinhOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody ThiSinh thiSinh, @RequestHeader("vaiTros") String vaiTros) {
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
         try {
+            validateRelationConstraint(thiSinh);
+
             ThiSinh thiSinhMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
                 thiSinh.setCuocThi(cuocThi);
                 return thiSinhRepository.save(thiSinh);
             }).orElseThrow(() -> new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId));
 
             return new ResponseEntity<>(thiSinhMoi, HttpStatus.CREATED);
-        } catch (ResourceNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
@@ -134,55 +159,63 @@ public class ThiSinhController {
         return ResponseEntity.ok().body(thiSinh);
     }
 
-    @PostMapping("/thisinhs")
-    public ResponseEntity<ThiSinh> createThiSinh(@RequestBody ThiSinh thiSinh) {
-        try {
-            ThiSinh _thiSinh = thiSinhRepository.save(new ThiSinh(thiSinh.getHoTen(), thiSinh.getGioiTinh(), thiSinh.getNgaySinh(), thiSinh.getEmail(), thiSinh.getSoDienThoai(), thiSinh.getDoiTuongThi(), thiSinh.getNganhDaoTao(), thiSinh.getDatGiaiThuong(), thiSinh.getCaNhanId(), thiSinh.getCuocThi(), thiSinh.getDoanThiId()));
-            return new ResponseEntity<>(_thiSinh, HttpStatus.CREATED);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // @PostMapping("/thisinhs")
+    // public ResponseEntity<ThiSinh> createThiSinh(@RequestBody ThiSinh thiSinh) {
+    //     try {
+    //         ThiSinh _thiSinh = thiSinhRepository.save(new ThiSinh(thiSinh.getHoTen(), thiSinh.getGioiTinh(), thiSinh.getNgaySinh(), thiSinh.getEmail(), thiSinh.getSoDienThoai(), thiSinh.getDoiTuongThi(), thiSinh.getNganhDaoTao(), thiSinh.getDatGiaiThuong(), thiSinh.getCaNhanId(), thiSinh.getCuocThi(), thiSinh.getDoanThiId()));
+    //         return new ResponseEntity<>(_thiSinh, HttpStatus.CREATED);
+    //     }
+    //     catch (Exception e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
     @PutMapping("/thisinhs/{id}")
     public ResponseEntity<ThiSinh> updateThiSinh(@PathVariable("id") String id, @RequestBody ThiSinh thiSinh) {
         Optional<ThiSinh> thiSinhData = thiSinhRepository.findById(id);
         if (thiSinhData.isPresent()) {
-            ThiSinh _thiSinh = thiSinhData.get();
-            if (thiSinh.getHoTen() != null) {
-                _thiSinh.setHoTen(thiSinh.getHoTen());
+            try {
+                validateRelationConstraint(thiSinh);
+                
+                ThiSinh _thiSinh = thiSinhData.get();
+                if (thiSinh.getHoTen() != null) {
+                    _thiSinh.setHoTen(thiSinh.getHoTen());
+                }
+                if (thiSinh.getGioiTinh() != null) {
+                    _thiSinh.setGioiTinh(thiSinh.getGioiTinh());
+                }
+                if (thiSinh.getNgaySinh() != null) {
+                    _thiSinh.setNgaySinh(thiSinh.getNgaySinh());
+                }
+                if (thiSinh.getEmail() != null) {
+                    _thiSinh.setEmail(thiSinh.getEmail());
+                }
+                if (thiSinh.getSoDienThoai() != null) {
+                    _thiSinh.setSoDienThoai(thiSinh.getSoDienThoai());
+                }
+                if (thiSinh.getDoiTuongThi() != null) {
+                    _thiSinh.setDoiTuongThi(thiSinh.getDoiTuongThi());
+                }
+                if (thiSinh.getNganhDaoTao() != null) {
+                    _thiSinh.setNganhDaoTao(thiSinh.getNganhDaoTao());
+                }
+                if (thiSinh.getDatGiaiThuong() != null) {
+                    _thiSinh.setDatGiaiThuong(thiSinh.getDatGiaiThuong());
+                }
+                if (thiSinh.getCaNhanId() != null) {
+                    _thiSinh.setCaNhanId(thiSinh.getCaNhanId());
+                }
+                if (thiSinh.getDoanThiId() != null) {
+                    _thiSinh.setDoanThiId(thiSinh.getDoanThiId());
+                }
+                _thiSinh.setThoiGianCapNhat(System.currentTimeMillis());
+                
+                return new ResponseEntity<>(thiSinhRepository.save(_thiSinh), HttpStatus.OK);
             }
-            if (thiSinh.getGioiTinh() != null) {
-                _thiSinh.setGioiTinh(thiSinh.getGioiTinh());
+            catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if (thiSinh.getNgaySinh() != null) {
-                _thiSinh.setNgaySinh(thiSinh.getNgaySinh());
-            }
-            if (thiSinh.getEmail() != null) {
-                _thiSinh.setEmail(thiSinh.getEmail());
-            }
-            if (thiSinh.getSoDienThoai() != null) {
-                _thiSinh.setSoDienThoai(thiSinh.getSoDienThoai());
-            }
-            if (thiSinh.getDoiTuongThi() != null) {
-                _thiSinh.setDoiTuongThi(thiSinh.getDoiTuongThi());
-            }
-            if (thiSinh.getNganhDaoTao() != null) {
-                _thiSinh.setNganhDaoTao(thiSinh.getNganhDaoTao());
-            }
-            if (thiSinh.getDatGiaiThuong() != null) {
-                _thiSinh.setDatGiaiThuong(thiSinh.getDatGiaiThuong());
-            }
-            if (thiSinh.getCaNhanId() != null) {
-                _thiSinh.setCaNhanId(thiSinh.getCaNhanId());
-            }
-            if (thiSinh.getDoanThiId() != null) {
-                _thiSinh.setDoanThiId(thiSinh.getDoanThiId());
-            }
-            _thiSinh.setThoiGianCapNhat(System.currentTimeMillis());
-            
-            return new ResponseEntity<>(thiSinhRepository.save(_thiSinh), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

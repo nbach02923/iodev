@@ -28,6 +28,7 @@ import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
 import vn.iodev.contestmanagementsystem.repository.KhoiThiRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
+import vn.iodev.contestmanagementsystem.validator.KhoiThiValidator;
 
 @RestController
 @RequestMapping("/api")
@@ -50,20 +51,21 @@ public class KhoiThiController {
 
         return new ResponseEntity<>(lstKhoiThi, HttpStatus.OK);
     }
-
+        
     @PostMapping("/cuocthis/{cuocThiId}/khoithis")
     public ResponseEntity<KhoiThi> createKhoiThiOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
         try {
+            KhoiThiValidator.getInstance().validate(khoiThi);
             KhoiThi khoiThiMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
                 khoiThi.setCuocThi(cuocThi);
                 return khoiThiRepository.save(khoiThi);
             }).orElseThrow(() -> new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId));
 
             return new ResponseEntity<>(khoiThiMoi, HttpStatus.CREATED);
-        } catch (ResourceNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
@@ -90,19 +92,19 @@ public class KhoiThiController {
         return ResponseEntity.ok().body(khoiThi);
     }
 
-    @PostMapping("/khoithis")
-    public ResponseEntity<KhoiThi> createKhoiThi(@Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
-        }
-        try {
-            KhoiThi _khoiThi = khoiThiRepository.save(new KhoiThi(khoiThi.getTenGoi(), khoiThi.getCuocThi(), khoiThi.getNoiDungThi(), khoiThi.getVongSoLoai(), khoiThi.getThiTapThe(), khoiThi.getThiSangTao(), khoiThi.getMaxDangKi(), khoiThi.getMaxThiSinh()));
-            return new ResponseEntity<>(_khoiThi, HttpStatus.CREATED);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // @PostMapping("/khoithis")
+    // public ResponseEntity<KhoiThi> createKhoiThi(@Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
+    //     if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+    //         return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+    //     }
+    //     try {
+    //         KhoiThi _khoiThi = khoiThiRepository.save(new KhoiThi(khoiThi.getTenGoi(), khoiThi.getCuocThi(), khoiThi.getNoiDungThi(), khoiThi.getVongSoLoai(), khoiThi.getThiTapThe(), khoiThi.getThiSangTao(), khoiThi.getMaxDangKi(), khoiThi.getMaxThiSinh()));
+    //         return new ResponseEntity<>(_khoiThi, HttpStatus.CREATED);
+    //     }
+    //     catch (Exception e) {
+    //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
     @PutMapping("/khoithis/{id}")
     public ResponseEntity<KhoiThi> updateKhoiThi(@PathVariable("id") String id, @Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
@@ -111,34 +113,41 @@ public class KhoiThiController {
         }
         Optional<KhoiThi> khoiThiData = khoiThiRepository.findById(id);
         if (khoiThiData.isPresent()) {
-            KhoiThi _khoiThi = khoiThiData.get();
-            if (khoiThi.getTenGoi() != null) {
-                _khoiThi.setTenGoi(khoiThi.getTenGoi());
+            try {
+                KhoiThiValidator.getInstance().validate(khoiThi);
+                KhoiThi _khoiThi = khoiThiData.get();
+                if (khoiThi.getTenGoi() != null) {
+                    _khoiThi.setTenGoi(khoiThi.getTenGoi());
+                }
+                if (khoiThi.getNoiDungThi() != null) {
+                    _khoiThi.setNoiDungThi(khoiThi.getNoiDungThi());
+                }
+                if (khoiThi.getVongSoLoai() != null) {
+                    _khoiThi.setVongSoLoai(khoiThi.getVongSoLoai());
+                }
+                if (khoiThi.getThiTapThe() != null) {
+                    _khoiThi.setThiTapThe(khoiThi.getThiTapThe());
+                }
+                if (khoiThi.getThiSangTao() != null) {
+                    _khoiThi.setThiSangTao(khoiThi.getThiSangTao());
+                }
+                if (khoiThi.getMaxDangKi() != null) {
+                    _khoiThi.setMaxDangKi(khoiThi.getMaxDangKi());
+                }
+                if (khoiThi.getMaxThiSinh() != null) {
+                    _khoiThi.setMaxThiSinh(khoiThi.getMaxThiSinh());
+                }
+                if (khoiThi.getTinhTrang() != null) {
+                    _khoiThi.setTinhTrang(khoiThi.getTinhTrang());
+                }
+                _khoiThi.setThoiGianCapNhat(System.currentTimeMillis());
+                
+                return new ResponseEntity<>(khoiThiRepository.save(_khoiThi), HttpStatus.OK);
             }
-            if (khoiThi.getNoiDungThi() != null) {
-                _khoiThi.setNoiDungThi(khoiThi.getNoiDungThi());
+            catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if (khoiThi.getVongSoLoai() != null) {
-                _khoiThi.setVongSoLoai(khoiThi.getVongSoLoai());
-            }
-            if (khoiThi.getThiTapThe() != null) {
-                _khoiThi.setThiTapThe(khoiThi.getThiTapThe());
-            }
-            if (khoiThi.getThiSangTao() != null) {
-                _khoiThi.setThiSangTao(khoiThi.getThiSangTao());
-            }
-            if (khoiThi.getMaxDangKi() != null) {
-                _khoiThi.setMaxDangKi(khoiThi.getMaxDangKi());
-            }
-            if (khoiThi.getMaxThiSinh() != null) {
-                _khoiThi.setMaxThiSinh(khoiThi.getMaxThiSinh());
-            }
-            if (khoiThi.getTinhTrang() != null) {
-                _khoiThi.setTinhTrang(khoiThi.getTinhTrang());
-            }
-            _khoiThi.setThoiGianCapNhat(System.currentTimeMillis());
-            
-            return new ResponseEntity<>(khoiThiRepository.save(_khoiThi), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

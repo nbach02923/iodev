@@ -13,6 +13,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -102,6 +104,8 @@ public class TaiKhoan {
     private String matKhau;
 
     @Column(name = "tinhTrang", nullable = false)
+    @Min(0)
+    @Max(2)
     private int tinhTrang;
 
     @Column(name = "maKichHoat")

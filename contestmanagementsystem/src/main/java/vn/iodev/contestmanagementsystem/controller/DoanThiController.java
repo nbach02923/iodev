@@ -32,6 +32,8 @@ import vn.iodev.contestmanagementsystem.model.LoaiTaiKhoan;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
 import vn.iodev.contestmanagementsystem.service.ExcelService;
+import vn.iodev.contestmanagementsystem.service.ToChucService;
+import vn.iodev.contestmanagementsystem.validator.DoanThiValidator;
 
 @RestController
 @RequestMapping("/api")
@@ -42,6 +44,9 @@ public class DoanThiController {
 
     @Autowired
     ExcelService fileService;
+
+    @Autowired
+    ToChucService toChucService;
 
     @GetMapping("/doanthis")
     public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId, @RequestHeader("id") String taiKhoanId, @RequestHeader("loaiTaiKhoan") Integer loaiTaiKhoan, @RequestHeader("vaiTros") String vaiTros) {
@@ -94,6 +99,10 @@ public class DoanThiController {
     @PostMapping("/doanthis")
     public ResponseEntity<DoanThi> createDoanThi(@RequestBody DoanThi doanThi) {
         try {
+            DoanThiValidator.getInstance().validate(doanThi);
+            if (doanThi.getToChucId() != null) {
+                toChucService.getToChucById(doanThi.getToChucId());
+            }
             DoanThi _doanThi = doanThiRepository.save(new DoanThi(doanThi.getTenGoi(), doanThi.getTiengAnh(), doanThi.getDiaChiHoatDong(), doanThi.getEmail(), doanThi.getToChucId(), doanThi.getCuocThiId()));
             return new ResponseEntity<>(_doanThi, HttpStatus.CREATED);
         }
@@ -129,31 +138,39 @@ public class DoanThiController {
     public ResponseEntity<DoanThi> updateDoanThi(@PathVariable("id") String id, @RequestBody DoanThi doanThi) {
         Optional<DoanThi> doanThiData = doanThiRepository.findById(id);
         if (doanThiData.isPresent()) {
-            DoanThi _doanThi = doanThiData.get();
-            if (doanThi.getTenGoi() != null) {
-                _doanThi.setTenGoi(doanThi.getTenGoi());
+            try {
+                DoanThiValidator.getInstance().validate(doanThi);
+                DoanThi _doanThi = doanThiData.get();
+                if (doanThi.getTenGoi() != null) {
+                    _doanThi.setTenGoi(doanThi.getTenGoi());
+                }
+                if (doanThi.getTiengAnh() != null) {
+                    _doanThi.setTiengAnh(doanThi.getTiengAnh());
+                }
+                if (doanThi.getDiaChiHoatDong() != null) {
+                    _doanThi.setDiaChiHoatDong(doanThi.getDiaChiHoatDong());;
+                }
+                if (doanThi.getEmail() != null) {
+                    _doanThi.setEmail(doanThi.getEmail());;
+                }
+                if (doanThi.getToChucId() != null) {
+                    toChucService.getToChucById(doanThi.getToChucId());
+                    _doanThi.setToChucId(doanThi.getToChucId());
+                }
+                if (doanThi.getCuocThiId() != null) {
+                    _doanThi.setCuocThiId(doanThi.getCuocThiId());
+                }
+                if (doanThi.getThuTuXepHang() != null) {
+                    _doanThi.setThuTuXepHang(doanThi.getThuTuXepHang());
+                }
+                _doanThi.setThoiGianCapNhat(System.currentTimeMillis());
+                
+                return new ResponseEntity<>(doanThiRepository.save(_doanThi), HttpStatus.OK);
             }
-            if (doanThi.getTiengAnh() != null) {
-                _doanThi.setTiengAnh(doanThi.getTiengAnh());
+            catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if (doanThi.getDiaChiHoatDong() != null) {
-                _doanThi.setDiaChiHoatDong(doanThi.getDiaChiHoatDong());;
-            }
-            if (doanThi.getEmail() != null) {
-                _doanThi.setEmail(doanThi.getEmail());;
-            }
-            if (doanThi.getToChucId() != null) {
-                _doanThi.setToChucId(doanThi.getToChucId());
-            }
-            if (doanThi.getCuocThiId() != null) {
-                _doanThi.setCuocThiId(doanThi.getCuocThiId());
-            }
-            if (doanThi.getThuTuXepHang() != null) {
-                _doanThi.setThuTuXepHang(doanThi.getThuTuXepHang());
-            }
-            _doanThi.setThoiGianCapNhat(System.currentTimeMillis());
-            
-            return new ResponseEntity<>(doanThiRepository.save(_doanThi), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
