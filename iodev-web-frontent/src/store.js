@@ -111,7 +111,7 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         let dataPost = JSON.stringify(filter.data)
         let config = {
-          method: 'post',
+          method: 'put',
           url: '/api/' + filter.collectionName + '/' + filter.id,
           headers: { 
             'Accept': 'application/json', 
@@ -408,17 +408,17 @@ export default new Vuex.Store({
         })
       })
     },
-    activeCaNhan ({commit, state}, filter) {
+    activeTaiKhoan ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
         let config = {
-          method: 'post',
-          url: '/api/idp/account/'+ filter.data.type + '/active',
+          method: 'put',
+          url: '/api/auth/'+ filter.email + '/verify-email',
           headers: { 
             'Accept': 'application/json', 
             'Content-Type': 'application/json'
           },
-          data : dataPost
+          params: {maKichHoat: filter.maKichHoat},
+          data : {}
         }
         axios(config).then(function (response) {
           let serializable = response.data

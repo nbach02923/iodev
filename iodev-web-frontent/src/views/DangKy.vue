@@ -16,7 +16,7 @@
           </v-flex>
         </div>
 
-        <div class="wrap-form px-4 py-3" v-if="!signed">
+        <div class="wrap-form px-4 py-3" v-if="!signed && !dialogActive">
           <div>
             <v-form ref="form" v-model="valid" lazy-validation class="">
               <v-flex xs12 class="action-title mb-5" style="text-align: center;
@@ -24,18 +24,35 @@
                 font-family: 'Roboto Slab';
                 color: #fff;
                 font-weight: 700;">
-                <div>ĐĂNG NHẬP</div>
+                <div>ĐĂNG KÝ TÀI KHOẢN</div>
+              </v-flex>
+              <v-flex xs12 class="select-loaitk" style="text-align: center;">
+                <v-radio-group class="d-inline-block mt-0"
+                  v-model="loaiTaiKhoan"
+                  row
+                >
+                  <v-radio
+                    label="Tài khoản tổ chức"
+                    value="0"
+                    color="#fff"
+                  ></v-radio>
+                  <v-radio
+                    label="Tài khoản cá nhân"
+                    value="1"
+                    color="#fff"
+                  ></v-radio>
+                </v-radio-group>
               </v-flex>
               <v-flex xs12>
                 <v-text-field
                   dense
                   class="input-text"
-                  placeholder="Tên đăng nhập"
+                  placeholder="Email đăng nhập"
                   v-model="userName"
-                  :rules="[v => !!v || 'Tên đăng nhập là bắt buộc']"
+                  :rules="[v => !!v || 'Email là bắt buộc']"
                   required
                   prepend-inner-icon="mdi-account"
-                  @keyup.enter="login"
+                  @keyup.enter="signUp"
                   hide-details="auto"
                 ></v-text-field>
               </v-flex>
@@ -49,22 +66,19 @@
                   :rules="[v => !!v || 'Mật khẩu là bắt buộc']"
                   required
                   prepend-inner-icon="mdi-key"
-                  @keyup.enter="login"
+                  @keyup.enter="signUp"
                   hide-details="auto"
                 ></v-text-field>
               </v-flex>
-              <v-flex xs12 class="wrap-btn-login" style="margin-top: 30px;margin-bottom: 20px;position: relative">
+              <v-flex xs12 class="wrap-btn-login" style="margin-top: 30px;margin-bottom: 20px">
                 <v-btn class="my-0 white--text mr-3 btn-login" style="padding: 0 15px !important;"
                   :loading="loading"
                   :disabled="loading"
-                  @click="login"
+                  @click="signUp"
                 >
                   <v-icon size="20">mdi-login</v-icon>&nbsp;
-                  Đăng nhập
+                  Đăng ký
                 </v-btn>
-                <a @click="goToSignUp()"  href="javascript:;" class="" style="position: absolute; right: 0; bottom: 0; color: #fff;">
-                  <span> Đăng ký</span>
-                </a>
               </v-flex>
             </v-form>
           </div>
@@ -95,21 +109,6 @@
       </div> 
       
     </v-container>
-    <!-- <div class="wrap-contact-info">
-      <div class="mb-1"></div>
-      <div class="mb-1">
-        <v-icon size="18" color="#fff">mdi-map-marker-outline</v-icon>&nbsp;
-        <span></span>
-      </div>
-      <div class="mb-1">
-        <v-icon size="18" color="#fff">mdi-phone-in-talk-outline</v-icon>&nbsp;
-        <span></span>
-      </div>
-      <div class="mb-1">
-        <v-icon size="18" color="#fff">mdi-email-outline</v-icon>&nbsp;
-        <span></span>
-      </div>
-    </div> -->
     <div class="text-center">
       <v-overlay :value="overlay">
         <v-progress-circular
@@ -118,6 +117,54 @@
         ></v-progress-circular>
       </v-overlay>
     </div>
+    <v-dialog
+      max-width="450"
+      v-model="dialogActive"
+      persistent
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="primary" class="px-3" style=""
+        >
+          <v-toolbar-title>KÍCH HOẠT TÀI KHOẢN</v-toolbar-title>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-card-text class="mt-5 px-2">
+          <v-form
+            ref="formActive"
+            v-model="validFormActive"
+            lazy-validation
+          >
+            <v-layout wrap>
+              <v-col cols="12" class="py-0 mb-2">
+                  <label>Mã kích hoạt <span class="red--text">(*)</span> </label>
+                  <i>Vui lòng kiểm tra email để lấy mã kích hoạt.</i>
+                  <v-text-field
+                    class="flex input-form"
+                    v-model="maKichHoat"
+                    solo
+                    dense
+                    :rules="[v => !!v || 'Mã kích hoạt là bắt buộc']"
+                    required
+                    hide-details="auto"
+                    placeholder="Nhập mã kích hoạt"
+                    clearable
+                  ></v-text-field>
+              </v-col>
+            </v-layout>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="justify-end pb-3">
+          <v-btn small class="mr-2" color="primary" :loading="loading" :disabled="loading" @click="activeTaiKhoan">
+            <v-icon left>
+              mdi-content-save
+            </v-icon>
+            <span>Kích hoạt</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
   
 </template>
@@ -144,7 +191,12 @@
       password: '',
       client_secret: '',
       code: '',
-      signed: false
+      signed: false,
+      loaiTaiKhoan: '0',
+      dialogActive: false,
+      validFormActive: false,
+      emailActive: '',
+      maKichHoat: ''
     }),
     created () {
       let vm = this
@@ -153,138 +205,70 @@
       } else {
         vm.signed = false
       }
+      
+      let router = vm.$router.history.current
+      console.log('router', router)
+      let searchParams = window.location.href.split("?")[1]
+      let email = decodeURIComponent(String(vm.getSearchParams(searchParams, "email")))
+      let active = decodeURIComponent(String(vm.getSearchParams(searchParams, "active")))
+      if (email && active && !vm.signed) {
+        vm.dialogActive = true
+        vm.emailActive = email
+      }
     },
     computed: {
     },
     methods: {
-      login () {
+      signUp () {
         let vm = this
         if (vm.loading || !vm.userName || !vm.password) {
           return
         }
         vm.loading = true
         let filter = {
+          collectionName: 'taikhoans',
           data: {
-            username: vm.userName,
-            password: vm.password
+            "email": vm.userName,
+            "id": "",
+            "loaiTaiKhoan": Number(vm.loaiTaiKhoan),
+            "matKhau": vm.password,
+            "vaiTros": ["VAITRO_NGUOIDUNG"]
           }
         }
-        vm.$store.dispatch('login', filter).then(function (result) {
+        vm.$store.dispatch('collectionCreate', filter).then(function (result) {
           vm.loading = false
-          if (!result.expires_in) {
-            result['expires_in'] = 24*60*60*1000
-          }
-          if (result && result.accessToken) {
-            try {
-              let payload = String(result.accessToken.split('.')[1]).replace(/_/g, "/")
-              let dataUser = JSON.parse(atob(payload))
-              let roleUser = dataUser && dataUser.hasOwnProperty('vaiTros') && dataUser.vaiTros ? dataUser.vaiTros : ''
-              let admin = roleUser ? roleUser.find(function (item) {
-                return item.ten === 'VAITRO_QUANTRIHETHONG'
-              }) : false
-              // console.log('roleUser', roleUser)
-              if (roleUser && roleUser.length) {
-                vm.$cookies.set('Token', result.accessToken, result.expires_in)
-                vm.$cookies.set('RefreshToken', result.refreshToken ? result.refreshToken : '', result.refresh_expires_in)
-                axios.defaults.headers['Authorization'] = 'Bearer ' + result.accessToken
-                vm.$store.commit('SET_ISSIGNED', true)
-                if (admin) {
-                  vm.$cookies.set('admin', true, result.expires_in)
-                  let dataUser1 = {
-                    hoVaTen: 'Quản trị',
-                    maSoCanBo: '',
-                    viTriChucDanh: 'Quản trị hệ thống',
-                    vaiTroSuDung: '',
-                    email: vm.userName
-                  }
-                  vm.$cookies.set('UserInfo', dataUser1, result.expires_in)
-                  vm.$cookies.set('Roles', '', result.expires_in)
-                  vm.goToPage()
-                } else {
-                  let filter = {
-                    token: 'Bearer ' + result.accessToken,
-                    email: vm.userName
-                  }
-                  vm.$store.dispatch('getThongTinUserDangNhap', filter).then(function (result) {
-                    let chucDanh = ''
-                    let vaiTroSuDung = ''
-                    let dataUser2 = {
-                      hoVaTen: 'Người dùng',
-                      maSoCanBo: '',
-                      viTriChucDanh: '',
-                      vaiTroSuDung: '',
-                      email: vm.userName
-                    }
-                    if (result.vaiTros && result.vaiTros.length) {
-                      vaiTroSuDung = []
-                      vaiTroSuDung = Array.from(result.vaiTros, function (item) {
-                        return item.ten
-                      }).toString()
-                      dataUser.vaiTroSuDung = vaiTroSuDung
-                      let isAdmin = vaiTroSuDung.find(function (item) {
-                        return item == 'QUANTRIHETHONG'
-                      })
-                      if (isAdmin) {
-                        vm.$cookies.set('admin', true, result.expires_in)
-                      } else {
-                        vm.$cookies.set('admin', '', result.expires_in)
-                      }
-                      vm.$cookies.set('UserInfo', dataUser2, result.expires_in)
-                      vm.$cookies.set('Roles', vaiTroSuDung, result.expires_in)
-                    } else {
-                      vm.$cookies.set('admin', '', result.expires_in)
-                      vm.$cookies.set('UserInfo', dataUser2, result.expires_in)
-                      vm.$cookies.set('Roles', vaiTroSuDung, result.expires_in)
-                    }
-                    setTimeout(function () {
-                      vm.goToPage()
-                    }, 200)
-                  }).catch (function () {
-                    vm.loading = false
-                    toastr.error('TÀI KHOẢN CHƯA ĐƯỢC CẤP QUYỀN CÁN BỘ')
-                    setTimeout(function () {
-                      vm.submitLogout()
-                    }, 500)
-                  })
-                }                
-              } else {
-                vm.loading = false
-                vm.overlay = false
-                toastr.error('TÀI KHOẢN KHÔNG CÓ TRÊN HỆ THỐNG')
-                setTimeout(function () {
-                  vm.submitLogout()
-                }, 500)
-              }
-            } catch (error) {
-              vm.loading = false
-              toastr.error('TÀI KHOẢN KHÔNG CÓ TRÊN HỆ THỐNG')
-              setTimeout(function () {
-                vm.submitLogout()
-              }, 500)
-            }
-          } else {
-            toastr.remove()
-            toastr.error('Tên đăng nhập hoặc mật khẩu không chính xác')
-          }
+          toastr.remove()
+          toastr.success('Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.')
+          vm.$refs.form.reset()
+          vm.$refs.form.resetValidation()
         }).catch(function (result) {
           vm.loading = false
           toastr.remove()
-          toastr.error('Tên đăng nhập hoặc mật khẩu không chính xác')
+          toastr.error('Đăng ký không thành công')
         })
       },
-      submitLogout () {
+      activeTaiKhoan () {
         let vm = this
-        vm.signed = false
-        vm.$store.commit('SET_ISSIGNED', false)
-        localStorage.setItem('user', null)
-        vm.$cookies.set('Token', '')
-        vm.$cookies.set('RefreshToken', '')
-        // vm.$store.dispatch('logoutKeyCloak').then(function (result) {
-        //   let redirect_uri = process.env.VUE_APP_PATH_REDIRECT_SSO
-        //   window.location.href = result.endpoint + '?redirect_uri='+ redirect_uri
-        // }).catch(function () {
-        //   window.location.href = window.location.origin + window.location.pathname + "#/dang-nhap"
-        // })
+        if (!String(vm.maKichHoat).trim()) {
+          return
+        }
+        vm.loading = true
+        let filter = {
+          maKichHoat: vm.maKichHoat,
+          email: vm.emailActive
+        }
+        vm.$store.dispatch('activeTaiKhoan', filter).then(function (result) {
+          vm.loading = false
+          toastr.remove()
+          toastr.success('Kích hoạt thành công. Đăng nhập để sử dụng hệ thống.')
+          setTimeout(function () {
+            vm.$router.push({ path: '/dang-nhap' })
+          }, 300)
+        }).catch(function (result) {
+          vm.loading = false
+          toastr.remove()
+          toastr.error('Kích hoạt không thành công')
+        })
       },
       goToPage () {
         let vm = this
@@ -295,9 +279,17 @@
           vm.$router.push({ path: '/' })
         }
       },
-      goToSignUp () {
-        let vm = this
-        vm.$router.push({ path: '/dang-ky' })
+      getSearchParams (prams, key) {
+        let value = ""
+        let headers = prams.split("&")
+        headers.forEach(function (header) {
+          header = header.split("=");
+          let keyHeader = header[0];
+          if (keyHeader === key) {
+            value = header[1]
+          }
+        });
+        return value
       }
     }
   }
@@ -307,6 +299,9 @@
   $image-login: $public-path + '/images/bg-login-2.jpg?t=3913123';
   #app {
     background: transparent !important
+  }
+  .select-loaitk .v-icon, .select-loaitk label  {
+    color: #ffffff !important;
   }
   .wrap-login {
     background: url($image-login) no-repeat;

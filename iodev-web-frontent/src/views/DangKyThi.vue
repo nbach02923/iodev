@@ -6,7 +6,7 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <a :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+          <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
             <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="width: 100%">
           </a>
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
@@ -70,19 +70,24 @@
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
-        
-            <v-col class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
-              <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showAddThiSinh">
-                <v-icon size="18">mdi-plus</v-icon>&nbsp;
-                Thêm thí sinh
-              </v-btn>
-            </v-col>
           </v-row>
           <v-row class="my-0 py-0 pt-3 mx-0">
-            <v-col cols="12" class="py-0 px-0 mb-2 col col-12 my-2" style="color: #2161b1;font-weight: bold;">
-              <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-              DANH SÁCH THÍ SINH
-            </v-col>
+            <v-flex>
+              <v-row justify="end" class="my-0 mx-0 mt-3">
+                <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
+                  <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
+                  DANH SÁCH THÍ SINH
+                </v-col>
+                <v-spacer></v-spacer>
+            
+                <v-col v-if="chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
+                  <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateThiSinh">
+                    <v-icon size="18">mdi-plus</v-icon>&nbsp;
+                    Thêm thí sinh
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-flex>
             <v-col cols="12"  class="pt-0 px-0">
               <v-data-table
                 :headers="headersDanhSachThiSinh"
@@ -105,7 +110,7 @@
                   <div>{{ dateLocale(item.ngaySinh)}}</div>
                 </template>
                 <template v-slot:item.action="{ item }">
-                  <div>
+                  <div v-if="chiTietCuocThi.tinhTrang == 1">
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn small @click.stop="showEditThiSinh(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
@@ -129,10 +134,22 @@
             </v-col>
           </v-row>
           <v-row class="my-0 py-0 pt-3 mx-0">
-            <v-col cols="12" class="py-0 px-0 mb-2 col col-12 my-2" style="color: #2161b1;font-weight: bold;">
-              <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-              DANH SÁCH HUẤN LUẬN VIÊN
-            </v-col>
+             <v-flex>
+              <v-row justify="end" class="my-0 mx-0 mt-3">
+                <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
+                  <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
+                  DANH SÁCH HUẤN LUYỆN VIÊN
+                </v-col>
+                <v-spacer></v-spacer>
+            
+                <v-col v-if="chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
+                  <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateHlv">
+                    <v-icon size="18">mdi-plus</v-icon>&nbsp;
+                    Thêm huấn luyện viên
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-flex>
             <v-col cols="12"  class="pt-0 px-0">
               <v-data-table
                 :headers="headersDanhSachHlv"
@@ -151,11 +168,11 @@
                 <template v-slot:item.truongPhoDoan="{ item, index }">
                   <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : 'Phó đoàn'}}</div>
                 </template>
-                <template v-slot:item.action="{ item }">
-                  <div>
+                <template v-slot:item.action="{ item }" >
+                  <div v-if="chiTietCuocThi.tinhTrang == 1">
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="showEditThiSinh(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
+                        <v-btn small @click.stop="showEditHlv(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-pencil</v-icon>
                         </v-btn>
                       </template>
@@ -163,7 +180,7 @@
                     </v-tooltip>
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="deleteThiSinh(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
+                        <v-btn small @click.stop="deleteHlv(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-delete</v-icon>
                         </v-btn>
                       </template>
@@ -292,7 +309,7 @@
                   placeholder="Sinh viên, học sinh năm mấy..."
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6" class="py-0">
+              <v-col cols="12" class="py-0">
                 <label>Nghành đào tạo</label>
                 <v-text-field
                   class="input-form"
@@ -304,17 +321,18 @@
                   hide-details="auto"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6" class="py-0">
+              <v-col cols="12" class="py-0">
                 <label>Giải thưởng đã đạt được</label>
-                <v-text-field
+                <v-textarea
                   class="input-form"
                   v-model="thongTinThiSinh['datGiaiThuong']"
                   solo
                   dense
                   clearable
                   max
+                  rows="2"
                   hide-details="auto"
-                ></v-text-field>
+                ></v-textarea>
               </v-col>
             </v-layout>
           </v-form>
@@ -401,11 +419,11 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6" class="py-0">
-                <label>Chức vụ</label>
+              <v-col cols="12" md="6" class="py-0 mb-2">
+                <label>Số điện thoại <span class="red--text">(*)</span></label>
                 <v-text-field
                   class="input-form"
-                  v-model="thongTinHlv['truongPhoDoan']"
+                  v-model="thongTinHlv['soDienThoai']"
                   solo
                   dense
                   clearable
@@ -415,11 +433,29 @@
                   required
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="6" class="py-0">
+                <label>Chức vụ <span class="red--text">(*)</span></label>
+                <v-autocomplete
+                  class="flex input-form"
+                  hide-no-data
+                  :items="itemsChucVu"
+                  v-model="thongTinHlv['truongPhoDoan']"
+                  item-text="tenMuc"
+                  item-value="maMuc"
+                  dense
+                  solo
+                  hide-details="auto"
+                  placeholder="Chọn chức vụ"
+                  :rules="required"
+                  required
+                >
+                </v-autocomplete>
+              </v-col>
             </v-layout>
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end pb-3">
-          <v-btn small color="red" class="white--text mr-2" :loading="loading" :disabled="loading" @click="dialogAddThiSinh = false">
+          <v-btn small color="red" class="white--text mr-2" :loading="loading" :disabled="loading" @click="dialogAddHlv = false">
             <v-icon left>
               mdi-close
             </v-icon>
@@ -460,25 +496,12 @@ export default {
     props: ['type', 'id'],
     data() {
       return {
+        loading: false,
         readonlyForm: false,
         mauNhapForm: '',
         dataInput: '',
         formData: '',
-        chiTietCuocThi: {
-          "id": "adac1aec-41ac-4e92-be04-52dc99d9fd85",
-          "tenGoi": "Olympic tin học sinh viên Việt Nam",
-          "tiengAnh": null,
-          "serieCuocThi": "OLP",
-          "lanToChuc": 21,
-          "donViToChuc": "Hội tin học Việt Nam",
-          "toChucId": "02123",
-          "ngayBatDau": "06-11-2021",
-          "ngayKetThuc": "19-03-2022",
-          "thongTinMoTa": "Olympic Tin học Sinh viên Việt Nam (OLP) là sáng kiến của Hội Tin học Việt Nam, Hội Sinh viên Việt Nam và Bộ giáo dục và Đào tạo nhằm động viên phong trào học tập tin học và khuyến khích các tài năng tin học trẻ. Bắt đầu từ năm 1992, Kỳ thi đã được tổ chức định kỳ hàng năm với sự tham gia của đông đảo sinh viên các trường Đại học và Cao đẳng trong cả nước. Từ năm 2005, sau những năm thử nghiệm với tiêu chuẩn thi lập trình quốc tế ACM/ICPC cho quy trình chấm thi và thi trực tuyến cho khối thi tập thể ”lều chõng”, từ năm 2006 Việt Nam chính thức được chấp thuận tổ chức Kỳ thi lập trình sinh viên quốc tế ACM/ICPC (ACM International Collegiate Programming Contest) Khu vực Châu Á. Từ năm 2007, Olympic Tin học sinh viên Việt Nam đã kết nối với Kỳ thi ACM/ICPC thành một Hội thi tin học cho sinh viên Việt Nam và Khu vực Châu Á. Từ năm 2018, ACM/ICPC đổi thành Kỳ thi lập trình sinh viên quốc tế ICPC (International Collegiate Programming Contest).",
-          "website": "https://www.olp.vn/",
-          "hinhAnh": 'https://oj.vnoi.info/martor/16698f71-9463-4556-91f2-d9aa7acdfa96.png',
-          "tinhTrang": 1
-        },
+        chiTietCuocThi: '',
         itemsPerPage: 30,
         keywordSearch: '',
         danhSachThiSinh: [],
@@ -542,7 +565,7 @@ export default {
           {
               sortable: false,
               text: 'Giải thưởng',
-              align: 'center',
+              align: 'left',
               value: 'datGiaiThuong',
               class: 'th-center',
               width: 200
@@ -550,10 +573,16 @@ export default {
           {
               sortable: false,
               text: 'Nội dung thi',
-              align: 'center',
+              align: 'left',
               value: 'noiDungThi',
               class: 'th-center',
               width: 200
+          },
+          {
+              sortable: false,
+              text: 'Thao tác',
+              align: 'center',
+              value: 'action'
           }
         ],
         loadingDataDanhSachThiSinh: false,
@@ -574,7 +603,7 @@ export default {
               sortable: false,
               text: 'Họ tên',
               align: 'left',
-              value: 'tenGoi',
+              value: 'hoTen',
               class: 'th-center py-2'
           },
           {
@@ -594,7 +623,7 @@ export default {
           {
               sortable: false,
               text: 'Email',
-              align: 'center',
+              align: 'left',
               value: 'email',
               class: 'th-center',
               width: 200
@@ -602,10 +631,16 @@ export default {
           {
               sortable: false,
               text: 'Nội dung thi',
-              align: 'center',
+              align: 'left',
               value: 'noiDungThi',
               class: 'th-center',
               width: 200
+          },
+          {
+              sortable: false,
+              text: 'Thao tác',
+              align: 'center',
+              value: 'action'
           }
         ],
         loadingDataDanhSachHlv: false,
@@ -626,6 +661,7 @@ export default {
           {tenMuc: 'Trưởng đoàn', maMuc: 1},
           {tenMuc: 'Phó đoàn', maMuc: 2}
         ],
+        ngaySinhCreate: '',
         thongTinHlv: '',
         dialogAddHlv: false,
         validFormAddHlv: false,
@@ -671,7 +707,7 @@ export default {
         vm.loadingData = true
         vm.$store.dispatch('collectionDetail', filter).then(function (response) {
           vm.loadingData = false
-          // vm.chiTietCuocThi = response
+          vm.chiTietCuocThi = response
         }).catch(function () {
           vm.loadingData = false
         })
@@ -692,12 +728,12 @@ export default {
           collectionId: vm.id,
           collectionNameChild: 'thisinhs',
           data: {
-            page: vm.pageDanhSachThiSinh,
-            size: vm.itemsPerPage
+            // page: vm.pageDanhSachThiSinh,
+            // size: vm.itemsPerPage
           }
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachThiSinh = response.content
+          vm.danhSachThiSinh = response
           vm.totalDanhSachThiSinh = response.totalElements
           vm.pageCountDanhSachThiSinh = response.totalPages
           vm.loadingDataDanhSachThiSinh = false
@@ -721,12 +757,12 @@ export default {
           collectionId: vm.id,
           collectionNameChild: 'huanluyenviens',
           data: {
-            page: vm.pageDanhSachHlv,
-            size: vm.itemsPerPage
+            // page: vm.pageDanhSachHlv,
+            // size: vm.itemsPerPage
           }
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachHlv = response.content
+          vm.danhSachHlv = response
           vm.totalDanhSachHlv = response.totalElements
           vm.pageCountDanhSachHlv = response.totalPages
           vm.loadingDataDanhSachHlv = false
@@ -757,7 +793,7 @@ export default {
         vm.typeAction = 'update'
         vm.dialogAddThiSinh = true
         setTimeout(function () {
-          vm.thongTinThiSinh = item
+          vm.thongTinThiSinh = Object.assign({}, item)
           vm.ngaySinhCreate = vm.dateLocale(vm.thongTinThiSinh.ngaySinh)
           vm.$refs.formAddThiSinh.resetValidation()
         }, 100)
@@ -800,14 +836,10 @@ export default {
             toastr.remove()
             toastr.success('Thêm mới thành công')
             vm.dialogAddThiSinh = false
-            vm.getDanhSachCanBo()
+            vm.getDanhSachThiSinh()
           }).catch(function (response) {
             vm.loading = false
             toastr.remove()
-            if (response && response.status == 409) {
-              toastr.error('Mã thí sinh đã tồn tại')
-              return
-            }
             toastr.error('Thêm mới thất bại')
           })
         } else {
@@ -850,10 +882,11 @@ export default {
           vm.thongTinHlv = {
             "hoTen": "",
             "email": "",
+            "soDienThoai": "",
             "truongPhoDoan": ""
           }
-          vm.$refs.validFormAddHlv.reset()
-          vm.$refs.validFormAddHlv.resetValidation()
+          vm.$refs.formAddHlv.reset()
+          vm.$refs.formAddHlv.resetValidation()
         }, 100)
       },
       showEditHlv (item) {
@@ -861,8 +894,8 @@ export default {
         vm.typeAction = 'update'
         vm.dialogAddHlv = true
         setTimeout(function () {
-          vm.thongTinHlv = item
-          vm.$refs.validFormAddHlv.resetValidation()
+          vm.thongTinHlv = Object.assign({}, item)
+          vm.$refs.formAddHlv.resetValidation()
         }, 100)
       },
       submitCreateHlv () {
@@ -926,7 +959,7 @@ export default {
         let confirm = {
           auth: false,
           title: 'Xóa thí sinh',
-          message: 'Bạn có chắc chắn muốn xóa "' + item.hoVaTen + '"',
+          message: 'Bạn có chắc chắn muốn xóa "' + item.hoTen + '"',
           button: {
             yes: 'Có',
             no: 'Không'
@@ -957,7 +990,7 @@ export default {
         let confirm = {
           auth: false,
           title: 'Xóa huấn luyện viên',
-          message: 'Bạn có chắc chắn muốn xóa "' + item.hoVaTen + '"',
+          message: 'Bạn có chắc chắn muốn xóa "' + item.hoTen + '"',
           button: {
             yes: 'Có',
             no: 'Không'

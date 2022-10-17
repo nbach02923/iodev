@@ -6,7 +6,7 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <a :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+          <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
             <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="width: 100%">
           </a>
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
@@ -63,7 +63,7 @@
                   @click="dangKyThi(chiTietCuocThi)"
                 >
                   <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
-                  Đăng ký
+                  Đăng ký dự thi
                 </v-btn>
               </v-col>
             </v-row>
@@ -186,21 +186,7 @@ export default {
         mauNhapForm: '',
         dataInput: '',
         formData: '',
-        chiTietCuocThi: {
-          "id": "adac1aec-41ac-4e92-be04-52dc99d9fd85",
-          "tenGoi": "Olympic tin học sinh viên Việt Nam",
-          "tiengAnh": null,
-          "serieCuocThi": "OLP",
-          "lanToChuc": 21,
-          "donViToChuc": "Hội tin học Việt Nam",
-          "toChucId": "02123",
-          "ngayBatDau": "06-11-2021",
-          "ngayKetThuc": "19-03-2022",
-          "thongTinMoTa": "Olympic Tin học Sinh viên Việt Nam (OLP) là sáng kiến của Hội Tin học Việt Nam, Hội Sinh viên Việt Nam và Bộ giáo dục và Đào tạo nhằm động viên phong trào học tập tin học và khuyến khích các tài năng tin học trẻ. Bắt đầu từ năm 1992, Kỳ thi đã được tổ chức định kỳ hàng năm với sự tham gia của đông đảo sinh viên các trường Đại học và Cao đẳng trong cả nước. Từ năm 2005, sau những năm thử nghiệm với tiêu chuẩn thi lập trình quốc tế ACM/ICPC cho quy trình chấm thi và thi trực tuyến cho khối thi tập thể ”lều chõng”, từ năm 2006 Việt Nam chính thức được chấp thuận tổ chức Kỳ thi lập trình sinh viên quốc tế ACM/ICPC (ACM International Collegiate Programming Contest) Khu vực Châu Á. Từ năm 2007, Olympic Tin học sinh viên Việt Nam đã kết nối với Kỳ thi ACM/ICPC thành một Hội thi tin học cho sinh viên Việt Nam và Khu vực Châu Á. Từ năm 2018, ACM/ICPC đổi thành Kỳ thi lập trình sinh viên quốc tế ICPC (International Collegiate Programming Contest).",
-          "website": "https://www.olp.vn/",
-          "hinhAnh": 'https://oj.vnoi.info/martor/16698f71-9463-4556-91f2-d9aa7acdfa96.png',
-          "tinhTrang": 1
-        },
+        chiTietCuocThi: '',
         itemsPerPage: 15,
         keywordSearch: '',
 
@@ -308,8 +294,9 @@ export default {
     created () {
       let vm = this
       vm.getChiTietCuocThi()
-      vm.getdanhSachKetQuaCaNhan()
-      vm.getdanhSachKetQuaDongDoi()
+      vm.getdanhSachDoanThi('reset')
+      vm.getdanhSachKetQuaCaNhan('reset')
+      vm.getdanhSachKetQuaDongDoi('reset')
     },
     computed: {
       breakpointName () {
@@ -323,6 +310,9 @@ export default {
       '$route': function (newRoute, oldRoute) {
         let vm = this
         vm.getChiTietCuocThi()
+        vm.getdanhSachDoanThi('reset')
+        vm.getdanhSachKetQuaCaNhan('reset')
+        vm.getdanhSachKetQuaDongDoi('reset')
       }
     },
     methods: {
@@ -340,9 +330,37 @@ export default {
         vm.loadingData = true
         vm.$store.dispatch('collectionDetail', filter).then(function (response) {
           vm.loadingData = false
-          // vm.chiTietCuocThi = response
+          vm.chiTietCuocThi = response
         }).catch(function () {
           vm.loadingData = false
+        })
+      },
+      getdanhSachDoanThi (type) {
+        let vm = this
+        if (type === 'reset') {
+          vm.totalTongHopDangKy = 0
+          vm.pageCountTongHopDangKy = 0
+          vm.pageTongHopDangKy = 0
+        }
+        if (vm.loadingDataTongHopDangKy) {
+          return
+        }
+        vm.loadingDataTongHopDangKy = true
+        let filter = {
+          collectionName: 'doanthis',
+          data: {
+            // page: vm.pageTongHopDangKy,
+            // size: vm.itemsPerPage,
+            cuocThiId: vm.id
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.danhSachTongHopDangKy = response
+          vm.totalTongHopDangKy = response.totalElements
+          vm.pageCountTongHopDangKy = response.totalPages
+          vm.loadingDataTongHopDangKy = false
+        }).catch(function () {
+          vm.loadingDataTongHopDangKy = false
         })
       },
       getdanhSachKetQuaCaNhan (type) {
@@ -361,12 +379,12 @@ export default {
           collectionId: vm.id,
           collectionNameChild: 'thisinhs',
           data: {
-            page: vm.pageKetQuaCaNhan,
-            size: vm.itemsPerPage
+            // page: vm.pageKetQuaCaNhan,
+            // size: vm.itemsPerPage
           }
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachKetQuaCaNhan = response.content
+          vm.danhSachKetQuaCaNhan = response
           vm.totalKetQuaCaNhan = response.totalElements
           vm.pageCountKetQuaCaNhan = response.totalPages
           vm.loadingDataKetQuaCaNhan = false
@@ -390,12 +408,12 @@ export default {
           collectionId: vm.id,
           collectionNameChild: 'doithis',
           data: {
-            page: vm.pageKetQuaDongDoi,
-            size: vm.itemsPerPage
+            // page: vm.pageKetQuaDongDoi,
+            // size: vm.itemsPerPage
           }
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachKetQuaDongDoi = response.content
+          vm.danhSachKetQuaDongDoi = response
           vm.totalKetQuaDongDoi = response.totalElements
           vm.pageCountKetQuaDongDoi = response.totalPages
           vm.loadingDataKetQuaDongDoi = false
