@@ -67,26 +67,6 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    getThongKeHoSo ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let config = {
-          method: 'get',
-          url: state.apiSso + '/o/rest/v2/statistics/dossiers/todo',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data: {},
-          params: filter.data
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error)
-        })
-      })
-    },
     collectionCreate ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let dataPost = JSON.stringify(filter.data)
@@ -107,11 +87,31 @@ export default new Vuex.Store({
         })
       })
     },
-    collectionUpdate ({commit, state}, filter) {
+    collectionCreateChild ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let dataPost = JSON.stringify(filter.data)
         let config = {
           method: 'post',
+          url: '/api/' + filter.collectionName + '/' + filter.collectionId + '/' + filter.collectionChildName,
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data : dataPost
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error.response)
+        })
+      })
+    },
+    collectionUpdate ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let dataPost = JSON.stringify(filter.data)
+        let config = {
+          method: 'put',
           url: '/api/' + filter.collectionName + '/' + filter.id,
           headers: { 
             'Accept': 'application/json', 
@@ -408,17 +408,17 @@ export default new Vuex.Store({
         })
       })
     },
-    activeCaNhan ({commit, state}, filter) {
+    activeTaiKhoan ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
         let config = {
-          method: 'post',
-          url: '/api/idp/account/'+ filter.data.type + '/active',
+          method: 'put',
+          url: '/api/auth/'+ filter.email + '/verify-email',
           headers: { 
             'Accept': 'application/json', 
             'Content-Type': 'application/json'
           },
-          data : dataPost
+          params: {maKichHoat: filter.maKichHoat},
+          data : {}
         }
         axios(config).then(function (response) {
           let serializable = response.data
@@ -508,31 +508,6 @@ export default new Vuex.Store({
         })
       })
     },
-    // getRefreshTokenKeyCloak ({commit, state}, filter) {
-    //   return new Promise((resolve, reject) => {
-    //     let settings = {
-    //       "url": state.apiSso + '/flex/oauth2/refreshtoken',
-    //       "method": "POST",
-    //       "headers": {
-    //         'Authorization': 'Basic ZmxleDpzc28=',
-    //         'secret': state.secretLogin,
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //       },
-    //       "data": {
-    //         "refresh_token": filter.code,
-    //         "redirect_uri": filter.redirect_uri
-    //       }
-    //     };
-        
-    //     $.ajax(settings).done(function (response) {
-    //       let serializable = response
-    //       resolve(serializable)
-    //     }).fail(function (response) {
-    //       reject(response)
-    //     })
-    //   })
-    // },
     loadDataSource ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let apiGet = filter.api

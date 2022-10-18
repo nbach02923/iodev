@@ -20,7 +20,11 @@ export default {
   created () {
     if (this.$cookies.get('Token')) {
     } else {
-      this.$router.push({ path: '/' })
+      if (window.location.href.indexOf("/dang-ky") || window.location.href.indexOf("/dang-nhap")) {
+        
+      } else {
+        this.$router.push({ path: '/' })
+      }
     }
   },
   computed: {

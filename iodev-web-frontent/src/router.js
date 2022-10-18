@@ -25,7 +25,7 @@ export default new Router({
         },
         {
           path: '/dang-ky/:id',
-          name: 'DangKy',
+          name: 'DangKyThi',
           component: () => import('@/views/DangKyThi'),
           props: true
         }
@@ -36,10 +36,10 @@ export default new Router({
       path: '/dang-nhap',
       component: () => import('@/views/Login')
     },
-    // {
-    //   name: 'Home',
-    //   path: '/',
-    //   component: () => import('@/views/Dashboard')
-    // }
+    {
+      name: 'DangKy',
+      path: '/dang-ky',
+      component: () => import('@/views/DangKy')
+    }
   ]
 })
