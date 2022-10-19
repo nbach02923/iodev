@@ -25,4 +25,6 @@ public interface HuanLuyenVienRepository extends JpaRepository<HuanLuyenVien, St
 
     @Transactional
     void deleteByCuocThiId(String cuocThiId);
+
+    long countByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
 }

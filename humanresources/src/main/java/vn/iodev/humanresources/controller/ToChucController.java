@@ -1,6 +1,7 @@
 package vn.iodev.humanresources.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +50,13 @@ public class ToChucController {
     @GetMapping("/tochucs")
     public List<ToChuc> getAllToChucs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false, defaultValue = "") String tuKhoa, @RequestParam(required = false) String tenGoi, @RequestParam(required = false) String loaiToChuc, @RequestParam(required = false) String email, @RequestParam(required = false) Integer tinhTrang) {
         Pageable paging = PageRequest.of(page - 1, size);
-        List<ToChuc> toChucs;
-        toChucs = toChucRepository.findToChucByMultipleConditions(tuKhoa, tenGoi, loaiToChuc, email, tinhTrang, paging);
+        List<ToChuc> toChucs = new ArrayList<>();
+        try {
+            toChucs = toChucRepository.findToChucByMultipleConditions(tuKhoa, tenGoi, loaiToChuc, email, tinhTrang, paging);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         return toChucs;
     }
 

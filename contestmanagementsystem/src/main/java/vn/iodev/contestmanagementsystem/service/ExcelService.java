@@ -132,8 +132,16 @@ public class ExcelService {
         try {
             List<ToChucResponse> tochucs = ExcelHelper.excelXlsxToToChucs(file.getInputStream());
             for (ToChucResponse tcr : tochucs) {
-                ToChucResponse result = toChucService.createToChuc(tcr);
-                lstToChucs.add(result);
+                log.info("Find ToChuc: " + tcr.getTenGoi());
+                ToChucResponse[] findTC = toChucService.getToChucByTenGoi(tcr.getTenGoi());
+                log.info("Find ToChuc: " + tcr.getTenGoi() + ", result: " + findTC.length);
+                if (findTC.length > 0) {
+                    lstToChucs.add(findTC[0]);
+                }
+                else {
+                    ToChucResponse result = toChucService.createToChuc(tcr);
+                    lstToChucs.add(result);
+                }
             }
         }
         catch (IOException e) {
@@ -212,8 +220,8 @@ public class ExcelService {
                 if (huanLuyenVien.getTenToChuc() != null && !huanLuyenVien.getTenToChuc().isEmpty()) {
                     for (ToChucResponse tc : tochucs) {
                         if (tc.getTenGoi().equals(huanLuyenVien.getTenToChuc())) {
-                            DoanThi doanThi = new DoanThi(huanLuyenVien.getTenDoanThi(), "", tc.getDiaChiHoatDong(), tc.getEmail(), tc.getId(), null);
-                            Optional<DoanThi> oldDoanThi = doanThiRepository.findByTenGoiAndToChucId(doanThi.getTenGoi(), doanThi.getToChucId());
+                            DoanThi doanThi = new DoanThi(huanLuyenVien.getTenDoanThi(), "", tc.getDiaChiHoatDong(), tc.getEmail(), tc.getId(), cuocThi.getId());
+                            Optional<DoanThi> oldDoanThi = doanThiRepository.findByTenGoiAndToChucIdAndCuocThiId(doanThi.getTenGoi(), doanThi.getToChucId(), cuocThi.getId());
                             if (oldDoanThi.isPresent()) {
                                 doanThi.setId(oldDoanThi.get().getId());
                             }
@@ -259,6 +267,11 @@ public class ExcelService {
                 for (CuocThi cuocThi : cuocthis) {
                     if (cuocThi.getTenGoi().equals(ts.getTenCuocThi())) {
                         ts.setCuocThi(cuocThi);
+                        for (DoanThi doanThi : doanthis) {
+                            if (doanThi.getTenGoi().equals(ts.getTenDoanThi()) && doanThi.getCuocThiId().equals(cuocThi.getId())) {
+                                ts.setDoanThiId(doanThi.getId());
+                            }
+                        }        
                         break;
                     }
                 }

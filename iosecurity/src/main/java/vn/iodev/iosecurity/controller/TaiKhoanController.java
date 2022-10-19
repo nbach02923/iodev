@@ -280,7 +280,7 @@ public class TaiKhoanController {
     public ResponseEntity<TaiKhoan> dangKyTaiKhoan(@Valid @RequestBody TaiKhoanRequest taiKhoan) {
         try {
             boolean isOrganizeAdmin = false;
-            if (taiKhoan.getId() != null) {
+            if (taiKhoan.getId() != null || taiKhoan.getId().isEmpty()) {
                 if (taiKhoan.getLoaiTaiKhoan() != null) {
                     if (taiKhoan.getLoaiTaiKhoan() == ELoaiTaiKhoan.TAIKHOAN_CANHAN) {                     
                         CaNhanResponse caNhan = humanResourceService.getCaNhanById(taiKhoan.getId());

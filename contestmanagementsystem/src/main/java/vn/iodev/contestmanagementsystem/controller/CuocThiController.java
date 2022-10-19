@@ -1,8 +1,11 @@
 package vn.iodev.contestmanagementsystem.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -30,12 +33,25 @@ import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.config.CMSConfiguration;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DanhSachThi;
+import vn.iodev.contestmanagementsystem.model.DoanThi;
+import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.FileIO;
+import vn.iodev.contestmanagementsystem.model.KhoiThi;
+import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.FileIOResponse;
+import vn.iodev.contestmanagementsystem.payload.NoiDungThi;
 import vn.iodev.contestmanagementsystem.payload.ResponseMessage;
+import vn.iodev.contestmanagementsystem.payload.DongThongKeResponse;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DoiThiRepository;
 import vn.iodev.contestmanagementsystem.repository.FileIORepository;
+import vn.iodev.contestmanagementsystem.repository.HuanLuyenVienRepository;
+import vn.iodev.contestmanagementsystem.repository.KhoiThiRepository;
+import vn.iodev.contestmanagementsystem.repository.ThiSinhRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
 import vn.iodev.contestmanagementsystem.service.FileStorageService;
 import vn.iodev.contestmanagementsystem.service.ToChucService;
@@ -60,6 +76,24 @@ public class CuocThiController {
     @Autowired
     ToChucService toChucService;
 
+    @Autowired
+    DoanThiRepository doanThiRepository;
+
+    @Autowired
+    HuanLuyenVienRepository huanLuyenVienRepository;
+
+    @Autowired
+    ThiSinhRepository thiSinhRepository;
+
+    @Autowired
+    KhoiThiRepository khoiThiRepository;
+
+    @Autowired
+    DanhSachThiRepository danhSachThiRepository;
+
+    @Autowired
+    DoiThiRepository doiThiRepository;
+    
     @GetMapping("/cuocthis")
     public List<CuocThi> getAllCuocThis(@RequestParam(defaultValue = "1") int page, 
             @RequestParam(defaultValue = "15") int size, 
@@ -295,5 +329,53 @@ public class CuocThiController {
         catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping(value = "/cuocthis/{cuocThiId}/thongke")
+    public ResponseEntity<List<DongThongKeResponse>> thongKe(@PathVariable("cuocThiId") String cuocThiId) {
+        if (!cuocThiRepository.existsById(cuocThiId)) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        List<DongThongKeResponse> result = new ArrayList<>();
+        List<KhoiThi> khoithis = khoiThiRepository.findByCuocThiId(cuocThiId);
+
+        List<DoanThi> lstDoanThi = doanThiRepository.findByCuocThiId(cuocThiId);
+        for (DoanThi doanThi : lstDoanThi) {
+            DongThongKeResponse response = new DongThongKeResponse();
+            response.setDoanThi(doanThi);
+            response.setSoHuanLuyenVien(huanLuyenVienRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
+            response.setSoThiSinh(thiSinhRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
+
+            List<NoiDungThi> lstNoiDungThi = new ArrayList<>();
+
+            for (KhoiThi khoiThi : khoithis) {
+                NoiDungThi noiDungThi = new NoiDungThi();
+                noiDungThi.setTenNoiDung(khoiThi.getTenGoi());
+                
+                List<ThiSinh> lstThiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
+                List<DoiThi> lstDoiThis = doiThiRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
+                List<String> thiSinhIds = new ArrayList<>();
+                List<String> doiThiIds = new ArrayList<>();
+                for (ThiSinh thiSinh : lstThiSinhs) {
+                    thiSinhIds.add(thiSinh.getId());
+                }
+                for (DoiThi doiThi : lstDoiThis) {
+                    doiThiIds.add(doiThi.getId());
+                }
+                List<DanhSachThi> thiSinhThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(cuocThiId, khoiThi.getId(), thiSinhIds);
+                List<DanhSachThi> doiThiThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(cuocThiId, khoiThi.getId(), doiThiIds);
+
+                noiDungThi.setSoDoi(doiThiThamGiaThis.size());
+                noiDungThi.setSoThiSinh(thiSinhThamGiaThis.size());
+
+                lstNoiDungThi.add(noiDungThi);
+            }
+
+            response.setNoiDungThi(lstNoiDungThi);
+
+            result.add(response);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

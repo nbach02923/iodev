@@ -24,4 +24,7 @@ public interface ThiSinhRepository extends JpaRepository<ThiSinh, String> {
 
     @Transactional
     void deleteByCuocThiId(String cuocThiId);
+
+    long countByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
+    List<ThiSinh> findByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
 }
