@@ -5,17 +5,45 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Component
 public class RouterValidator {
-    public static final List<String> openApiEndpoints = Arrays.asList(
-        "/api/taikhoans",
-        "/api/authenticate"
+    public static final List<Route> openApiEndpoints = Arrays.asList(
+        new Route("/api/taikhoans$", "GET"),
+        new Route("/api/tochucs$", "GET"),
+        new Route("/api/canhans$", "GET"),
+        new Route("/api/authenticate$", "POST"),
+        new Route("/api/cuocthis$", "GET"),
+        new Route("/api/cuocthis/.+/hinhanhs$", "GET"),
+        new Route("/api/cuocthis/.+$", "GET"),
+        new Route("/api/cuocthis/.+/khoithis$", "GET"),
+        new Route("/api/khoithis$", "GET"),
+        new Route("/api/khoithis/.+$", "GET"),
+        new Route("/api/doanthis$", "GET"),
+        new Route("/api/doanthis/.+$", "GET"),
+        new Route("/api/huanluyenviens$", "GET"),
+        new Route("/api/huanluyenviens/.+$", "GET"),
+        new Route("/api/cuocthis/.+/huanluyenviens$", "GET"),
+        new Route("/api/khoithis/.+$", "GET"),
+        new Route("/api/thisinhs$", "GET"),
+        new Route("/api/cuocthis/.+$/thisinhs", "GET"),
+        new Route("/api/thisinhs/.+$", "GET"),
+        new Route("/api/doithis$", "GET"),
+        new Route("/api/cuocthis/.+$/doithis", "GET"),
+        new Route("/api/doithis/.+$", "GET"),
+        new Route("/api/danhsachthis$", "GET"),
+        new Route("/api/cuocthis/.+$/danhsachthis", "GET"),
+        new Route("/api/danhsachthis/.+$", "GET")
     );
+    public boolean isSecured(ServerHttpRequest request) {
+        boolean securedFlag = true;
+        for (Route r : openApiEndpoints) {
+            if (request.getMethodValue().equals(r.getHttpMethod()) && request.getURI().getPath().matches(r.getUrlPattern())) {
+                securedFlag = false;
+                break;
+            }
+        }
 
-    public Predicate<ServerHttpRequest> isSecured =
-        request -> openApiEndpoints
-                .stream()
-                .noneMatch(uri -> request.getURI().getPath().contains(uri));
+        return securedFlag;
+    }
 }
