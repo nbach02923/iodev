@@ -5,11 +5,11 @@
       <header id="banner" class="px-5">
         <div class="container layout wrap" style=""> 
           <a href="javascript:;" class="py-0 px-0"> 
-            <img class="logo-banner" :src="`${publicPath}/images/image-logo.png`">
+            <img class="logo-banner" :src="`${publicPath}/images/logo-vaip.jpg`">
           </a>
           <div class="title-banner">
-            <div class="mb-2" style="width: 100%">HỆ THỐNG THÔNG TIN IODEV</div>
-            <div style="width: 100%">Information systems IODEV</div>
+            <div class="mb-0" style="width: 100%">Hệ thống thông tin quản lý các cuộc thi tin học</div>
+            <!-- <div style="width: 100%">Information systems IODEV</div> -->
           </div>
         </div>
       </header>
@@ -186,6 +186,7 @@
     width: 52px;
     height: 52px;
     margin-right: 13px;
+    border-radius: 10px;
   }
   .title-banner {
     display: flex;

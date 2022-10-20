@@ -224,26 +224,6 @@ export default new Vuex.Store({
         })
       })
     },
-    getThongKe ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/thanhphanbaocao/thongke',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error)
-        })
-      })
-    },
     login ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let settings = {
@@ -254,48 +234,6 @@ export default new Vuex.Store({
             'Content-Type': 'application/json'
           },
           "data": JSON.stringify(filter.data)
-        };
-        
-        $.ajax(settings).done(function (response) {
-          let serializable = response
-          resolve(serializable)
-        }).fail(function (response) {
-          reject(response)
-        })
-      })
-    },
-    logoutKeyCloak ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let settings = {
-          "url": state.apiSso + '/flex/oauth2/logout_endpoint',
-          "method": "GET",
-          "headers": {
-            'Content-Type': 'application/json'
-          },
-        };
-        
-        $.ajax(settings).done(function (response) {
-          resolve(response)
-        }).fail(function (response) {
-          reject(response)
-        })
-      })
-    },
-    getRefreshTokenKeyCloak ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let settings = {
-          "url": state.apiSso + '/flex/oauth2/refreshtoken',
-          "method": "POST",
-          "headers": {
-            'Authorization': 'Basic ZmxleDpzc28=',
-            'secret': state.secretLogin,
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          "data": {
-            "refresh_token": filter.code,
-            "redirect_uri": filter.redirect_uri
-          }
         };
         
         $.ajax(settings).done(function (response) {
@@ -327,203 +265,16 @@ export default new Vuex.Store({
         })
       })
     },
-    getEmployee ({commit, state}, filter) {
+    signUp ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let settings = {
-          method: 'get',
-          url: state.apiSso + "/o/rest/v2/employees/" + filter.email + '/profile',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json',
-            'Authorization': filter.token
-          },
-          data: {},
-          params: {}
-        }
-        $.ajax(settings).done(function (response) {
-          let serializable = response
-          resolve(serializable)
-        }).fail(function (response) {
-          reject(response)
-        })
-      })
-    },
-    createAccountCanBo ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/' + filter.data.type,
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    changePass ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/resetpwd',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    changeAcc ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/' + filter.type + '/' + filter.maDinhDanh + '/tendinhdanh',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    activeTaiKhoan ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let config = {
-          method: 'put',
-          url: '/api/auth/'+ filter.email + '/verify-email',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          params: {maKichHoat: filter.maKichHoat},
-          data : {}
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    blockCaNhan ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/' + filter.data.type + '/lock',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    unBlockCaNhan ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/' + filter.data.type + '/unlock',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    restoreCaNhan ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'post',
-          url: '/api/idp/account/' + filter.data.type + '/restore',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    deleteCaNhan ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let dataPost = JSON.stringify(filter.data)
-        let config = {
-          method: 'delete',
-          url: '/api/idp/account/' + filter.data.type + '/delete',
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data : dataPost
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error.response)
-        })
-      })
-    },
-    loadDataSource ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let apiGet = filter.api
-        if (filter.api.indexOf('http') < 0) {
-          apiGet = state.apiSso + filter.api
-        }
-        let settings = {
-          "url": apiGet,
-          "method": "GET",
+          "url": state.apiSso + '/api/auth/register',
+          "method": "POST",
           "headers": {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + Vue.$cookies.get('Token')
+            'Content-Type': 'application/json'
           },
-          "data": {
-          }
+          "data": JSON.stringify(filter.data)
         };
         
         $.ajax(settings).done(function (response) {
@@ -531,52 +282,6 @@ export default new Vuex.Store({
           resolve(serializable)
         }).fail(function (response) {
           reject(response)
-        })
-      })
-    },
-    downloadFile ({ commit, state }, filter) {
-      return new Promise((resolve, reject) => {
-        let param = {
-          headers: {
-            'Authorization': 'Bearer ' + Vue.$cookies.get('Token')
-          },
-          responseType: 'blob'
-        }
-        axios.get('/api/thanhphanbaocao/downloadFile/' + filter.id, param).then(function (response) {
-          if (response.data) {
-            var a = document.createElement('a')
-            document.body.appendChild(a)
-            a.style = 'display: none'
-            var urlFile = window.URL.createObjectURL(response.data)
-            a.href = urlFile
-            a.download = filter.name
-            a.click()
-            resolve('success')
-          } else {
-            resolve('pending')
-          }
-        }).catch(function (xhr) {
-          console.log(xhr)
-        })
-        // 
-      })
-    },
-    deleteFile ({commit, state}, filter) {
-      return new Promise((resolve, reject) => {
-        let config = {
-          method: 'delete',
-          url: '/api/thanhphanbaocao/' + filter.idThanhPhan + '/attachment/' + filter.idFile,
-          headers: { 
-            'Accept': 'application/json', 
-            'Content-Type': 'application/json'
-          },
-          data: {}
-        }
-        axios(config).then(function (response) {
-          let serializable = response.data
-          resolve(serializable)
-        }).catch(function (error) {
-          reject(error)
         })
       })
     },

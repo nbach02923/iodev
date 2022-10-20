@@ -150,6 +150,15 @@
                       >
                         Mở đăng ký
                       </v-chip>
+                      <v-btn class="mb-2"
+                        v-if="item.tinhTrang == 1"
+                        text
+                        color="success"
+                        @click="dangKyThi(item)"
+                      >
+                        <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
+                        Đăng ký dự thi
+                      </v-btn>
                       <v-chip v-if="item.tinhTrang == 2"
                         class="ma-2 white--text"
                         color="orange"
@@ -163,17 +172,6 @@
                         Đã kết thúc
                       </v-chip>
                     </div>
-                    
-                  </template>
-                  <template v-slot:item.action="{ item }">                   
-                    <v-btn
-                      v-if="item.tinhTrang == 1"
-                      text
-                      color="primary"
-                      @click="dangKyThi(item)"
-                    >
-                      Đăng ký
-                    </v-btn>
                   </template>
               </v-data-table>
               <pagination v-if="pageCount" :pageInput="page" :total="total" :pageCount="pageCount" @tiny:change-page="changePage"></pagination>
@@ -202,7 +200,8 @@
       danhSachCuocThi_main: [
         {
           website: '',
-          hinhAnh: 'https://www.kaseya.com/wp-content/uploads/2021/12/IT-Infrastructure-Management.jpeg',
+          hinhAnh: '/images/bg-def.jpeg',
+          tinhTrang: 0
         }
       ],
       danhSachCuocThi_sub: [],
@@ -247,15 +246,7 @@
             value: 'tinhTrang',
             class: 'th-center',
             width: 90
-        },
-        {
-            sortable: false,
-            text: '',
-            align: 'center',
-            value: 'action',
-            class: 'th-center',
-            width: 100
-        },
+        }
       ],
       page: 0,
       itemsPerPage: 20,
@@ -290,10 +281,6 @@
           vm.pageCount = 0
           vm.page = 0
         }
-        if (vm.loadingData) {
-          return
-        }
-        vm.loadingData = true
         let filter = {
           collectionName: 'cuocthis',
           data: {
@@ -303,13 +290,11 @@
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           let data = response
-          vm.danhSachTatCaCuocThi = data
+          vm.danhSachTatCaCuocThi = vm.orderCuocThi(data)
           vm.total = response.length
           vm.pageCount = response.totalPages
           console.log('data', data)
-          vm.loadingData = false
         }).catch(function () {
-          vm.loadingData = false
         })
       },
       getDanhSachCuocThiStatus (status) {
@@ -322,21 +307,26 @@
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           let data = response
-          vm.danhSachCuocThi_sub = data
-          vm.danhSachCuocThi_main = [
+          vm.danhSachCuocThi_sub = vm.orderCuocThi(data)
+          vm.danhSachCuocThi_main = vm.orderCuocThi([
             {
               website: '',
-              hinhAnh: 'https://www.kaseya.com/wp-content/uploads/2021/12/IT-Infrastructure-Management.jpeg',
+              hinhAnh: '/images/bg-def.jpeg',
+              tinhTrang: 0
             }
           ].concat(data).filter(function (item) {
             return item.hinhAnh
-          })
+          }))
         }).catch(function () {
         })
       },
       xemChiTietCuocThi (item) {
         let vm = this
-        vm.$router.push({ path: '/cuoc-thi/' + item.id})
+        if (item.tinhTrang == 1 && vm.isSigned) {
+          vm.$router.push({ path: '/dang-ky/' + item.id})
+        } else {
+          vm.$router.push({ path: '/cuoc-thi/' + item.id})
+        }
       },
       dangKyThi (item) {
         let vm = this
@@ -371,8 +361,20 @@
         } else {
           return 'Đã kết thúc'
         }
+      },
+      orderCuocThi (data) {
+        let sortItems = function (items) {
+          function compare(a, b) {
+            if (a.tinhTrang < b.tinhTrang)
+              return -1
+            if (a.tinhTrang > b.tinhTrang)
+              return 1
+            return 0
+          }
+          return items.sort(compare)
+        }
+        return sortItems(data)
       }
-
     }
   }
 </script>
