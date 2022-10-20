@@ -286,11 +286,7 @@ public class CuocThiController {
     }
 
     @GetMapping("/cuocthis/{id}/hinhanhs")
-    public ResponseEntity<List<FileIOResponse>> getHinhAnhsCuocThi(@PathVariable("id") String id,
-        @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<List<FileIOResponse>> getHinhAnhsCuocThi(@PathVariable("id") String id) {
 
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
         String baseUrl = configuration.getGatewayUrl();

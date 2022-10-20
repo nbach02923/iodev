@@ -32,7 +32,9 @@ public class RouterValidator {
         new Route("/api/doithis/.+$", "GET"),
         new Route("/api/danhsachthis$", "GET"),
         new Route("/api/cuocthis/.+$/danhsachthis", "GET"),
-        new Route("/api/danhsachthis/.+$", "GET")
+        new Route("/api/danhsachthis/.+$", "GET"),
+        new Route("/api/auth/.+/verify-email*$", "PUT"),
+        new Route("/api/auth/register$", "POST")
     );
     public boolean isSecured(ServerHttpRequest request) {
         boolean securedFlag = true;
