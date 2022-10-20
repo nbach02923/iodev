@@ -42,6 +42,7 @@ import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.FileIO;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
+import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangCuocThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.FileIOResponse;
 import vn.iodev.contestmanagementsystem.payload.KetQuaCaNhanResponse;
@@ -112,10 +113,27 @@ public class CuocThiController {
             @RequestParam(defaultValue = "", required = false) String tuKhoa, 
             @RequestParam(required = false) String serieCuocThi, 
             @RequestParam(required = false) Integer lanToChuc, 
-            @RequestParam(required = false) String toChucId) {
+            @RequestParam(required = false) String toChucId,
+            @RequestParam(required = false) String tinhTrang) {
         Pageable paging = PageRequest.of(page - 1, size);
         List<CuocThi> cuocThis;
-        cuocThis = cuocThiRepository.findToChucByMultipleConditions(tuKhoa, serieCuocThi, lanToChuc, toChucId, paging);
+        List<Integer> tinhTrangs = new ArrayList<>();
+        if (tinhTrang != null && !tinhTrang.isEmpty()) {
+            for (String tempTinhTrang : tinhTrang.split(",")) {
+                try {
+                    tinhTrangs.add(Integer.parseInt(tempTinhTrang));
+                }
+                catch (NumberFormatException e) {
+
+                }
+            }
+        }
+        else {
+            tinhTrangs.add(LoaiTinhTrangCuocThi.MODANGKY);
+            tinhTrangs.add(LoaiTinhTrangCuocThi.DONGDANGKY);
+            tinhTrangs.add(LoaiTinhTrangCuocThi.DAKETTHUC);
+        }
+        cuocThis = cuocThiRepository.findToChucByMultipleConditions(tuKhoa, serieCuocThi, lanToChuc, toChucId, tinhTrangs, paging);
         return cuocThis;
     }
 
