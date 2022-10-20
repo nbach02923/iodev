@@ -7,7 +7,7 @@
           <v-layout wrap>
             <v-flex class="text-1">
               <v-icon size="18" color="#2161B1">mdi-copyright</v-icon>&nbsp;
-              <span>HỘI TIN HỌC VIỆT NAM - HỆ THỐNG THÔNG TIN IODEV</span>
+              <span style="text-transform: uppercase;">Hệ thống thông tin quản lý các cuộc thi tin học</span>
             </v-flex>
             <v-flex class="text-2">
               <v-icon size="18" color="#2161B1">mdi-phone-in-talk-outline</v-icon>&nbsp;

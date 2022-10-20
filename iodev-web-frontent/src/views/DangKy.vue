@@ -9,10 +9,10 @@
       <div class="container-wrap">
         <div class="wrap-title">
           <v-flex style="text-align: center;">
-            <img class="img-login-logo" :src="`${publicPath}/images/image-logo.png?t=93111413`">
+            <img class="img-login-logo" :src="`${publicPath}/images/logo-vaip.jpg?t=93111413`">
           </v-flex>
           <v-flex class="wrap-title pt-1 mb-2 mt-3">
-            <div class="text-1">HỆ THỐNG THÔNG TIN IODEV</div>
+            <div class="text-1">Hệ thống thông tin quản lý các cuộc thi tin học</div>
           </v-flex>
         </div>
 
@@ -226,16 +226,15 @@
         }
         vm.loading = true
         let filter = {
-          collectionName: 'taikhoans',
           data: {
             "email": vm.userName,
             "id": "",
             "loaiTaiKhoan": Number(vm.loaiTaiKhoan),
-            "matKhau": vm.password,
-            "vaiTros": ["VAITRO_NGUOIDUNG"]
+            "password": vm.password,
+            // "vaiTros": ["VAITRO_NGUOIDUNG"]
           }
         }
-        vm.$store.dispatch('collectionCreate', filter).then(function (result) {
+        vm.$store.dispatch('signUp', filter).then(function (result) {
           vm.loading = false
           toastr.remove()
           toastr.success('Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.')
@@ -331,10 +330,11 @@
     font-family: "Roboto Slab";
     font-style: normal;
     font-weight: 700;
-    font-size: 28px;
+    font-size: 24px;
     line-height: 24px;
     color: #ffffff;
     margin-bottom: 10px;
+    text-transform: uppercase;
   }
   #login-page .text-2 {
     font-family: "Roboto Slab";
@@ -415,7 +415,8 @@
     color: #ffffff !important;
   }
   .img-login-logo {
-    width: 85px;
+    width: 120px;
+    border-radius: 30px;
   }
   .wrap-title {
     text-align: center;
