@@ -13,6 +13,8 @@ import vn.iodev.contestmanagementsystem.model.KhoiThi;
 public interface KhoiThiRepository extends JpaRepository<KhoiThi, String> {
     List<KhoiThi> findByCuocThiId(String cuocThiId, Pageable pageable);
     List<KhoiThi> findByCuocThiId(String cuocThiId);
+    List<KhoiThi> findByIdIn(List<String> khoiThiIds);
+    
     Optional<KhoiThi> findByTenGoiAndCuocThiId(String tenGoi, String cuocThiId);
 
     @Transactional

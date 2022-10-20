@@ -62,6 +62,18 @@ public class CaNhanController {
         return ResponseEntity.ok().body(caNhan);
     }
 
+    @GetMapping("/canhans/email/{email}")
+    public ResponseEntity<CaNhan> getCaNhanByEmail(@PathVariable(value = "email") String email)
+        throws ResourceNotFoundException {
+        Optional<CaNhan> caNhanData = caNhanRepository.findByEmail(email);
+        if (caNhanData.isPresent()) {
+            return ResponseEntity.ok().body(caNhanData.get());
+        }
+        else {
+            throw new ResourceNotFoundException("CaNhan not found for this email :: " + email);
+        }
+    }
+
     @PostMapping("/canhans")
     public ResponseEntity<CaNhan> createCaNhan(@Valid @RequestBody CaNhan caNhan) {
         try {

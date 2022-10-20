@@ -1,5 +1,6 @@
 package vn.iodev.iosecurity.controller;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,8 +34,10 @@ import vn.iodev.iosecurity.model.MailQueue;
 import vn.iodev.iosecurity.model.QueueStatus;
 import vn.iodev.iosecurity.model.TaiKhoan;
 import vn.iodev.iosecurity.model.VaiTro;
+import vn.iodev.iosecurity.payload.CaNhanRequest;
 import vn.iodev.iosecurity.payload.CaNhanResponse;
 import vn.iodev.iosecurity.payload.TaiKhoanRequest;
+import vn.iodev.iosecurity.payload.ToChucRequest;
 import vn.iodev.iosecurity.payload.ToChucResponse;
 import vn.iodev.iosecurity.repository.MailQueueRepository;
 import vn.iodev.iosecurity.repository.TaiKhoanRepository;
@@ -129,7 +132,7 @@ public class TaiKhoanController {
                         }
                     }
                     else {
-                        ToChucResponse toChuc = humanResourceService.getToChucId(taiKhoan.getId());
+                        ToChucResponse toChuc = humanResourceService.getToChucById(taiKhoan.getId());
                         if (toChuc.getId() != null) {
                             Optional<TaiKhoan> tkCuData = taiKhoanRepository.findById(toChuc.getId());
                             if (tkCuData.isPresent()) {
@@ -280,50 +283,79 @@ public class TaiKhoanController {
     public ResponseEntity<TaiKhoan> dangKyTaiKhoan(@Valid @RequestBody TaiKhoanRequest taiKhoan) {
         try {
             boolean isOrganizeAdmin = false;
-            if (taiKhoan.getId() != null && !taiKhoan.getId().isEmpty()) {
+            String id = null;
+
+            if (taiKhoan.getEmail() != null) {
                 if (taiKhoan.getLoaiTaiKhoan() != null) {
-                    if (taiKhoan.getLoaiTaiKhoan() == ELoaiTaiKhoan.TAIKHOAN_CANHAN) {                     
-                        CaNhanResponse caNhan = humanResourceService.getCaNhanById(taiKhoan.getId());
-                        if (caNhan.getId() != null) {
-                            Optional<TaiKhoan> tkCuData = taiKhoanRepository.findById(caNhan.getId());
-                            if (tkCuData.isPresent()) {
-                                return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-                            }
-                        }
-                        else {
-                            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-                        }
-                    }
-                    else {
-                        ToChucResponse toChuc = humanResourceService.getToChucId(taiKhoan.getId());
-                        if (toChuc.getId() != null) {
-                            Optional<TaiKhoan> tkCuData = taiKhoanRepository.findById(toChuc.getId());
-                            if (tkCuData.isPresent()) {
-                                return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-                            }
-                            else {
-                                if (toChuc.getEmail().equals(taiKhoan.getEmail())) {
-                                    isOrganizeAdmin = true;
+                    if (taiKhoan.getLoaiTaiKhoan() == ELoaiTaiKhoan.TAIKHOAN_CANHAN) {    
+                        try {                 
+                            CaNhanResponse caNhan = humanResourceService.getCaNhanByEmail(taiKhoan.getEmail());
+                            if (caNhan.getId() != null) {
+                                Optional<TaiKhoan> tkCuData = taiKhoanRepository.findById(caNhan.getId());
+                                if (tkCuData.isPresent()) {
+                                    return new ResponseEntity<>(null, HttpStatus.CONFLICT);
                                 }
                             }
                         }
-                        else {
-                            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                        catch (Exception e1) {
+                            CaNhanRequest request = new CaNhanRequest();
+                            request.setEmail(taiKhoan.getEmail());
+                            request.setGioiTinh(0);
+                            request.setNgaySinh(new Date(0));
+                            request.setHoTen(taiKhoan.getEmail());
+                            try {
+                                CaNhanResponse result = humanResourceService.createCaNhan(request);
+                                id = result.getId();
+                            }
+                            catch (Exception e2) {
+                                e2.printStackTrace();
+                                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                            }                        
                         }
-                            
+                    }
+                    else if (taiKhoan.getLoaiTaiKhoan() == ELoaiTaiKhoan.TAIKHOAN_TOCHUC) {
+                        ToChucResponse toChuc = null;
+                        try {
+                            toChuc = humanResourceService.getToChucByEmail(taiKhoan.getEmail());
+                        }
+                        catch (Exception e) {
+
+                        }
+                        if (toChuc != null && toChuc.getId() != null) {
+                            id = toChuc.getId();
+                        }
+                        else {
+                            isOrganizeAdmin = true;
+
+                            if (toChuc != null && toChuc.getEmail().equals(taiKhoan.getEmail())) {
+                            }
+                            else {
+                                ToChucRequest request = new ToChucRequest();
+                                request.setEmail(taiKhoan.getEmail());
+                                request.setTenGoi(taiKhoan.getEmail());
+                                request.setLoaiToChuc("");
+                                try {
+                                    ToChucResponse result = humanResourceService.createToChuc(request);
+                                    id = result.getId();
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                    return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                                }
+                            }
+                        }
                     }
                 }
                 else {
                     return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
-            }
-            if (taiKhoan.getEmail() != null) {
+
                 TaiKhoan taiKhoanWithEmail = taiKhoanRepository.findByEmail(taiKhoan.getEmail());
                 if (taiKhoanWithEmail != null) {
                     return new ResponseEntity<>(null, HttpStatus.CONFLICT);
                 }
             }
-            TaiKhoan taiKhoanMoi = new TaiKhoan(taiKhoan.getEmail(), taiKhoan.getId(), taiKhoan.getLoaiTaiKhoan(), passwordEncoder.encode(taiKhoan.getMatKhau()));
+            TaiKhoan taiKhoanMoi = new TaiKhoan(taiKhoan.getEmail(), id, taiKhoan.getLoaiTaiKhoan(), passwordEncoder.encode(taiKhoan.getMatKhau()));
             taiKhoanMoi.setMaKichHoat(RandomUtil.generateRandomAlphanumeric(activeCodeLength));
             long nowTime = System.currentTimeMillis();
             taiKhoanMoi.setThoiHanKichHoat(nowTime + activeExpired * 60 * 60 * 1000);

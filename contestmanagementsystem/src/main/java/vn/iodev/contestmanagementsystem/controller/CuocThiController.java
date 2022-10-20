@@ -2,7 +2,10 @@ package vn.iodev.contestmanagementsystem.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,18 +34,26 @@ import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.config.CMSConfiguration;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DanhMuc;
+import vn.iodev.contestmanagementsystem.model.DanhMucId;
 import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.FileIO;
+import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.FileIOResponse;
+import vn.iodev.contestmanagementsystem.payload.KetQuaCaNhanResponse;
+import vn.iodev.contestmanagementsystem.payload.KetQuaDongDoiResponse;
 import vn.iodev.contestmanagementsystem.payload.NoiDungThi;
 import vn.iodev.contestmanagementsystem.payload.ResponseMessage;
+import vn.iodev.contestmanagementsystem.payload.DanhSachHLVTrongDoan;
+import vn.iodev.contestmanagementsystem.payload.DanhSachThiSinhTrongDoanResponse;
 import vn.iodev.contestmanagementsystem.payload.DongThongKeResponse;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DanhMucRepository;
 import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoiThiRepository;
@@ -92,6 +103,9 @@ public class CuocThiController {
     @Autowired
     DoiThiRepository doiThiRepository;
     
+    @Autowired
+    DanhMucRepository danhMucRepository;
+
     @GetMapping("/cuocthis")
     public List<CuocThi> getAllCuocThis(@RequestParam(defaultValue = "1") int page, 
             @RequestParam(defaultValue = "15") int size, 
@@ -375,5 +389,177 @@ public class CuocThiController {
         }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaicanhan")
+    public ResponseEntity<List<KetQuaCaNhanResponse>> ketQuaCaNhan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "khoiThiId") String khoiThiId)
+        throws ResourceNotFoundException {
+        List<KetQuaCaNhanResponse> lstKetquas = new ArrayList<>();
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
+        Optional<KhoiThi> khoiThiData = khoiThiRepository.findById(khoiThiId);
+        List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiId(cuocThiId);
+        Map<String, ThiSinh> mapThiSinhs = new HashMap<>();
+        for (ThiSinh ts : thiSinhs) {
+            mapThiSinhs.put(ts.getId(), ts);
+        }
+        List<DoanThi> doanThis = doanThiRepository.findByCuocThiId(cuocThiId);
+        Map<String, DoanThi> mapDoanThis = new HashMap<>();
+        for (DoanThi dt : doanThis) {
+            mapDoanThis.put(dt.getId(), dt);
+        }
+        if (cuocThiData.isPresent() && khoiThiData.isPresent()) {
+            List<DanhSachThi> danhSachThis = danhSachThiRepository.getDanhSachThiCaNhan(cuocThiData.get(), khoiThiId);
+            for (DanhSachThi dst : danhSachThis) {
+                if (dst.getThiSinhId() != null && !dst.getThiSinhId().isEmpty() && (dst.getDoiThiId() == null || dst.getDoiThiId().isEmpty())) {
+                    KetQuaCaNhanResponse row = new KetQuaCaNhanResponse();
+                    row.setThuTuXepHang(dst.getThuTuXepHang());
+                    row.setSoBaoDanh(dst.getSoBaoDanh());
+                    row.setHangGiaiThuong(dst.getHangGiaiThuong());
+                    if (mapThiSinhs.containsKey(dst.getThiSinhId())) {
+                        ThiSinh ts = mapThiSinhs.get(dst.getThiSinhId());
+                        row.setTenThiSinh(ts.getHoTen());
+                        row.setMaThiSinh(ts.getId());
+                        if (mapDoanThis.containsKey(ts.getDoanThiId())) {
+                            row.setTenDoanThi(mapDoanThis.get(ts.getDoanThiId()).getTenGoi());
+                            row.setMaDoanThi(ts.getDoanThiId());
+                        }
+                    }
+                    if (dst.getHangGiaiThuong() != null && !dst.getHangGiaiThuong().isEmpty()) {
+                        Optional<DanhMuc> giaiThuong = danhMucRepository.findById(new DanhMucId("C_HangGiaiThuong", dst.getHangGiaiThuong()));
+                        if (giaiThuong.isPresent()) {
+                            row.setTenGiaiThuong(giaiThuong.get().getGiaTri());
+                        }
+                    }
+                    lstKetquas.add(row);
+                }
+            }
+        }
+        return ResponseEntity.ok().body(lstKetquas);
+    }
+
+    @GetMapping("/cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaitapthe")
+    public ResponseEntity<List<KetQuaDongDoiResponse>> ketQuaTapThe(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "khoiThiId") String khoiThiId)
+        throws ResourceNotFoundException {
+        List<KetQuaDongDoiResponse> lstKetquas = new ArrayList<>();
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
+        Optional<KhoiThi> khoiThiData = khoiThiRepository.findById(khoiThiId);
+        List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiId(cuocThiId);
+        Map<String, ThiSinh> mapThiSinhs = new HashMap<>();
+        for (ThiSinh ts : thiSinhs) {
+            mapThiSinhs.put(ts.getId(), ts);
+        }
+        List<DoiThi> doiThis = doiThiRepository.findByCuocThiIdAndKhoiThiId(cuocThiId, khoiThiId);
+        Map<String, DoiThi> mapDoiThis = new HashMap<>();
+        for (DoiThi dt : doiThis) {
+            mapDoiThis.put(dt.getId(), dt);
+        }
+        List<DoanThi> doanThis = doanThiRepository.findByCuocThiId(cuocThiId);
+        Map<String, DoanThi> mapDoanThis = new HashMap<>();
+        for (DoanThi dt : doanThis) {
+            mapDoanThis.put(dt.getId(), dt);
+        }
+        if (cuocThiData.isPresent() && khoiThiData.isPresent()) {
+            List<DanhSachThi> danhSachThis = danhSachThiRepository.getDanhSachThiTapThe(cuocThiData.get(), khoiThiId);
+            for (DanhSachThi dst : danhSachThis) {
+                if (dst.getDoiThiId() != null && !dst.getDoiThiId().isEmpty() && mapDoiThis.containsKey(dst.getDoiThiId())) {
+                    KetQuaDongDoiResponse row = new KetQuaDongDoiResponse();
+                    row.setThuTuXepHang(dst.getThuTuXepHang());
+                    row.setHangGiaiThuong(dst.getHangGiaiThuong());
+                    DoiThi dt = mapDoiThis.get(dst.getDoiThiId());
+                    row.setTenDoiThi(dt.getTenGoi());
+                    row.setMaDoiThi(dt.getId());
+                    if (mapDoanThis.containsKey(dt.getDoanThiId())) {
+                        row.setTenDoanThi(mapDoanThis.get(dt.getDoanThiId()).getTenGoi());
+                        row.setMaDoanThi(dt.getDoanThiId());
+                    }
+
+                    if (dst.getHangGiaiThuong() != null && !dst.getHangGiaiThuong().isEmpty()) {
+                        Optional<DanhMuc> giaiThuong = danhMucRepository.findById(new DanhMucId("C_HangGiaiThuong", dst.getHangGiaiThuong()));
+                        if (giaiThuong.isPresent()) {
+                            row.setTenGiaiThuong(giaiThuong.get().getGiaTri());
+                        }
+                    }
+                    List<DanhSachThi> thiSinhTrongDois = danhSachThiRepository.getDanhSachThiCuaDoiThi(cuocThiData.get(), khoiThiId, dst.getDoiThiId());
+                    List<ThiSinh> lstThiSinh = new ArrayList<>();
+                    for (DanhSachThi tstd : thiSinhTrongDois) {
+                        if (mapThiSinhs.containsKey(tstd.getThiSinhId())) {
+                            lstThiSinh.add(mapThiSinhs.get(tstd.getThiSinhId()));
+                        }
+                    }
+                    row.setThiSinh(lstThiSinh);
+                    lstKetquas.add(row);
+
+                    mapDoiThis.remove(dst.getDoiThiId());
+                }
+            }
+        }
+        return ResponseEntity.ok().body(lstKetquas);
+    }
+
+    @GetMapping("/cuocthis/{cuocThiId}/doanthis/{doanThiId}/thisinhs")
+    public ResponseEntity<List<DanhSachThiSinhTrongDoanResponse>> danhSachThiSinhTrongDoan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "doanThiId") String doanThiId)
+        throws ResourceNotFoundException {
+        List<DanhSachThiSinhTrongDoanResponse> lstKetquas = new ArrayList<>();
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
+        Optional<DoanThi> doanThiData = doanThiRepository.findById(doanThiId);
+        List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThiId);
+        Map<String, ThiSinh> mapThiSinhs = new HashMap<>();
+        for (ThiSinh ts : thiSinhs) {
+            mapThiSinhs.put(ts.getId(), ts);
+        }
+        if (cuocThiData.isPresent() && doanThiData.isPresent()) {
+            for (ThiSinh thiSinh : thiSinhs) {
+                List<DanhSachThi> danhSachThis = danhSachThiRepository.getDanhSachThamGiaCuaCaNhan(cuocThiData.get(), thiSinh.getId());
+                DanhSachThiSinhTrongDoanResponse row = new DanhSachThiSinhTrongDoanResponse();
+                row.setHoTen(thiSinh.getHoTen());
+                row.setGioiTinh(thiSinh.getGioiTinh());
+                row.setDoiTuongThi(thiSinh.getDoiTuongThi());
+                row.setNganhDaoTao(thiSinh.getNganhDaoTao());
+                row.setNgaySinh(thiSinh.getNgaySinh());
+                row.setSoDienThoai(thiSinh.getSoDienThoai());
+                row.setEmail(thiSinh.getEmail());
+                row.setDatGiaiThuong(thiSinh.getDatGiaiThuong());
+                List<String> khoiThiIds = new ArrayList<>();
+                for (DanhSachThi dst : danhSachThis) {
+                    if (!khoiThiIds.contains(dst.getKhoiThiId())) {
+                        khoiThiIds.add(dst.getKhoiThiId());
+                    }
+                }
+                List<KhoiThi> noiDungThi = khoiThiRepository.findByIdIn(khoiThiIds);
+                row.setNoiDungThi(noiDungThi);
+
+                if (noiDungThi.size() > 0) {
+                    lstKetquas.add(row);
+                }
+            }
+        }
+        return ResponseEntity.ok().body(lstKetquas);
+    }
+
+    @GetMapping("/cuocthis/{cuocThiId}/doanthis/{doanThiId}/huanluyenviens")
+    public ResponseEntity<List<DanhSachHLVTrongDoan>> danhSachHLVTrongDoan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "doanThiId") String doanThiId)
+        throws ResourceNotFoundException {
+        List<DanhSachHLVTrongDoan> lstKetquas = new ArrayList<>();
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
+        Optional<DoanThi> doanThiData = doanThiRepository.findById(doanThiId);
+        List<HuanLuyenVien> huanLuyenViens = huanLuyenVienRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThiId);
+        if (cuocThiData.isPresent() && doanThiData.isPresent()) {
+            for (HuanLuyenVien huanLuyenVien : huanLuyenViens) {
+                DanhSachHLVTrongDoan row = new DanhSachHLVTrongDoan();
+                row.setHoTen(huanLuyenVien.getHoTen());
+                row.setSoDienThoai(huanLuyenVien.getSoDienThoai());
+                row.setEmail(huanLuyenVien.getEmail());
+
+                List<String> khoiThiIds = Arrays.asList(huanLuyenVien.getKhoiThiId().split(","));
+            
+                List<KhoiThi> noiDungThi = khoiThiRepository.findByIdIn(khoiThiIds);
+                row.setNoiDungThi(noiDungThi);
+
+                if (noiDungThi.size() > 0) {
+                    lstKetquas.add(row);
+                }
+            }
+        }
+        return ResponseEntity.ok().body(lstKetquas);
     }
 }

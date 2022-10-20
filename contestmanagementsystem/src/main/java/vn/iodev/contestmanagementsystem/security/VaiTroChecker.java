@@ -14,18 +14,21 @@ public class VaiTroChecker {
         return lstVaiTro.contains(VAITRO_QUANTRIHETHONG);
     }
     public static boolean hasVaiTroQuanTriToChuc(String vaiTro) {
+        if (vaiTro == null || vaiTro.isEmpty()) return false;
         List<String> lstVaiTro = Arrays.asList(vaiTro.split(","));
         
         return lstVaiTro.contains(VAITRO_QUANTRITOCHUC);
     }
 
     public static boolean hasVaiTroNguoiDung(String vaiTro) {
+        if (vaiTro == null || vaiTro.isEmpty()) return false;
         List<String> lstVaiTro = Arrays.asList(vaiTro.split(","));
         
         return lstVaiTro.contains(VAITRO_NGUOIDUNG);
     }
 
     public static boolean hasVaiTro(String maVaiTro, String vaiTro) {
+        if (vaiTro == null || vaiTro.isEmpty()) return false;
         List<String> lstVaiTro = Arrays.asList(vaiTro.split(","));
         
         return lstVaiTro.contains(maVaiTro);

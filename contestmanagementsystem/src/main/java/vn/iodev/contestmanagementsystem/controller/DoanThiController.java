@@ -48,7 +48,6 @@ public class DoanThiController {
     @Autowired
     ToChucService toChucService;
 
-    @GetMapping("/doanthis")
     public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId, @RequestHeader("id") String taiKhoanId, @RequestHeader("loaiTaiKhoan") Integer loaiTaiKhoan, @RequestHeader("vaiTros") String vaiTros) {
         List<DoanThi> lstDoanThi = new ArrayList<>();
         log.info("VaiTro: " + vaiTros + ", " + VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) + ", " + VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros));

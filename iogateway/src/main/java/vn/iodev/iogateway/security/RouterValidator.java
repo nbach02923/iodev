@@ -19,7 +19,6 @@ public class RouterValidator {
         new Route("/api/cuocthis/.+/khoithis$", "GET"),
         new Route("/api/khoithis$", "GET"),
         new Route("/api/khoithis/.+$", "GET"),
-        new Route("/api/doanthis$", "GET"),
         new Route("/api/doanthis/.+$", "GET"),
         new Route("/api/huanluyenviens$", "GET"),
         new Route("/api/huanluyenviens/.+$", "GET"),

@@ -68,6 +68,18 @@ public class ToChucController {
         return ResponseEntity.ok().body(toChuc);
     }
 
+    @GetMapping("/tochucs/email/{email}")
+    public ResponseEntity<ToChuc> getToChucByEmail(@PathVariable(value = "email") String email)
+        throws ResourceNotFoundException {
+        Optional<ToChuc> toChucData = toChucRepository.findByEmail(email);
+        if (toChucData.isPresent()) {
+            return ResponseEntity.ok().body(toChucData.get());
+        }
+        else {
+            throw new ResourceNotFoundException("ToChuc not found for this email :: " + email);
+        }
+    }
+
     @PostMapping("/tochucs")
     public ResponseEntity<ToChuc> createToChuc(@RequestBody ToChuc toChuc) {
         try {
