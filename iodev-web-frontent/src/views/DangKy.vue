@@ -238,13 +238,13 @@
         }
         vm.$store.dispatch('signUp', filter).then(function (result) {
           vm.loading = false
+          vm.emailActive = String(result.email).trim()
           toastr.remove()
           toastr.success('Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.')
           vm.$refs.form.reset()
           vm.$refs.form.resetValidation()
           setTimeout(function () {
             vm.dialogActive = true
-            vm.emailActive = String(vm.userName).trim()
           }, 300)
         }).catch(function (result) {
           vm.loading = false
