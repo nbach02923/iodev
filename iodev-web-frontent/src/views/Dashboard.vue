@@ -64,14 +64,14 @@
                     <div class="status-contest mx-4" :style="item.tinhTrang == 1 ? 'color: green' : (item.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(item.tinhTrang)}}
                     </div>
-                    <v-card-title>{{item.tenGoi}}</v-card-title>
+                    <v-card-title class="py-0">{{item.tenGoi}}</v-card-title>
                     <v-card-text height="200">
-                      <div v-snip="{ lines: 7 }" class="my-0 text-subtitle-1">
+                      <div v-snip="{ lines: 5 }" class="my-0 text-subtitle-1">
                         {{item.thongTinMoTa}}
                       </div>
                     </v-card-text>
                     <v-divider class="mx-4"></v-divider>
-                    <v-card-title class="des-contest">
+                    <v-card-title class="des-contest py-2">
                       <v-flex>
                         <v-icon size="18" color="#2161B1">mdi-calendar-month</v-icon>&nbsp;
                         <span>{{item.ngayBatDau}} đến {{item.ngayKetThuc}}</span>
@@ -154,7 +154,7 @@
                         v-if="item.tinhTrang == 1"
                         text
                         color="success"
-                        @click="dangKyThi(item)"
+                        @click.stop="dangKyThi(item)"
                       >
                         <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
                         Đăng ký dự thi
@@ -322,11 +322,11 @@
       },
       xemChiTietCuocThi (item) {
         let vm = this
-        if (item.tinhTrang == 1 && vm.isSigned) {
-          vm.$router.push({ path: '/dang-ky/' + item.id})
-        } else {
+        // if (item.tinhTrang == 1 && vm.isSigned) {
+        //   vm.$router.push({ path: '/dang-ky/' + item.id})
+        // } else {
           vm.$router.push({ path: '/cuoc-thi/' + item.id})
-        }
+        // }
       },
       dangKyThi (item) {
         let vm = this

@@ -40,10 +40,10 @@ axios.interceptors.response.use((response) => {
         toastr.remove()
         toastr.error('Thao tác thất bại. Vui lòng thử lại.')
       }).catch(function () {
-        router.push({ path: '/' })
+        // router.push({ path: '/' })
       })
     } else {
-      router.push({ path: '/' })
+      // router.push({ path: '/' })
     }
   }
   if (error.response) {

@@ -285,5 +285,25 @@ export default new Vuex.Store({
         })
       })
     },
+    activeTaiKhoan ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/api/auth/' + filter.email +'/verify-email?maKichHoat=' + filter.maKichHoat,
+          "method": "PUT",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
   }
 })
