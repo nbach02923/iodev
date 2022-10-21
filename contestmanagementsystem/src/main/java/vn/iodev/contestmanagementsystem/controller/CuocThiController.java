@@ -107,6 +107,9 @@ public class CuocThiController {
     @Autowired
     DanhMucRepository danhMucRepository;
 
+    @Autowired
+    VaiTroChecker vaiTroChecker;
+    
     @GetMapping("/cuocthis")
     public List<CuocThi> getAllCuocThis(@RequestParam(defaultValue = "1") int page, 
             @RequestParam(defaultValue = "15") int size, 
@@ -166,7 +169,7 @@ public class CuocThiController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /cuocthis");
         try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 validateRelationConstraint(cuocThi);
                 CuocThiValidator.getInstance().validate(cuocThi);
                 CuocThi _cuocThi = cuocThiRepository.save(new CuocThi(cuocThi.getTenGoi(), 
@@ -196,7 +199,7 @@ public class CuocThiController {
     public ResponseEntity<CuocThi> updateCuocThi(@PathVariable("id") String id, @RequestBody CuocThi cuocThi,
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /cuocthis/{id}");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
@@ -268,7 +271,7 @@ public class CuocThiController {
     public ResponseEntity<ResponseMessage> updateHinhAnhCuocThi(@PathVariable("id") String id, @RequestParam("hinhAnhs") MultipartFile[] hinhAnhFiles,
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /cuocthis/{id}/hinhanhs");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -337,7 +340,7 @@ public class CuocThiController {
     @DeleteMapping("/cuocthis/{cuocThiId}/hinhanhs/{id}")
     public ResponseEntity<HttpStatus> deleteHinhAnhCuocThi(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /cuocthis/{cuocThiId}/hinhanhs/{id}");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         if (!cuocThiRepository.existsById(cuocThiId)) {
@@ -356,7 +359,7 @@ public class CuocThiController {
     @DeleteMapping("/cuocthis/{id}")
     public ResponseEntity<HttpStatus> deleteCuocThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /cuocthis/{id}");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         try {

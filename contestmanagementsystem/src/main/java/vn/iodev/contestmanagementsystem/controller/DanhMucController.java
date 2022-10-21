@@ -32,6 +32,9 @@ public class DanhMucController {
     @Autowired
     DanhMucRepository danhMucRepository;
 
+    @Autowired
+    VaiTroChecker vaiTroChecker;
+
     @GetMapping("/danhmucs")
     public List<DanhMuc> getAllDanhMucs(@RequestParam(defaultValue = "1") int page, 
             @RequestParam(defaultValue = "15") int size,
@@ -58,7 +61,7 @@ public class DanhMucController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API GET /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
             try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
                     return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
                 }
@@ -89,7 +92,7 @@ public class DanhMucController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /danhmucs");
         try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 DanhMuc _danhMuc = danhMucRepository.save(new DanhMuc(danhMuc.getLoaiDanhMuc(), danhMuc.getMaDanhMuc(), danhMuc.getGiaTri()));
                 return new ResponseEntity<>(_danhMuc, HttpStatus.CREATED);
             }
@@ -112,7 +115,7 @@ public class DanhMucController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
         try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
                     return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
                 }
@@ -148,7 +151,7 @@ public class DanhMucController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /danhmucs");
         try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(danhMuc.getLoaiDanhMuc(), danhMuc.getMaDanhMuc()))) {
                     return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
                 }
@@ -185,7 +188,7 @@ public class DanhMucController {
         @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
         try {
-            if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
                     return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
                 }

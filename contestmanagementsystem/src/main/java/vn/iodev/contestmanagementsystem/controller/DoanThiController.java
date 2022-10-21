@@ -46,6 +46,9 @@ public class DoanThiController {
     @Autowired
     ToChucService toChucService;
 
+    @Autowired
+    VaiTroChecker vaiTroChecker;
+
     @GetMapping("/doanthis")
     public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId) {
         log.info("API GET /doanthis");
@@ -77,16 +80,19 @@ public class DoanThiController {
     }
 
     @PostMapping("/doanthis")
-    public ResponseEntity<DoanThi> createDoanThi(@RequestBody DoanThi doanThi, @RequestHeader("vaiTros") String vaiTros) {
+    public ResponseEntity<DoanThi> createDoanThi(@RequestBody DoanThi doanThi, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /doanthis");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         try {
             DoanThiValidator.getInstance().validate(doanThi);
-            if (doanThi.getToChucId() != null) {
+            if (doanThi.getToChucId() != null && doanThi.getToChucId().equals(toChucId)) {
                 toChucService.getToChucById(doanThi.getToChucId());
+            }
+            else {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             DoanThi _doanThi = doanThiRepository.save(new DoanThi(doanThi.getTenGoi(), doanThi.getTiengAnh(), doanThi.getDiaChiHoatDong(), doanThi.getEmail(), doanThi.getToChucId(), doanThi.getCuocThiId()));
             return new ResponseEntity<>(_doanThi, HttpStatus.CREATED);
@@ -100,7 +106,7 @@ public class DoanThiController {
     @PostMapping("/doanthis/import")
     public ResponseEntity<ImportResponse> importDoanThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /doanthis/import");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -125,13 +131,17 @@ public class DoanThiController {
     }
 
     @PutMapping("/doanthis/{id}")
-    public ResponseEntity<DoanThi> updateDoanThi(@PathVariable("id") String id, @RequestBody DoanThi doanThi, @RequestHeader("vaiTros") String vaiTros) {
+    public ResponseEntity<DoanThi> updateDoanThi(@PathVariable("id") String id, @RequestBody DoanThi doanThi, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /doanthis/{id}");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         Optional<DoanThi> doanThiData = doanThiRepository.findById(id);
+        if (id != null && !id.equals(toChucId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         if (doanThiData.isPresent()) {
             try {
                 DoanThiValidator.getInstance().validate(doanThi);
@@ -173,12 +183,15 @@ public class DoanThiController {
     }
 
     @DeleteMapping("/doanthis/{id}")
-    public ResponseEntity<HttpStatus> deleteDoanThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+    public ResponseEntity<HttpStatus> deleteDoanThi(@PathVariable("id") String id, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /doanthis/{id}");
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-
+        if (id != null && !id.equals(toChucId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        
         try {
             doanThiRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
