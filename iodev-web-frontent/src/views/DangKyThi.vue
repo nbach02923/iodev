@@ -6,9 +6,12 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
-            <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="width: 100%">
-          </a>
+          <div style="text-align: center;">
+            <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+              <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
+            </a>
+          </div>
+          
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -44,8 +47,8 @@
               </v-col>
               <v-col cols="12" md="3" class="pt-0">
                 <span class="label-header">Thời gian tổ chức: </span>
-                <span class="blue-text font-weight-bold">Từ ngày {{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
-                <span class="blue-text font-weight-bold"> - Đến ngày {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
+                <span class="blue-text font-weight-bold">{{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
+                <span class="blue-text font-weight-bold"> - {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
               </v-col>
               <v-col cols="12" md="3" class="pt-0">
                 <span class="label-header">Trang web: </span>
@@ -56,6 +59,15 @@
                 <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                   {{statusContest(chiTietCuocThi.tinhTrang)}}
                 </span>
+              </v-col>
+
+              <v-col v-if="userLogin.loaiTaiKhoan == 1" cols="12" class="pt-0">
+                <span class="label-header">Đơn vị đăng ký dự thi: </span>
+                <span class="blue-text font-weight-bold">{{thongTinToChuc.tenGoi}}</span>
+              </v-col>
+              <v-col v-if="userLogin.loaiTaiKhoan == 1" cols="12" class="pt-0">
+                <span class="label-header">Địa chỉ: </span>
+                <span class="blue-text font-weight-bold">{{thongTinToChuc.diaChiHoatDong ? thongTinToChuc.diaChiHoatDong : ''}}</span>
               </v-col>
             </v-row>
           </div>
@@ -76,11 +88,11 @@
               <v-row justify="end" class="my-0 mx-0 mt-3">
                 <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
                   <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-                  DANH SÁCH THÍ SINH
+                  DANH SÁCH THÍ SINH ĐĂNG KÝ DỰ THI
                 </v-col>
                 <v-spacer></v-spacer>
             
-                <v-col v-if="chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
+                <v-col v-if="userLogin.loaiTaiKhoan == 1 && chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
                   <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateThiSinh">
                     <v-icon size="18">mdi-plus</v-icon>&nbsp;
                     Thêm thí sinh
@@ -136,11 +148,11 @@
               <v-row justify="end" class="my-0 mx-0 mt-3">
                 <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
                   <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-                  DANH SÁCH HUẤN LUYỆN VIÊN
+                  DANH SÁCH HUẤN LUYỆN VIÊN ĐĂNG KÝ
                 </v-col>
                 <v-spacer></v-spacer>
             
-                <v-col v-if="chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
+                <v-col v-if="userLogin.loaiTaiKhoan == 1 && chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
                   <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateHlv">
                     <v-icon size="18">mdi-plus</v-icon>&nbsp;
                     Thêm huấn luyện viên
@@ -225,6 +237,23 @@
             lazy-validation
           >
             <v-layout wrap>
+              <v-col cols="12" class="py-0">
+                <label>Nội dung dự thi <span class="red--text">(*)</span></label>
+                <v-autocomplete
+                  class="flex input-form"
+                  hide-no-data
+                  :items="danhSachKhoiThi"
+                  v-model="noiDungDuThiThiSinh"
+                  item-text="tenGoi"
+                  item-value="id"
+                  dense
+                  solo
+                  hide-details="auto"
+                  multiple
+                  return-object
+                >
+                </v-autocomplete>
+              </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
                   <label>Họ và tên <span class="red--text">(*)</span></label>
                   <v-text-field
@@ -390,6 +419,23 @@
             lazy-validation
           >
             <v-layout wrap>
+              <v-col cols="12" class="py-0">
+                <label>Nội dung dự thi <span class="red--text">(*)</span></label>
+                <v-autocomplete
+                  class="flex input-form"
+                  hide-no-data
+                  :items="danhSachKhoiThi"
+                  v-model="noiDungDuThiHlv"
+                  item-text="tenGoi"
+                  item-value="id"
+                  dense
+                  solo
+                  hide-details="auto"
+                  multiple
+                  return-object
+                >
+                </v-autocomplete>
+              </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
                   <label>Họ và tên <span class="red--text">(*)</span></label>
                   <v-text-field
@@ -646,7 +692,11 @@ export default {
         totalDanhSachHlv: 0,
         pageCountDanhSachHlv: 0,
 
-        
+        danhSachKhoiThi: [],
+        noiDungDuThiThiSinh: '',
+        noiDungDuThiHlv: '',
+        thongTinToChuc: '',
+        thongTinDoanThi: '',
         typeAction: '',
         thongTinThiSinh: '',
         dialogAddThiSinh: false,
@@ -671,8 +721,11 @@ export default {
     created () {
       let vm = this
       vm.getChiTietCuocThi()
-      vm.getDanhSachThiSinh()
-      vm.getDanhSachHlv()
+      vm.getDanhSachKhoiThi()
+      if (vm.userLogin.loaiTaiKhoan == 1) {
+        vm.getThongTinToChuc()
+        vm.getThongTinDoanThi()
+      }
     },
     computed: {
       breakpointName () {
@@ -680,34 +733,72 @@ export default {
       },
       isSigned () {
         return this.$cookies.get('Token') ? true : false
-      },
+      }
     },
     watch: {
       '$route': function (newRoute, oldRoute) {
         let vm = this
         vm.getChiTietCuocThi()
-        vm.getDanhSachThiSinh()
-        vm.getDanhSachHlv()
+        vm.getDanhSachKhoiThi()
+        if (vm.userLogin.loaiTaiKhoan == 1) {
+          vm.getThongTinToChuc()
+          vm.getThongTinDoanThi()
+        }
       }
     },
     methods: {
       getChiTietCuocThi () {
         let vm = this
-        if (vm.loadingData) {
-          return
-        }
-        vm.loadingData = true
         let filter = {
           collectionName: 'cuocthis',
           id: vm.id
         }
-        vm.actionItems = []
-        vm.loadingData = true
         vm.$store.dispatch('collectionDetail', filter).then(function (response) {
-          vm.loadingData = false
           vm.chiTietCuocThi = response
         }).catch(function () {
-          vm.loadingData = false
+        })
+      },
+      getDanhSachKhoiThi () {
+        let vm = this
+        let filter = {
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'khoithis',
+          data: {}
+        }
+        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+          vm.danhSachKhoiThi = response
+        }).catch(function () {
+        })
+      },
+      getThongTinToChuc () {
+        let vm = this
+        let filter = {
+          collectionName: 'tochucs',
+          data: {
+            // email: vm.userLogin.email
+            email: 'congtrinh02092008@gmail.com'
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.thongTinToChuc = response && response.length ? response[0] : ''
+        }).catch(function () {
+        })
+      },
+      getThongTinDoanThi () {
+        let vm = this
+        let filter = {
+          collectionName: 'doanthis',
+          data: {
+            // email: vm.userLogin.email
+            email: 'congtrinh02092008@gmail.com'
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.thongTinDoanThi = response && response.length ? response[0] : ''
+          vm.getDanhSachThiSinh()
+          vm.getDanhSachHlv()
+        }).catch(function () {
         })
       },
       getDanhSachThiSinh (type) {
@@ -717,23 +808,20 @@ export default {
           vm.pageCountDanhSachThiSinh = 0
           vm.pageDanhSachThiSinh = 0
         }
-        if (vm.loadingDataDanhSachThiSinh) {
-          return
-        }
         vm.loadingDataDanhSachThiSinh = true
         let filter = {
           collectionName: 'cuocthis',
           collectionId: vm.id,
-          collectionNameChild: 'thisinhs',
+          collectionNameChild: 'doanthis',
+          collectionChildId: vm.thongTinDoanThi.id,
+          collectionNameChild2: 'thisinhs',
           data: {
             // page: vm.pageDanhSachThiSinh,
             // size: vm.itemsPerPage
           }
         }
-        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.danhSachThiSinh = response
-          vm.totalDanhSachThiSinh = response.totalElements
-          vm.pageCountDanhSachThiSinh = response.totalPages
           vm.loadingDataDanhSachThiSinh = false
         }).catch(function () {
           vm.loadingDataDanhSachThiSinh = false
@@ -753,7 +841,9 @@ export default {
         let filter = {
           collectionName: 'cuocthis',
           collectionId: vm.id,
-          collectionNameChild: 'huanluyenviens',
+          collectionNameChild: 'doanthis',
+          collectionChildId: vm.thongTinDoanThi.id,
+          collectionNameChild2: 'huanluyenviens',
           data: {
             // page: vm.pageDanhSachHlv,
             // size: vm.itemsPerPage
@@ -761,8 +851,6 @@ export default {
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
           vm.danhSachHlv = response
-          vm.totalDanhSachHlv = response.totalElements
-          vm.pageCountDanhSachHlv = response.totalPages
           vm.loadingDataDanhSachHlv = false
         }).catch(function () {
           vm.loadingDataDanhSachHlv = false
@@ -792,7 +880,7 @@ export default {
         vm.dialogAddThiSinh = true
         setTimeout(function () {
           vm.thongTinThiSinh = Object.assign({}, item)
-          vm.ngaySinhCreate = vm.dateLocale(vm.thongTinThiSinh.ngaySinh)
+          vm.ngaySinhCreate = vm.convertDate(vm.thongTinThiSinh.ngaySinh)
           vm.$refs.formAddThiSinh.resetValidation()
         }, 100)
       },

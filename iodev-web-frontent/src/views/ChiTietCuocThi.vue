@@ -6,9 +6,11 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
-            <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="width: 100%">
-          </a>
+          <div style="text-align: center;">
+            <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+              <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
+            </a>
+          </div>
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">

@@ -392,6 +392,8 @@
     border-bottom: 2px solid #dedede
   .main-slider__desktop .v-carousel__item, .main-slider__desktop .v-carousel
     height: 600px !important
+  .main-slider__desktop .v-image__image
+    background-size: contain !important
   .text-title-dashboard
     font-weight: 600
     font-size: 14px
