@@ -81,9 +81,14 @@ public class HuanLuyenVienController {
     public List<HuanLuyenVien> getAllHuanLuyenViens(@RequestParam(defaultValue = "1") int page, @RequestParam(name = "tuKhoa", defaultValue = "") String tuKhoa, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doanThiId) {
         log.info("API GET /huanluyenviens");
         Pageable paging = PageRequest.of(page - 1, size);
-        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
-        if (cuocThiData.isPresent()) {
-            return huanLuyenVienRespository.findHuanLuyenVienByMultipleConditions(tuKhoa, cuocThiData.get(), khoiThiId, doanThiId, paging);
+        if (cuocThiId != null) {
+            Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
+            if (cuocThiData.isPresent()) {
+                return huanLuyenVienRespository.findHuanLuyenVienByMultipleConditions(tuKhoa, cuocThiData.get(), khoiThiId, doanThiId, paging);
+            }
+            else {
+                return huanLuyenVienRespository.findHuanLuyenVienByMultipleConditions(tuKhoa, null, khoiThiId, doanThiId, paging);
+            }
         }
         else {
             return huanLuyenVienRespository.findHuanLuyenVienByMultipleConditions(tuKhoa, null, khoiThiId, doanThiId, paging);
