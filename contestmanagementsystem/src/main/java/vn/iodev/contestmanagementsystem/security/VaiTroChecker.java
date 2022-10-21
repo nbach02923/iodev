@@ -8,10 +8,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
+import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoiThiRepository;
 import vn.iodev.contestmanagementsystem.repository.HuanLuyenVienRepository;
@@ -30,6 +32,9 @@ public class VaiTroChecker {
 
     @Autowired
     ThiSinhRepository thiSinhRepository;
+
+    @Autowired
+    DanhSachThiRepository danhSachThiRepository;
 
     public static final String VAITRO_QUANTRIHETHONG = "VAITRO_QUANTRIHETHONG";
     public static final String VAITRO_QUANTRITOCHUC = "VAITRO_QUANTRITOCHUC";
@@ -152,6 +157,76 @@ public class VaiTroChecker {
         
         if (doanThiIds.contains(doiThi.getDoanThiId())) {
             return true;
+        }
+
+        return false;
+    }
+
+    public boolean canAccessDanhSachThi(String toChucId, DanhSachThi danhSachThi) {
+        List<DoanThi> lstDoanThi = doanThiRepository.findByToChucId(toChucId);
+        List<String> doanThiIds = new ArrayList<>();
+        for (DoanThi dt : lstDoanThi) {
+            doanThiIds.add(dt.getId());
+        }
+        if (danhSachThi.getDoiThiId() != null) {
+            Optional<DoiThi> doiThiData = doiThiRepository.findById(danhSachThi.getDoiThiId());
+            if (!doiThiData.isPresent()) {
+                return false;
+            }
+            DoiThi doiThi = doiThiData.get();
+            
+            if (doanThiIds.contains(doiThi.getDoanThiId())) {
+                return true;
+            }
+        }
+        if (danhSachThi.getThiSinhId() != null) {
+            Optional<ThiSinh> thiSinhData = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+            if (!thiSinhData.isPresent()) {
+                return false;
+            }
+            ThiSinh thiSinh = thiSinhData.get();
+            
+            if (doanThiIds.contains(thiSinh.getDoanThiId())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean canAccessDanhSachThi(String toChucId, Long id) {
+        List<DoanThi> lstDoanThi = doanThiRepository.findByToChucId(toChucId);
+        List<String> doanThiIds = new ArrayList<>();
+        for (DoanThi dt : lstDoanThi) {
+            doanThiIds.add(dt.getId());
+        }
+        Optional<DanhSachThi> danhSachThiData = danhSachThiRepository.findById(id);
+        if (!danhSachThiData.isPresent()) {
+            return false;
+        }
+        DanhSachThi danhSachThi = danhSachThiData.get();
+        
+        if (danhSachThi.getDoiThiId() != null) {
+            Optional<DoiThi> doiThiData = doiThiRepository.findById(danhSachThi.getDoiThiId());
+            if (!doiThiData.isPresent()) {
+                return false;
+            }
+            DoiThi doiThi = doiThiData.get();
+            
+            if (doanThiIds.contains(doiThi.getDoanThiId())) {
+                return true;
+            }
+        }
+        if (danhSachThi.getThiSinhId() != null) {
+            Optional<ThiSinh> thiSinhData = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+            if (!thiSinhData.isPresent()) {
+                return false;
+            }
+            ThiSinh thiSinh = thiSinhData.get();
+            
+            if (doanThiIds.contains(thiSinh.getDoanThiId())) {
+                return true;
+            }
         }
 
         return false;

@@ -42,6 +42,7 @@ import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoiThiRepository;
 import vn.iodev.contestmanagementsystem.repository.KhoiThiRepository;
 import vn.iodev.contestmanagementsystem.repository.ThiSinhRepository;
+import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
 import vn.iodev.contestmanagementsystem.service.ExcelService;
 import vn.iodev.contestmanagementsystem.validator.DanhSachThiValidator;
 
@@ -66,6 +67,9 @@ public class DanhSachThiController {
 
     @Autowired
     ExcelService fileService;
+
+    @Autowired
+    VaiTroChecker vaiTroChecker;
 
     @GetMapping("/danhsachthis")
     public List<DanhSachThi> getAllDanhSachThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doiThiId) {
@@ -129,8 +133,14 @@ public class DanhSachThiController {
     }
 
     @PostMapping("/cuocthis/{cuocThiId}/danhsachthis")
-    public ResponseEntity<DanhSachThi> createDanhSachThiOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody DanhSachThi danhSachThi, @RequestHeader("vaiTros") String vaiTros) {
+    public ResponseEntity<DanhSachThi> createDanhSachThiOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody DanhSachThi danhSachThi, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /cuocthis/{cuocThiId}/danhsachthis");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+        if (vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !vaiTroChecker.canAccessDanhSachThi(toChucId, danhSachThi)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
 
         try {
             validateRelationConstraint(danhSachThi);
@@ -171,8 +181,14 @@ public class DanhSachThiController {
     // }
 
     @PutMapping("/danhsachthis/{id}")
-    public ResponseEntity<DanhSachThi> updateDanhSachThi(@PathVariable("id") long id, @RequestBody DanhSachThi danhSachThi) {
+    public ResponseEntity<DanhSachThi> updateDanhSachThi(@PathVariable("id") long id, @RequestBody DanhSachThi danhSachThi, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API PUT /danhsachthis/{id}");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+        if (vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !vaiTroChecker.canAccessDanhSachThi(toChucId, id)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
 
         Optional<DanhSachThi> danhSachThiData = danhSachThiRepository.findById(id);
         if (danhSachThiData.isPresent()) {
@@ -223,14 +239,21 @@ public class DanhSachThiController {
     }
 
     @DeleteMapping("/danhsachthis/{id}")
-    public ResponseEntity<HttpStatus> deleteDanhSachThi(@PathVariable("id") long id) {
+    public ResponseEntity<HttpStatus> deleteDanhSachThi(@PathVariable("id") long id, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /danhsachthis/{id}");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+        if (vaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !vaiTroChecker.canAccessDanhSachThi(toChucId, id)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
 
         try {
             danhSachThiRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /danhsachthis/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -238,6 +261,9 @@ public class DanhSachThiController {
     @DeleteMapping("/cuocthis/{cuocThiId}/danhsachthis")
     public ResponseEntity<List<DanhSachThi>> deleteAllDanhSachThisOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API DELETE /cuocthis/{cuocThiId}/danhsachthis");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -248,8 +274,11 @@ public class DanhSachThiController {
     }
 
     @PostMapping("/danhsachthis/import")
-    public ResponseEntity<ImportResponse> importDanhSachThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType) {
+    public ResponseEntity<ImportResponse> importDanhSachThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
         log.info("API POST /danhsachthis/import");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
 
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
         long size = multipartFile.getSize();
