@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.netflix.config.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
@@ -40,6 +41,7 @@ import vn.iodev.contestmanagementsystem.validator.DoiThiValidator;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class DoiThiController {
     @Autowired
     DoiThiRepository doiThiRepository;
@@ -57,13 +59,9 @@ public class DoiThiController {
     HuanLuyenVienRepository huanLuyenVienRepository;
 
     @GetMapping("/doithis")
-    public List<DoiThi> getAllDoiThis(@RequestParam(defaultValue = "1") int page,@RequestParam(name = "tuKhoa", defaultValue="") String tuKhoa, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doanThiId, @RequestHeader("id") String taiKhoanId, @RequestHeader("loaiTaiKhoan") Integer loaiTaiKhoan, @RequestHeader("vaiTros") String vaiTros) {
-        List<DoiThi> lstDoiThi = new ArrayList<>();
-
-        if (!VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return lstDoiThi;
-        }
-
+    public List<DoiThi> getAllDoiThis(@RequestParam(defaultValue = "1") int page,@RequestParam(name = "tuKhoa", defaultValue="") String tuKhoa, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doanThiId) {
+        log.info("API GET /doithis");
+        
         Pageable paging = PageRequest.of(page - 1, size);
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         return doiThiRepository.findDoiThiByMultipleConditions(tuKhoa, cuocThiData.get(), khoiThiId, doanThiId, paging);
@@ -71,6 +69,8 @@ public class DoiThiController {
 
     @GetMapping("/cuocthis/{cuocThiId}/doithis")
     public ResponseEntity<List<DoiThi>> getAllDoiThisByCuocThiId(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @PathVariable(value = "cuocThiId") String cuocThiId) {
+        log.info("API GET /cuocthis/{cuocThiId}/doithis");
+
         List<DoiThi> lstDoiThi = new ArrayList<>();
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
@@ -88,6 +88,8 @@ public class DoiThiController {
     @GetMapping("/doithis/{id}")
     public ResponseEntity<DoiThi> getDoiThiById(@PathVariable(value = "id") String doiThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /doithis/{id}");
+
         DoiThi doiThi = doiThiRepository.findById(doiThiId)
           .orElseThrow(() -> new ResourceNotFoundException("DoiThi not found for this id :: " + doiThiId));
         return ResponseEntity.ok().body(doiThi);
@@ -116,6 +118,11 @@ public class DoiThiController {
 
     @PostMapping("/cuocthis/{cuocThiId}/doithis")
     public ResponseEntity<DoiThi> createThiSinhOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody DoiThi doiThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/{cuocThiId}/doithis");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         try {
             DoiThiValidator.getInstance().validate(doiThi);
             validateRelationConstraint(doiThi);
@@ -126,7 +133,7 @@ public class DoiThiController {
 
             return new ResponseEntity<>(doiThiMoi, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis/{cuocThiId}/doithis", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
     }
@@ -143,7 +150,12 @@ public class DoiThiController {
     // }
 
     @PutMapping("/doithis/{id}")
-    public ResponseEntity<DoiThi> updateDoiThi(@PathVariable("id") String id, @RequestBody DoiThi doiThi) {
+    public ResponseEntity<DoiThi> updateDoiThi(@PathVariable("id") String id, @RequestBody DoiThi doiThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /doithis/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         Optional<DoiThi> doiThiData = doiThiRepository.findById(id);
         if (doiThiData.isPresent()) {
             try {
@@ -183,7 +195,7 @@ public class DoiThiController {
                 return new ResponseEntity<>(doiThiRepository.save(_doiThi), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /doithis/{id}", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -193,18 +205,29 @@ public class DoiThiController {
     }
 
     @DeleteMapping("/doithis/{id}")
-    public ResponseEntity<HttpStatus> deleteDoiThi(@PathVariable("id") String id) {
+    public ResponseEntity<HttpStatus> deleteDoiThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /doithis/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         try {
             doiThiRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /doithis/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/cuocthis/{cuocThiId}/doithis")
     public ResponseEntity<List<DoiThi>> deleteAllDoiThisOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/doithis");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

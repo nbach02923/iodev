@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.netflix.config.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
@@ -46,6 +47,7 @@ import vn.iodev.contestmanagementsystem.validator.DanhSachThiValidator;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class DanhSachThiController {
     @Autowired
     DanhSachThiRepository danhSachThiRepository;
@@ -67,6 +69,8 @@ public class DanhSachThiController {
 
     @GetMapping("/danhsachthis")
     public List<DanhSachThi> getAllDanhSachThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doiThiId) {
+        log.info("API GET /danhsachthis");
+
         Pageable paging = PageRequest.of(page - 1, size);
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         if (cuocThiData.isPresent()) {
@@ -79,6 +83,8 @@ public class DanhSachThiController {
 
     @GetMapping("/cuocthis/{cuocThiId}/danhsachthis")
     public ResponseEntity<List<DanhSachThi>> getAllDanhSachThisByCuocThiId(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @PathVariable(value = "cuocThiId") String cuocThiId) {
+        log.info("API GET /cuocthis/{cuocThiId}/danhsachthis");
+
         List<DanhSachThi> lstDanhSachThi = new ArrayList<>();
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
@@ -96,6 +102,8 @@ public class DanhSachThiController {
     @GetMapping("/danhsachthis/{danhSachId}")
     public ResponseEntity<DanhSachThi> getDanhSachThiById(@PathVariable(value = "danhSachId", required = true) long danhSachId)
         throws ResourceNotFoundException {
+        log.info("API GET /danhsachthis/{danhSachId}");
+
         DanhSachThi danhSachThi = danhSachThiRepository.findById(danhSachId)
           .orElseThrow(() -> new ResourceNotFoundException("DanhSachThi not found for this id::" + danhSachId));
         return ResponseEntity.ok().body(danhSachThi);
@@ -122,6 +130,8 @@ public class DanhSachThiController {
 
     @PostMapping("/cuocthis/{cuocThiId}/danhsachthis")
     public ResponseEntity<DanhSachThi> createDanhSachThiOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody DanhSachThi danhSachThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/{cuocThiId}/danhsachthis");
+
         try {
             validateRelationConstraint(danhSachThi);
             DanhSachThiValidator.getInstance().validate(danhSachThi);
@@ -133,7 +143,7 @@ public class DanhSachThiController {
 
             return new ResponseEntity<>(danhSachThiMoi, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis/{cuocThiId}/danhsachthis", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
     }
@@ -156,13 +166,14 @@ public class DanhSachThiController {
     //         return new ResponseEntity<>(_danhSachThi, HttpStatus.CREATED);
     //     }
     //     catch (Exception e) {
-    //         e.printStackTrace();
     //         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     //     }
     // }
 
     @PutMapping("/danhsachthis/{id}")
     public ResponseEntity<DanhSachThi> updateDanhSachThi(@PathVariable("id") long id, @RequestBody DanhSachThi danhSachThi) {
+        log.info("API PUT /danhsachthis/{id}");
+
         Optional<DanhSachThi> danhSachThiData = danhSachThiRepository.findById(id);
         if (danhSachThiData.isPresent()) {
             try {
@@ -202,7 +213,7 @@ public class DanhSachThiController {
                 return new ResponseEntity<>(danhSachThiRepository.save(_danhSachThi), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /danhsachthis/{id}", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -213,6 +224,8 @@ public class DanhSachThiController {
 
     @DeleteMapping("/danhsachthis/{id}")
     public ResponseEntity<HttpStatus> deleteDanhSachThi(@PathVariable("id") long id) {
+        log.info("API DELETE /danhsachthis/{id}");
+
         try {
             danhSachThiRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -224,6 +237,8 @@ public class DanhSachThiController {
 
     @DeleteMapping("/cuocthis/{cuocThiId}/danhsachthis")
     public ResponseEntity<List<DanhSachThi>> deleteAllDanhSachThisOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/danhsachthis");
+
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -234,6 +249,8 @@ public class DanhSachThiController {
 
     @PostMapping("/danhsachthis/import")
     public ResponseEntity<ImportResponse> importDanhSachThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType) {
+        log.info("API POST /danhsachthis/import");
+
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
         long size = multipartFile.getSize();
         String message = "";

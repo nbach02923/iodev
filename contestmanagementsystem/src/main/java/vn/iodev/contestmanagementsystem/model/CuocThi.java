@@ -179,7 +179,8 @@ public class CuocThi {
         Date ngayBatDau,
         Date ngayKetThuc,
         String thongTinMoTa,
-        String website
+        String website,
+        Integer tinhTrang
         ) {
             this.tenGoi = tenGoi;
             this.tiengAnh = tiengAnh;
@@ -191,6 +192,6 @@ public class CuocThi {
             this.ngayKetThuc = ngayKetThuc;
             this.thongTinMoTa = thongTinMoTa;
             this.website = website;
-            this.tinhTrang = 1;
+            this.tinhTrang = tinhTrang;
         }
 }

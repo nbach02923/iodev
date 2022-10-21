@@ -80,6 +80,7 @@ public class TaiKhoanController {
 
     @GetMapping("/taikhoans")
     public ResponseEntity<List<TaiKhoan>> getAllTaiKhoans(@RequestParam(required = false) String email, @RequestParam(required = false) Integer tinhTrang) {
+        log.info("API GET /taikhoans");
         try {
             List<TaiKhoan> taiKhoans = new ArrayList<TaiKhoan>();
 
@@ -100,12 +101,14 @@ public class TaiKhoanController {
 
             return new ResponseEntity<>(taiKhoans, HttpStatus.OK);
         } catch (Exception e) {
+            log.debug("API GET /taikhoans", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/taikhoans/{email}")
     public ResponseEntity<TaiKhoan> getTaiKhoanById(@PathVariable("email") String email) {
+        log.info("API GET /taikhoans/{email}");
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
         if (taiKhoanData.isPresent()) {
             return new ResponseEntity<>(taiKhoanData.get(), HttpStatus.OK);
@@ -116,6 +119,7 @@ public class TaiKhoanController {
 
     @PostMapping("/taikhoans")
     public ResponseEntity<TaiKhoan> createTaiKhoan(@Valid @RequestBody TaiKhoan taiKhoan) {
+        log.info("API POST /taikhoans");
         try {
             if (taiKhoan.getId() != null) {
                 if (taiKhoan.getLoaiTaiKhoan() != null) {
@@ -192,13 +196,14 @@ public class TaiKhoanController {
 
             return new ResponseEntity<>(_taiKhoan, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /taikhoans", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/taikhoans/{id}")
     public ResponseEntity<TaiKhoan> updateTaiKhoan(@PathVariable("id") String email, @Valid @RequestBody TaiKhoan taiKhoan) {
+        log.info("API PUT /taikhoans/{id}");
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {
@@ -232,6 +237,7 @@ public class TaiKhoanController {
 
     @DeleteMapping("/taikhoans/{email}")
     public ResponseEntity<HttpStatus> deleteTaiKhoan(@PathVariable("email") String email) {
+        log.info("API DELETE /taikhoans/{email}");
         try {
             Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
             if (taiKhoanData.isPresent()) {
@@ -243,12 +249,14 @@ public class TaiKhoanController {
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
+            log.debug("API DELETE /taikhoans/{email}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/taikhoans/{id}/kichhoat")
     public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email) {
+        log.info("API PUT /taikhoans/{id}/kichhoat");
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
         log.info("User email: " + email);
         if (taiKhoanData.isPresent()) {
@@ -262,6 +270,7 @@ public class TaiKhoanController {
 
     @PutMapping("/auth/{id}/verify-email")
     public ResponseEntity<TaiKhoan> verifyEmail(@PathVariable("id") String email, @RequestParam("maKichHoat") String maKichHoat) {
+        log.info("API PUT /auth/{id}/verify-email");
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {
@@ -281,6 +290,7 @@ public class TaiKhoanController {
 
     @PostMapping("/auth/register")
     public ResponseEntity<TaiKhoan> dangKyTaiKhoan(@Valid @RequestBody TaiKhoanRequest taiKhoan) {
+        log.info("API POST /auth/register");
         try {
             boolean isOrganizeAdmin = false;
             String id = null;
@@ -298,6 +308,7 @@ public class TaiKhoanController {
                             }
                         }
                         catch (Exception e1) {
+                            log.debug("API POST /auth/register", e1);
                             CaNhanRequest request = new CaNhanRequest();
                             request.setEmail(taiKhoan.getEmail());
                             request.setGioiTinh(0);
@@ -308,7 +319,7 @@ public class TaiKhoanController {
                                 id = result.getId();
                             }
                             catch (Exception e2) {
-                                e2.printStackTrace();
+                                log.debug("API POST /auth/register", e2);
                                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
                             }                        
                         }
@@ -319,7 +330,7 @@ public class TaiKhoanController {
                             toChuc = humanResourceService.getToChucByEmail(taiKhoan.getEmail());
                         }
                         catch (Exception e) {
-
+                            log.debug("API POST /auth/register", e);
                         }
                         if (toChuc != null && toChuc.getId() != null) {
                             id = toChuc.getId();
@@ -339,7 +350,7 @@ public class TaiKhoanController {
                                     id = result.getId();
                                 }
                                 catch (Exception e) {
-                                    e.printStackTrace();
+                                    log.debug("API POST /auth/register", e);
                                     return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
                                 }
                             }
@@ -388,13 +399,14 @@ public class TaiKhoanController {
 
             return new ResponseEntity<>(_taiKhoan, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /auth/register", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/taikhoans/{id}/dongtaikhoan")
     public ResponseEntity<TaiKhoan> dongTaiKhoan(@PathVariable("id") String email) {
+        log.info("API PUT /taikhoans/{id}/dongtaikhoan");
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {

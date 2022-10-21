@@ -9,6 +9,7 @@ public class VaiTroChecker {
     public static final String VAITRO_NGUOIDUNG = "VAITRO_NGUOIDUNG";
 
     public static boolean hasVaiTroQuanTriHeThong(String vaiTro) {
+        if (vaiTro == null || vaiTro.isEmpty()) return false;
         List<String> lstVaiTro = Arrays.asList(vaiTro.split(","));
         
         return lstVaiTro.contains(VAITRO_QUANTRIHETHONG);

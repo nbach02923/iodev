@@ -59,6 +59,7 @@ public class WebSecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .authorizeRequests()
                 .antMatchers("/api/authenticate/**", "/api/auth/**").permitAll()
+                .antMatchers("/api/mail/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
                 .antMatchers("/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
                 .antMatchers("/api/vaitros/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
             .anyRequest().authenticated();

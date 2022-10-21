@@ -61,31 +61,22 @@ public class HuanLuyenVienController {
     CaNhanService caNhanService;
 
     @GetMapping("/cuocthis/{cuocThiId}/huanluyenviens")
-    public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader(value = "id", required = false) String taiKhoanId, @RequestHeader(value = "loaiTaiKhoan", required = false) Integer loaiTaiKhoan, @RequestHeader(value = "vaiTros", required = false) String vaiTros) {
-        log.info("Inside find huanluyenvien of cuocthi");
-        if (!VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+    public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId) {
+        log.info("API GET /cuocthis/{cuocThiId}/huanluyenviens");
         List<HuanLuyenVien> lstHuanLuyenVien = new ArrayList<>();
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(lstHuanLuyenVien, HttpStatus.OK);
         }
-        if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            List<HuanLuyenVien> huanLuyenViens = huanLuyenVienRespository.findByCuocThiId(cuocThiId);
-            lstHuanLuyenVien.addAll(huanLuyenViens);
-        }
-        else if (taiKhoanId != null && !taiKhoanId.isEmpty()) {
-            List<DoanThi> lstDoanThi = doanThiRepository.findByToChucIdAndCuocThiId(taiKhoanId, cuocThiId);
-            for (DoanThi dt : lstDoanThi) {
-                lstHuanLuyenVien.addAll(huanLuyenVienRespository.findByCuocThiIdAndDoanThiId(cuocThiId, dt.getId()));
-            }
-        }
+        List<HuanLuyenVien> huanLuyenViens = huanLuyenVienRespository.findByCuocThiId(cuocThiId);
+        lstHuanLuyenVien.addAll(huanLuyenViens);
+        
         return new ResponseEntity<>(lstHuanLuyenVien, HttpStatus.OK);
     }
 
     @GetMapping("/huanluyenviens")
     public List<HuanLuyenVien> getAllHuanLuyenViens(@RequestParam(defaultValue = "1") int page, @RequestParam(name = "tuKhoa", defaultValue = "") String tuKhoa, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doanThiId) {
+        log.info("API GET /huanluyenviens");
         Pageable paging = PageRequest.of(page - 1, size);
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         if (cuocThiData.isPresent()) {
@@ -99,6 +90,7 @@ public class HuanLuyenVienController {
     @GetMapping("/huanluyenviens/{id}")
     public ResponseEntity<HuanLuyenVien> getHuanLuyenVienById(@PathVariable(value = "id") String huanLuyenVienId)
         throws ResourceNotFoundException {
+        log.info("API GET /huanluyenviens/{id}");
         HuanLuyenVien huanLuyenVien = huanLuyenVienRespository.findById(huanLuyenVienId)
           .orElseThrow(() -> new ResourceNotFoundException("HuanLuyenVien not found for this id :: " + huanLuyenVienId));
         return ResponseEntity.ok().body(huanLuyenVien);
@@ -124,7 +116,9 @@ public class HuanLuyenVienController {
 
     @PostMapping("/cuocthis/{cuocThiId}/huanluyenviens")
     public ResponseEntity<HuanLuyenVien> createHuanLuyenVienOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody HuanLuyenVien huanLuyenVien, @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        log.info("API POST /cuocthis/{cuocThiId}/huanluyenviens");
+
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
         try {
@@ -136,7 +130,7 @@ public class HuanLuyenVienController {
 
             return new ResponseEntity<>(huanLuyenVienMoi, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis/{cuocThiId}/huanluyenviens", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
     }
@@ -153,7 +147,12 @@ public class HuanLuyenVienController {
     // }
 
     @PutMapping("/huanluyenviens/{id}")
-    public ResponseEntity<HuanLuyenVien> updateHuanLuyenVien(@PathVariable("id") String id, @RequestBody HuanLuyenVien huanLuyenVien) {
+    public ResponseEntity<HuanLuyenVien> updateHuanLuyenVien(@PathVariable("id") String id, @RequestBody HuanLuyenVien huanLuyenVien, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /huanluyenviens/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
         Optional<HuanLuyenVien> huanLuyenVienData = huanLuyenVienRespository.findById(id);
         if (huanLuyenVienData.isPresent()) {
             try {
@@ -187,7 +186,7 @@ public class HuanLuyenVienController {
                 return new ResponseEntity<>(huanLuyenVienRespository.save(_huanLuyenVien), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /huanluyenviens/{id}", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -198,6 +197,7 @@ public class HuanLuyenVienController {
 
     @DeleteMapping("/huanluyenviens/{id}")
     public ResponseEntity<HttpStatus> deleteHuanLuyenVien(@PathVariable("id") String id) {
+        log.info("API DELETE /huanluyenviens/{id}");
         try {
             huanLuyenVienRespository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -209,7 +209,8 @@ public class HuanLuyenVienController {
 
     @DeleteMapping("/cuocthis/{cuocThiId}/huanluyenviens")
     public ResponseEntity<List<HuanLuyenVien>> deleteAllHuanLuyenViensOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/huanluyenviens");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         if (!cuocThiRepository.existsById(cuocThiId)) {

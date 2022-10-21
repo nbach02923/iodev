@@ -37,6 +37,7 @@ public class DanhMucController {
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(required = false) String loaiDanhMuc, 
             @RequestParam(required = false) String maDanhMuc) {
+        log.info("API GET /danhmucs");
         Pageable pageable = PageRequest.of(page - 1, size);
         List<DanhMuc> danhMucs;
         if (loaiDanhMuc != null) {
@@ -55,8 +56,8 @@ public class DanhMucController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
-        log.info("LoaiDanhMuc: " + loaiDanhMuc + ", maDanhMuc: " + maDanhMuc);
-        try {
+        log.info("API GET /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
+            try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
                     return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -86,6 +87,7 @@ public class DanhMucController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /danhmucs");
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 DanhMuc _danhMuc = danhMucRepository.save(new DanhMuc(danhMuc.getLoaiDanhMuc(), danhMuc.getMaDanhMuc(), danhMuc.getGiaTri()));
@@ -108,7 +110,7 @@ public class DanhMucController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
-        log.info("LoaiDanhMuc: " + loaiDanhMuc + ", maDanhMuc: " + maDanhMuc);
+        log.info("API PUT /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {
@@ -144,6 +146,7 @@ public class DanhMucController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /danhmucs");
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(danhMuc.getLoaiDanhMuc(), danhMuc.getMaDanhMuc()))) {
@@ -180,6 +183,7 @@ public class DanhMucController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /danhmucs/{loaiDanhMuc}/{maDanhMuc}");
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 if (!danhMucRepository.existsById(new DanhMucId(loaiDanhMuc, maDanhMuc))) {

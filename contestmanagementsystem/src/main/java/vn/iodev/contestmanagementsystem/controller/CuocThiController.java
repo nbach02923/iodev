@@ -115,6 +115,7 @@ public class CuocThiController {
             @RequestParam(required = false) Integer lanToChuc, 
             @RequestParam(required = false) String toChucId,
             @RequestParam(required = false) String tinhTrang) {
+        log.info("API GET /cuocthis");
         Pageable paging = PageRequest.of(page - 1, size);
         List<CuocThi> cuocThis;
         List<Integer> tinhTrangs = new ArrayList<>();
@@ -124,7 +125,7 @@ public class CuocThiController {
                     tinhTrangs.add(Integer.parseInt(tempTinhTrang));
                 }
                 catch (NumberFormatException e) {
-
+                    log.debug("API GET /cuocthis", e);
                 }
             }
         }
@@ -140,6 +141,7 @@ public class CuocThiController {
     @GetMapping("/cuocthis/{id}")
     public ResponseEntity<CuocThi> getCuocThiById(@PathVariable(value = "id") String cuocThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /cuocthis/{id}");
         CuocThi cuocThi = cuocThiRepository.findById(cuocThiId)
           .orElseThrow(() -> new ResourceNotFoundException("CuocThi not found for this id :: " + cuocThiId));
         return ResponseEntity.ok().body(cuocThi);
@@ -162,6 +164,7 @@ public class CuocThiController {
         @RequestHeader("id") String id,
         @RequestHeader("email") String email,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis");
         try {
             if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 validateRelationConstraint(cuocThi);
@@ -175,7 +178,8 @@ public class CuocThiController {
                                                             cuocThi.getNgayBatDau(), 
                                                             cuocThi.getNgayKetThuc(), 
                                                             cuocThi.getThongTinMoTa(), 
-                                                            cuocThi.getWebsite()));
+                                                            cuocThi.getWebsite(),
+                                                            cuocThi.getTinhTrang()));
                 return new ResponseEntity<>(_cuocThi, HttpStatus.CREATED);
             }
             else {
@@ -183,7 +187,7 @@ public class CuocThiController {
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -191,8 +195,9 @@ public class CuocThiController {
     @PutMapping("/cuocthis/{id}")
     public ResponseEntity<CuocThi> updateCuocThi(@PathVariable("id") String id, @RequestBody CuocThi cuocThi,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /cuocthis/{id}");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
         if (cuocThiData.isPresent()) {
@@ -250,7 +255,7 @@ public class CuocThiController {
                 return new ResponseEntity<>(cuocThiRepository.save(_cuocThi), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /cuocthis/{id}", e);
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -262,6 +267,7 @@ public class CuocThiController {
     @PutMapping("/cuocthis/{id}/hinhanhs")
     public ResponseEntity<ResponseMessage> updateHinhAnhCuocThi(@PathVariable("id") String id, @RequestParam("hinhAnhs") MultipartFile[] hinhAnhFiles,
         @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /cuocthis/{id}/hinhanhs");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -274,7 +280,7 @@ public class CuocThiController {
                     FileIO fileIO = storageService.store(hinhAnhFile, _cuocThi);
                     fileIORepository.save(fileIO);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.debug("API PUT /cuocthis/{id}/hinhanhs", e);
                 } 
             }
           
@@ -287,7 +293,7 @@ public class CuocThiController {
 
     @GetMapping("/cuocthis/{id}/hinhanhs")
     public ResponseEntity<List<FileIOResponse>> getHinhAnhsCuocThi(@PathVariable("id") String id) {
-
+        log.info("GET PUT /cuocthis/{id}/hinhanhs");
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
         String baseUrl = configuration.getGatewayUrl();
 
@@ -316,6 +322,8 @@ public class CuocThiController {
         MediaType.IMAGE_GIF_VALUE
     })
     public ResponseEntity<byte[]> getFile(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("id") String id) {
+        log.info("API GET /files/cuocthis/{cuocThiId}/hinhanhs/{id}");
+
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -328,6 +336,7 @@ public class CuocThiController {
     
     @DeleteMapping("/cuocthis/{cuocThiId}/hinhanhs/{id}")
     public ResponseEntity<HttpStatus> deleteHinhAnhCuocThi(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/hinhanhs/{id}");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -339,12 +348,14 @@ public class CuocThiController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /cuocthis/{cuocThiId}/hinhanhs/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/cuocthis/{id}")
     public ResponseEntity<HttpStatus> deleteCuocThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /cuocthis/{id}");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -353,12 +364,14 @@ public class CuocThiController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /cuocthis/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/cuocthis/{cuocThiId}/thongke")
     public ResponseEntity<List<DongThongKeResponse>> thongKe(@PathVariable("cuocThiId") String cuocThiId) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/thongke");
         if (!cuocThiRepository.existsById(cuocThiId)) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -408,6 +421,7 @@ public class CuocThiController {
     @GetMapping("/cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaicanhan")
     public ResponseEntity<List<KetQuaCaNhanResponse>> ketQuaCaNhan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "khoiThiId") String khoiThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaicanhan");
         List<KetQuaCaNhanResponse> lstKetquas = new ArrayList<>();
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         Optional<KhoiThi> khoiThiData = khoiThiRepository.findById(khoiThiId);
@@ -454,6 +468,7 @@ public class CuocThiController {
     @GetMapping("/cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaitapthe")
     public ResponseEntity<List<KetQuaDongDoiResponse>> ketQuaTapThe(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "khoiThiId") String khoiThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /cuocthis/{cuocThiId}/khoithis/{khoiThiId}/giaitapthe");
         List<KetQuaDongDoiResponse> lstKetquas = new ArrayList<>();
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         Optional<KhoiThi> khoiThiData = khoiThiRepository.findById(khoiThiId);
@@ -513,6 +528,7 @@ public class CuocThiController {
     @GetMapping("/cuocthis/{cuocThiId}/doanthis/{doanThiId}/thisinhs")
     public ResponseEntity<List<DanhSachThiSinhTrongDoanResponse>> danhSachThiSinhTrongDoan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "doanThiId") String doanThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /cuocthis/{cuocThiId}/doanthis/{doanThiId}/thisinhs");
         List<DanhSachThiSinhTrongDoanResponse> lstKetquas = new ArrayList<>();
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         Optional<DoanThi> doanThiData = doanThiRepository.findById(doanThiId);
@@ -553,6 +569,7 @@ public class CuocThiController {
     @GetMapping("/cuocthis/{cuocThiId}/doanthis/{doanThiId}/huanluyenviens")
     public ResponseEntity<List<DanhSachHLVTrongDoan>> danhSachHLVTrongDoan(@PathVariable(value = "cuocThiId") String cuocThiId, @PathVariable(value = "doanThiId") String doanThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /cuocthis/{cuocThiId}/doanthis/{doanThiId}/huanluyenviens");
         List<DanhSachHLVTrongDoan> lstKetquas = new ArrayList<>();
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         Optional<DoanThi> doanThiData = doanThiRepository.findById(doanThiId);

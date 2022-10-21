@@ -1,6 +1,5 @@
 package vn.iodev.contestmanagementsystem.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +27,6 @@ import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.ImportResponse;
-import vn.iodev.contestmanagementsystem.model.LoaiTaiKhoan;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
 import vn.iodev.contestmanagementsystem.service.ExcelService;
@@ -48,55 +46,43 @@ public class DoanThiController {
     @Autowired
     ToChucService toChucService;
 
-    public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId, @RequestHeader(value = "id", required = false) String taiKhoanId, @RequestHeader(value = "loaiTaiKhoan", required = false) Integer loaiTaiKhoan, @RequestHeader(value = "vaiTros", required = false) String vaiTros) {
-        List<DoanThi> lstDoanThi = new ArrayList<>();
-        log.info("VaiTro: " + vaiTros + ", " + VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) + ", " + VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros));
-        if (!VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            return lstDoanThi;
+    @GetMapping("/doanthis")
+    public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId) {
+        log.info("API GET /doanthis");
+        Pageable paging = PageRequest.of(page - 1, size);
+        if (toChucId == null && cuocThiId != null) {
+            return doanThiRepository.findByCuocThiId(cuocThiId, paging);
         }
-        if (VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
-            Pageable paging = PageRequest.of(page - 1, size);
-            log.info("To chuc id: " + toChucId + ", cuoc thi id: " + cuocThiId);
-            if (toChucId == null && cuocThiId != null) {
-                return doanThiRepository.findByCuocThiId(cuocThiId, paging);
-            }
-            else if (toChucId != null && cuocThiId == null) {
-                return doanThiRepository.findByToChucId(toChucId, paging);
-            }
-            else if (toChucId != null && cuocThiId != null) {
-                return doanThiRepository.findByToChucIdAndCuocThiId(toChucId, cuocThiId, paging);
-            }
-            else {
-                Page<DoanThi> doanThis;
-                doanThis = doanThiRepository.findAll(paging);
-                return doanThis.getContent();
-            }
+        else if (toChucId != null && cuocThiId == null) {
+            return doanThiRepository.findByToChucId(toChucId, paging);
         }
-        else if (VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
-            if (loaiTaiKhoan == LoaiTaiKhoan.TAIKHOAN_TOCHUC && taiKhoanId !=null && !taiKhoanId.isEmpty()) {
-                Pageable paging = PageRequest.of(page - 1, size);
-                lstDoanThi.addAll(doanThiRepository.findByToChucId(taiKhoanId, paging));
-                return lstDoanThi;
-            }
-            else {
-                return lstDoanThi;
-            }
+        else if (toChucId != null && cuocThiId != null) {
+            return doanThiRepository.findByToChucIdAndCuocThiId(toChucId, cuocThiId, paging);
         }
         else {
-            return lstDoanThi;
+            Page<DoanThi> doanThis;
+            doanThis = doanThiRepository.findAll(paging);
+            return doanThis.getContent();
         }
     }
 
     @GetMapping("/doanthis/{id}")
     public ResponseEntity<DoanThi> getDoanThiById(@PathVariable(value = "id") String doanThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /doanthis/{id}");
+
         DoanThi doanThi = doanThiRepository.findById(doanThiId)
           .orElseThrow(() -> new ResourceNotFoundException("DoanThi not found for this id :: " + doanThiId));
         return ResponseEntity.ok().body(doanThi);
     }
 
     @PostMapping("/doanthis")
-    public ResponseEntity<DoanThi> createDoanThi(@RequestBody DoanThi doanThi) {
+    public ResponseEntity<DoanThi> createDoanThi(@RequestBody DoanThi doanThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /doanthis");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         try {
             DoanThiValidator.getInstance().validate(doanThi);
             if (doanThi.getToChucId() != null) {
@@ -106,13 +92,18 @@ public class DoanThiController {
             return new ResponseEntity<>(_doanThi, HttpStatus.CREATED);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /doanthis", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/doanthis/import")
-    public ResponseEntity<ImportResponse> importDoanThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType) {
+    public ResponseEntity<ImportResponse> importDoanThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /doanthis/import");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
         long size = multipartFile.getSize();
         String message = "";
@@ -123,7 +114,7 @@ public class DoanThiController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ImportResponse(fileName, size, message));
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API POST /doanthis/import", e);
                 message = "Cound not import DoanThi: " + multipartFile.getOriginalFilename();
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ImportResponse(fileName, size, message));
             }
@@ -134,7 +125,12 @@ public class DoanThiController {
     }
 
     @PutMapping("/doanthis/{id}")
-    public ResponseEntity<DoanThi> updateDoanThi(@PathVariable("id") String id, @RequestBody DoanThi doanThi) {
+    public ResponseEntity<DoanThi> updateDoanThi(@PathVariable("id") String id, @RequestBody DoanThi doanThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /doanthis/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         Optional<DoanThi> doanThiData = doanThiRepository.findById(id);
         if (doanThiData.isPresent()) {
             try {
@@ -167,7 +163,7 @@ public class DoanThiController {
                 return new ResponseEntity<>(doanThiRepository.save(_doanThi), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /doanthis/{id}", e);
                 return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -177,12 +173,18 @@ public class DoanThiController {
     }
 
     @DeleteMapping("/doanthis/{id}")
-    public ResponseEntity<HttpStatus> deleteDoanThi(@PathVariable("id") String id) {
+    public ResponseEntity<HttpStatus> deleteDoanThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /doanthis/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         try {
             doanThiRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /doanthis/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

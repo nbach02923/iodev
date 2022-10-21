@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.netflix.config.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
@@ -41,6 +42,7 @@ import vn.iodev.contestmanagementsystem.service.ExcelService;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class ThiSinhController {
     @Autowired
     ThiSinhRepository thiSinhRepository;
@@ -59,6 +61,7 @@ public class ThiSinhController {
 
     @GetMapping("/thisinhs")
     public List<ThiSinh> getAllThiSinhs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(name = "tuKhoa", defaultValue = "") String tuKhoa, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String doanThiId) {
+        log.info("API GET /thisinhs");
         Pageable paging = PageRequest.of(page - 1, size);
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         if (cuocThiData.isPresent()) {
@@ -71,6 +74,7 @@ public class ThiSinhController {
 
     @GetMapping("/cuocthis/{cuocThiId}/thisinhs")
     public ResponseEntity<List<ThiSinh>> getAllThiSinhsByCuocThiId(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @PathVariable(value = "cuocThiId") String cuocThiId) {
+        log.info("API GET /cuocthis/{cuocThiId}/thisinhs");
         List<ThiSinh> lstThiSinh = new ArrayList<>();
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
@@ -99,7 +103,8 @@ public class ThiSinhController {
 
     @PostMapping("/cuocthis/{cuocThiId}/thisinhs")
     public ResponseEntity<ThiSinh> createThiSinhOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody ThiSinh thiSinh, @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        log.info("API POST /cuocthis/{cuocThiId}/thisinhs");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
         try {
@@ -112,13 +117,18 @@ public class ThiSinhController {
 
             return new ResponseEntity<>(thiSinhMoi, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis/{cuocThiId}/thisinhs", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
     }
 
     @PostMapping("/cuocthis/{cuocThiId}/thisinhs/import")
-    public ResponseEntity<ImportResponse> importThiSinh(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType) {
+    public ResponseEntity<ImportResponse> importThiSinh(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/{cuocThiId}/thisinhs/import");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+ 
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
         long size = multipartFile.getSize();
         String message = "";
@@ -137,11 +147,11 @@ public class ThiSinhController {
                 }
                 else {
                     message = "Cound not import ThiSinh: " + multipartFile.getOriginalFilename() + ", CuocThi not found";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ImportResponse(fileName, size, message));
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ImportResponse(fileName, size, message));
                 }
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API POST /cuocthis/{cuocThiId}/thisinhs/import", e);
                 message = "Cound not import ThiSinh: " + multipartFile.getOriginalFilename();
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ImportResponse(fileName, size, message));
             }
@@ -154,6 +164,7 @@ public class ThiSinhController {
     @GetMapping("/thisinhs/{id}")
     public ResponseEntity<ThiSinh> getThiSinhById(@PathVariable(value = "id") String thiSinhId)
         throws ResourceNotFoundException {
+        log.info("API GET /thisinhs/{id}");
         ThiSinh thiSinh = thiSinhRepository.findById(thiSinhId)
           .orElseThrow(() -> new ResourceNotFoundException("ThiSinh not found for this id :: " + thiSinhId));
         return ResponseEntity.ok().body(thiSinh);
@@ -171,7 +182,12 @@ public class ThiSinhController {
     // }
 
     @PutMapping("/thisinhs/{id}")
-    public ResponseEntity<ThiSinh> updateThiSinh(@PathVariable("id") String id, @RequestBody ThiSinh thiSinh) {
+    public ResponseEntity<ThiSinh> updateThiSinh(@PathVariable("id") String id, @RequestBody ThiSinh thiSinh, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /thisinhs/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
         Optional<ThiSinh> thiSinhData = thiSinhRepository.findById(id);
         if (thiSinhData.isPresent()) {
             try {
@@ -213,7 +229,7 @@ public class ThiSinhController {
                 return new ResponseEntity<>(thiSinhRepository.save(_thiSinh), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("API PUT /thisinhs/{id}", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -223,19 +239,26 @@ public class ThiSinhController {
     }
     
     @DeleteMapping("/thisinhs/{id}")
-    public ResponseEntity<HttpStatus> deleteThiSinh(@PathVariable("id") String id) {
+    public ResponseEntity<HttpStatus> deleteThiSinh(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /thisinhs/{id}");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
         try {
             thiSinhRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /thisinhs/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/cuocthis/{cuocThiId}/thisinhs")
     public ResponseEntity<List<ThiSinh>> deleteAllThiSinhsOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
-        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/thisinhs");
+        if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         if (!cuocThiRepository.existsById(cuocThiId)) {

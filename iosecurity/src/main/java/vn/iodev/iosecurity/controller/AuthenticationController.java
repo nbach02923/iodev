@@ -39,7 +39,7 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
-        log.info("Username: " + loginRequest.getUsername() + "," + loginRequest.getPassword());
+        log.info("API POST /authenticate");
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),

@@ -1,7 +1,6 @@
 package vn.iodev.iosecurity.scheduler;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.scheduling.support.PeriodicTrigger;
+// import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
 
 import vn.iodev.iosecurity.model.MailQueue;
@@ -27,8 +26,8 @@ public class MailTaskScheduler {
     @Autowired
     private CronTrigger cronTrigger;
 
-    @Autowired
-    private PeriodicTrigger periodicTrigger;
+    // @Autowired
+    // private PeriodicTrigger periodicTrigger;
 
     @Autowired
     EmailService emailService;

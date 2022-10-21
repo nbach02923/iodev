@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
@@ -32,6 +33,7 @@ import vn.iodev.contestmanagementsystem.validator.KhoiThiValidator;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class KhoiThiController {
     @Autowired
     KhoiThiRepository khoiThiRepository;
@@ -41,6 +43,7 @@ public class KhoiThiController {
 
     @GetMapping("/cuocthis/{cuocThiId}/khoithis")
     public ResponseEntity<List<KhoiThi>> getAllKhoiThisByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId) {
+        log.info("API /cuocthis/{cuocThiId}/khoithis");
         List<KhoiThi> lstKhoiThi = new ArrayList<>();
 
         if (!cuocThiRepository.existsById(cuocThiId)) {
@@ -54,6 +57,7 @@ public class KhoiThiController {
         
     @PostMapping("/cuocthis/{cuocThiId}/khoithis")
     public ResponseEntity<KhoiThi> createKhoiThiOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/{cuocThiId}/khoithis");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
@@ -66,13 +70,14 @@ public class KhoiThiController {
 
             return new ResponseEntity<>(khoiThiMoi, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("API POST /cuocthis/{cuocThiId}/khoithis", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }   
     }
 
     @GetMapping("/khoithis")
     public List<KhoiThi> getAllKhoiThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId) {
+        log.info("API GET /khoithis");
         Pageable paging = PageRequest.of(page - 1, size);
         if (cuocThiId == null) {
             Page<KhoiThi> khoiThis;
@@ -87,6 +92,7 @@ public class KhoiThiController {
     @GetMapping("/khoithis/{id}")
     public ResponseEntity<KhoiThi> getKhoiThiById(@PathVariable(value = "id") String khoiThiId)
         throws ResourceNotFoundException {
+        log.info("API GET /khoithis/{id}");
         KhoiThi khoiThi = khoiThiRepository.findById(khoiThiId)
           .orElseThrow(() -> new ResourceNotFoundException("KhoiThi not found for this id :: " + khoiThiId));
         return ResponseEntity.ok().body(khoiThi);
@@ -108,6 +114,7 @@ public class KhoiThiController {
 
     @PutMapping("/khoithis/{id}")
     public ResponseEntity<KhoiThi> updateKhoiThi(@PathVariable("id") String id, @Valid @RequestBody KhoiThi khoiThi, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API PUT /khoithis/{id}");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -145,7 +152,7 @@ public class KhoiThiController {
                 return new ResponseEntity<>(khoiThiRepository.save(_khoiThi), HttpStatus.OK);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.info("API PUT /khoithis/{id}");
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -156,6 +163,7 @@ public class KhoiThiController {
 
     @DeleteMapping("/khoithis/{id}")
     public ResponseEntity<HttpStatus> deleteKhoiThi(@PathVariable("id") String id, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /khoithis/{id}");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<HttpStatus>(HttpStatus.FORBIDDEN);
         }
@@ -164,12 +172,14 @@ public class KhoiThiController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e) {
+            log.debug("API DELETE /khoithis/{id}", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/cuocthis/{cuocThiId}/khoithis")
     public ResponseEntity<List<KhoiThi>> deleteAllKhoiThisOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API DELETE /cuocthis/{cuocThiId}/khoithis");
         if (!VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
