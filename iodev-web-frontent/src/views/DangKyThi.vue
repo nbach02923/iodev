@@ -106,9 +106,7 @@
                 <template v-slot:item.gioiTinh="{ item, index }">
                   <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
                 </template>
-                <template v-slot:item.ngaySinh="{ item, index }">
-                  <div>{{ dateLocale(item.ngaySinh)}}</div>
-                </template>
+                
                 <template v-slot:item.action="{ item }">
                   <div v-if="chiTietCuocThi.tinhTrang == 1">
                     <v-tooltip top>
@@ -1080,8 +1078,8 @@ export default {
       formatDateInput (date) {
         if (!date) return ''
         const [day, month, year] = date.split('/')
-        let ddd = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-        return (new Date(ddd)).toISOString()
+        let ddd = `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`
+        return ddd
       },
       dateLocale (dateInput) {
         if (!dateInput) {

@@ -85,10 +85,10 @@
             <v-btn class="my-0 white--text mr-3 btn-login" style="padding: 0 15px !important;"
               :loading="loading"
               :disabled="loading"
-              @click="goToPage"
+              @click="goToHome"
             >
                 <v-icon size="20">mdi-home-circle-outline</v-icon>&nbsp;
-                <span>Truy cập hệ thống</span>
+                <span>Trang chủ</span>
             </v-btn>
           </v-flex>
         </div>
@@ -180,7 +180,7 @@
               let dataUser = JSON.parse(atob(payload))
               let roleUser = dataUser && dataUser.hasOwnProperty('vaiTros') && dataUser.vaiTros ? dataUser.vaiTros : ''
               let admin = roleUser ? roleUser.find(function (item) {
-                return item.ten === 'VAITRO_QUANTRIHETHONG'
+                return item === 'VAITRO_QUANTRIHETHONG'
               }) : false
               // console.log('roleUser', roleUser)
               if (roleUser && roleUser.length) {
@@ -192,7 +192,6 @@
                   vm.$cookies.set('admin', true, result.expires_in)
                   let dataUser1 = {
                     hoVaTen: 'Quản trị',
-                    maSoCanBo: '',
                     viTriChucDanh: 'Quản trị hệ thống',
                     vaiTroSuDung: '',
                     email: vm.userName
@@ -206,11 +205,9 @@
                     email: vm.userName
                   }
                   vm.$store.dispatch('getThongTinUserDangNhap', filter).then(function (result) {
-                    let chucDanh = ''
                     let vaiTroSuDung = ''
                     let dataUser2 = {
                       hoVaTen: 'Người dùng',
-                      maSoCanBo: '',
                       viTriChucDanh: '',
                       vaiTroSuDung: '',
                       email: vm.userName
@@ -222,7 +219,7 @@
                       }).toString()
                       dataUser.vaiTroSuDung = vaiTroSuDung
                       let isAdmin = vaiTroSuDung.find(function (item) {
-                        return item == 'QUANTRIHETHONG'
+                        return item == 'VAITRO_QUANTRIHETHONG'
                       })
                       if (isAdmin) {
                         vm.$cookies.set('admin', true, result.expires_in)
@@ -241,10 +238,17 @@
                     }, 200)
                   }).catch (function () {
                     vm.loading = false
-                    toastr.error('TÀI KHOẢN CHƯA ĐƯỢC CẤP QUYỀN CÁN BỘ')
                     setTimeout(function () {
-                      vm.submitLogout()
-                    }, 500)
+                      let dataUser1 = {
+                        hoVaTen: '',
+                        viTriChucDanh: '',
+                        vaiTroSuDung: '',
+                        email: vm.userName
+                      }
+                      vm.$cookies.set('UserInfo', dataUser1, result.expires_in)
+                      vm.$cookies.set('Roles', '', result.expires_in)
+                      vm.goToPage()
+                    }, 200)
                   })
                 }                
               } else {
@@ -294,6 +298,10 @@
         } else {
           vm.$router.push({ path: '/' })
         }
+      },
+      goToHome () {
+        let vm = this
+        vm.$router.push({ path: '/' })
       },
       goToSignUp () {
         let vm = this
