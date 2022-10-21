@@ -138,6 +138,23 @@ public class CuocThiController {
             tinhTrangs.add(LoaiTinhTrangCuocThi.DAKETTHUC);
         }
         cuocThis = cuocThiRepository.findToChucByMultipleConditions(tuKhoa, serieCuocThi, lanToChuc, toChucId, tinhTrangs, paging);
+        String baseUrl = configuration.getGatewayUrl();
+
+        for (CuocThi cuocThi : cuocThis) {
+            List<FileIOResponse> files = storageService.getAllFilesByCuocThiId(cuocThi.getId()).map(fileIO -> {
+                String fileDownloadUri = String.format("%s/api/files/cuocthis/%s/hinhanhs/%s", baseUrl, cuocThi.getId(), fileIO.getId());
+          
+                return new FileIOResponse(
+                    fileIO.getId(),
+                    fileIO.getName(),
+                    fileDownloadUri,
+                    fileIO.getType(),
+                    fileIO.getData().length);
+              }).collect(Collectors.toList());
+            if (files.size() > 0) {
+                cuocThi.setHinhAnh(files.get(0).getUrl());
+            }
+        }
         return cuocThis;
     }
 
@@ -147,6 +164,21 @@ public class CuocThiController {
         log.info("API GET /cuocthis/{id}");
         CuocThi cuocThi = cuocThiRepository.findById(cuocThiId)
           .orElseThrow(() -> new ResourceNotFoundException("CuocThi not found for this id :: " + cuocThiId));
+        String baseUrl = configuration.getGatewayUrl();
+
+        List<FileIOResponse> files = storageService.getAllFilesByCuocThiId(cuocThi.getId()).map(fileIO -> {
+            String fileDownloadUri = String.format("%s/api/files/cuocthis/%s/hinhanhs/%s", baseUrl, cuocThi.getId(), fileIO.getId());
+      
+            return new FileIOResponse(
+                fileIO.getId(),
+                fileIO.getName(),
+                fileDownloadUri,
+                fileIO.getType(),
+                fileIO.getData().length);
+          }).collect(Collectors.toList());
+        if (files.size() > 0) {
+            cuocThi.setHinhAnh(files.get(0).getUrl());
+        }
         return ResponseEntity.ok().body(cuocThi);
     }
 
