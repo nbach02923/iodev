@@ -8,7 +8,7 @@
     >
       <div class="container-wrap">
         <div class="wrap-title">
-          <v-flex style="text-align: center;">
+          <v-flex style="text-align: center;" class="mb-5">
             <img class="img-login-logo" :src="`${publicPath}/images/logo-vaip.jpg?t=93111413`">
           </v-flex>
           <v-flex class="wrap-title pt-1 mb-2 mt-3">
@@ -76,9 +76,13 @@
                   :disabled="loading"
                   @click="signUp"
                 >
-                  <v-icon size="20">mdi-login</v-icon>&nbsp;
+                  <v-icon size="20">mdi-account-plus-outline</v-icon>&nbsp;
                   Đăng ký
                 </v-btn>
+                
+                <a @click="login()"  href="javascript:;" class="" style="position: absolute; right: 0; bottom: 0; color: #fff;">
+                  <span> Đăng nhập</span>
+                </a>
               </v-flex>
             </v-form>
           </div>
@@ -227,11 +231,9 @@
         vm.loading = true
         let filter = {
           data: {
-            "email": vm.userName,
-            "id": "",
+            "email": String(vm.userName).trim(),
             "loaiTaiKhoan": Number(vm.loaiTaiKhoan),
-            "password": vm.password,
-            // "vaiTros": ["VAITRO_NGUOIDUNG"]
+            "matKhau": vm.password
           }
         }
         vm.$store.dispatch('signUp', filter).then(function (result) {
@@ -240,10 +242,18 @@
           toastr.success('Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản.')
           vm.$refs.form.reset()
           vm.$refs.form.resetValidation()
+          setTimeout(function () {
+            vm.dialogActive = true
+            vm.emailActive = String(vm.userName).trim()
+          }, 300)
         }).catch(function (result) {
           vm.loading = false
           toastr.remove()
-          toastr.error('Đăng ký không thành công')
+          if (result.status == 409) {
+            toastr.error('Đăng ký không thành công. Email đã được sử dụng.')
+          } else {
+            toastr.error('Đăng ký không thành công')
+          }
         })
       },
       activeTaiKhoan () {
@@ -266,8 +276,12 @@
         }).catch(function (result) {
           vm.loading = false
           toastr.remove()
-          toastr.error('Kích hoạt không thành công')
+          toastr.error('Kích hoạt không thành công. Mã kích hoạt không chính xác.')
         })
+      },
+      login () {
+        let vm = this
+        vm.$router.push({ path: '/dang-nhap' })
       },
       goToPage () {
         let vm = this
@@ -405,6 +419,7 @@
   .wrap-title, .wrap-btn-login {
     text-align: center;
     text-transform: uppercase;
+    position: relative;
   }
   .wrap-contact-info {
     max-width: 1366px !important;

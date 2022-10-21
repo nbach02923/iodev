@@ -88,13 +88,31 @@
                 :items-per-page="itemsPerPage"
                 item-key="primKey"
                 hide-default-footer
-                class="table-base mt-2"
+                class="table-base mt-2 table-tong-hop"
                 no-data-text="Không có"
                 :loading="loadingDataTongHopDangKy"
                 loading-text="Đang tải... "
               >
+                <template v-slot:header.noiDungThi="{ header }">
+                  <v-layout>
+                    <v-flex class="py-2" v-for="(itemNd, indexNd) in headerNoiDung" :key="indexNd" :style="'width:' + maxLengthHeader + 'px'" style="border-right: 1px solid #dedede">
+                      {{itemNd.text}}
+                    </v-flex>
+                  </v-layout>
+                </template>
                 <template v-slot:item.index="{ item, index }">
                   <div>{{ (pageTongHopDangKy+1) * itemsPerPage - itemsPerPage + index + 1 }}</div>
+                </template>
+                <template v-slot:item.noiDungThi="{ item, index }">
+                  <v-layout>
+                    <v-flex class="py-2 px-2" v-for="(itemNd2, indexNd2) in item.noiDungThi" :key="indexNd2" :style="'width:' + maxLengthHeader + 'px'" style="border-right: 1px solid #dedede">
+                      <p class="mb-1">Số đội: <span>{{itemNd2.soDoi}}</span></p>
+                      <p class="mb-1">Số thí sinh: <span>{{itemNd2.soThiSinh}}</span></p>
+                    </v-flex>
+                  </v-layout>
+                </template>
+                <template v-slot:item.doanThi="{ item, index }">
+                  <div class="px-2">{{item.doanThi.tenGoi}}</div>
                 </template>
               </v-data-table>
               <pagination v-if="pageCountTongHopDangKy" :pageInput="pageTongHopDangKy" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
@@ -190,8 +208,49 @@ export default {
         itemsPerPage: 15,
         keywordSearch: '',
 
+        headerNoiDung: [],
+        maxLengthHeader: 0,
         danhSachTongHopDangKy: [],
-        headersTongHopDangKy: [],
+        headersTongHopDangKy: [
+          {
+              sortable: false,
+              text: 'STT',
+              align: 'center',
+              value: 'index',
+              width: 50
+          },
+          {
+              sortable: false,
+              text: 'Đoàn thi',
+              align: 'left',
+              value: 'doanThi',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Nội dung thi',
+              align: 'left',
+              value: 'noiDungThi',
+              class: 'th-center py-0 px-0',
+              width: 1000
+          },
+          {
+              sortable: false,
+              text: 'Số thí sinh',
+              align: 'center',
+              value: 'soThiSinh',
+              class: 'th-center',
+              width: 100
+          },
+          {
+              sortable: false,
+              text: 'Số huấn luyện viên',
+              align: 'center',
+              value: 'soHuanLuyenVien',
+              class: 'th-center',
+              width: 100
+          }
+        ],
         loadingDataTongHopDangKy: false,
         pageTongHopDangKy: 0,
         totalTongHopDangKy: 0,
@@ -347,17 +406,127 @@ export default {
         }
         vm.loadingDataTongHopDangKy = true
         let filter = {
-          collectionName: 'doanthis',
-          data: {
-            // page: vm.pageTongHopDangKy,
-            // size: vm.itemsPerPage,
-            cuocThiId: vm.id
-          }
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'thongke',
+          data: {}
         }
-        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
-          vm.danhSachTongHopDangKy = response
-          vm.totalTongHopDangKy = response.totalElements
-          vm.pageCountTongHopDangKy = response.totalPages
+        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+          // vm.danhSachTongHopDangKy = response
+          vm.danhSachTongHopDangKy = [
+            {
+                "doanThi": {
+                    "id": "4007c02b-a924-461d-b4c9-1d1f9d5e60eb",
+                    "tenGoi": "Đại học Bách khoa - Đại học Đà Nẵng",
+                    "tiengAnh": "",
+                    "diaChiHoatDong": "54 Nguyễn Lương Bằng - Tp Đà Nẵng",
+                    "email": "WebAdmin@dut.udn.vn",
+                    "toChucId": "34803",
+                    "cuocThiId": "6c683e9b-7e59-41f1-a1bd-440a6fa85667",
+                    "thuTuXepHang": null,
+                    "thoiGianTao": 1666147287561,
+                    "thoiGianCapNhat": 1666147287561
+                },
+                "soThiSinh": 12,
+                "soHuanLuyenVien": 2,
+                "noiDungThi": [
+                    {
+                        "tenNoiDung": "Khối cá nhân Siêu cúp OLP",
+                        "soDoi": 0,
+                        "soThiSinh": 2
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân Chuyên tin học",
+                        "soDoi": 0,
+                        "soThiSinh": 3
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân Không chuyên tin học",
+                        "soDoi": 0,
+                        "soThiSinh": 3
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân cho các trường Cao đẳng",
+                        "soDoi": 0,
+                        "soThiSinh": 0
+                    },
+                    {
+                        "tenNoiDung": "Khối thi Phần mềm nguồn mở",
+                        "soDoi": 0,
+                        "soThiSinh": 0
+                    },
+                    {
+                        "tenNoiDung": "Khối thi lập trình đối kháng PROCON",
+                        "soDoi": 0,
+                        "soThiSinh": 0
+                    }
+                ]
+            },
+            {
+                "doanThi": {
+                    "id": "3a666efe-1e1f-453f-8810-b50164005793",
+                    "tenGoi": "Đại học Bách khoa Hà Nội",
+                    "tiengAnh": "",
+                    "diaChiHoatDong": "Số 1 Đại Cồ Việt - Hai Bà Trưng - Hà Nội",
+                    "email": "hcth@hust.edu.vn",
+                    "toChucId": "34963",
+                    "cuocThiId": "6c683e9b-7e59-41f1-a1bd-440a6fa85667",
+                    "thuTuXepHang": null,
+                    "thoiGianTao": 1666147287585,
+                    "thoiGianCapNhat": 1666147287585
+                },
+                "soThiSinh": 46,
+                "soHuanLuyenVien": 2,
+                "noiDungThi": [
+                    {
+                        "tenNoiDung": "Khối cá nhân Siêu cúp OLP",
+                        "soDoi": 0,
+                        "soThiSinh": 5
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân Chuyên tin học",
+                        "soDoi": 0,
+                        "soThiSinh": 3
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân Không chuyên tin học",
+                        "soDoi": 0,
+                        "soThiSinh": 3
+                    },
+                    {
+                        "tenNoiDung": "Khối thi cá nhân cho các trường Cao đẳng",
+                        "soDoi": 0,
+                        "soThiSinh": 0
+                    },
+                    {
+                        "tenNoiDung": "Khối thi Phần mềm nguồn mở",
+                        "soDoi": 0,
+                        "soThiSinh": 0
+                    },
+                    {
+                        "tenNoiDung": "Khối thi lập trình đối kháng PROCON",
+                        "soDoi": 3,
+                        "soThiSinh": 6
+                    }
+                ]
+            }
+          ]
+          if (vm.danhSachTongHopDangKy.length) {
+            let noiDungThi = vm.danhSachTongHopDangKy[0]['noiDungThi']
+            if (noiDungThi.length) {
+              vm.maxLengthHeader = 1000 / noiDungThi.length
+              vm.headerNoiDung = Array.from(noiDungThi, function (item, index) {
+                return {
+                  sortable: false,
+                  text: item.tenNoiDung,
+                  align: 'left',
+                  value: 'noiDung',
+                  class: 'th-center py-2'
+                }
+              })
+              console.log('headerNoiDung', vm.headerNoiDung)
+            }
+          }
           vm.loadingDataTongHopDangKy = false
         }).catch(function () {
           vm.loadingDataTongHopDangKy = false
@@ -548,6 +717,10 @@ export default {
   }
 </script>
 <style lang="scss">
+  .table-tong-hop td{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
   .nav-content {
     border-right: 1px solid #DDDDDD;
     box-sizing: border-box;
