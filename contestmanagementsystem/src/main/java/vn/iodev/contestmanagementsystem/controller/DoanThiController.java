@@ -48,7 +48,7 @@ public class DoanThiController {
     @Autowired
     ToChucService toChucService;
 
-    public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId, @RequestHeader("id") String taiKhoanId, @RequestHeader("loaiTaiKhoan") Integer loaiTaiKhoan, @RequestHeader("vaiTros") String vaiTros) {
+    public List<DoanThi> getAllDoanThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String toChucId, @RequestParam(required = false) String cuocThiId, @RequestHeader(value = "id", required = false) String taiKhoanId, @RequestHeader(value = "loaiTaiKhoan", required = false) Integer loaiTaiKhoan, @RequestHeader(value = "vaiTros", required = false) String vaiTros) {
         List<DoanThi> lstDoanThi = new ArrayList<>();
         log.info("VaiTro: " + vaiTros + ", " + VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) + ", " + VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros));
         if (!VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {

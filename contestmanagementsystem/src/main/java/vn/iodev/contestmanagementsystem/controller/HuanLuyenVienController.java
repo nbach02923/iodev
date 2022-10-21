@@ -61,7 +61,7 @@ public class HuanLuyenVienController {
     CaNhanService caNhanService;
 
     @GetMapping("/cuocthis/{cuocThiId}/huanluyenviens")
-    public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader("id") String taiKhoanId, @RequestHeader("loaiTaiKhoan") Integer loaiTaiKhoan, @RequestHeader("vaiTros") String vaiTros) {
+    public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId, @RequestHeader(value = "id", required = false) String taiKhoanId, @RequestHeader(value = "loaiTaiKhoan", required = false) Integer loaiTaiKhoan, @RequestHeader(value = "vaiTros", required = false) String vaiTros) {
         log.info("Inside find huanluyenvien of cuocthi");
         if (!VaiTroChecker.hasVaiTroQuanTriToChuc(vaiTros) && !VaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
