@@ -95,9 +95,10 @@ Vue.mixin({
       return this.$cookies.get('admin', '')
     },
     userLogin () {
+      let vm = this
       let userInfo = ''
       try {
-        userInfo = JSON.parse(localStorage.getItem('user'))
+        userInfo = vm.$cookies.get('UserInfo', '')
       } catch (error) {
       }
       return userInfo

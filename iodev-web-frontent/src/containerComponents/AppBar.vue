@@ -114,9 +114,10 @@
       submitLogout () {
         let vm = this
         vm.$store.commit('SET_ISSIGNED', false)
-        localStorage.setItem('user', null)
         vm.$cookies.set('Token', '')
         vm.$cookies.set('RefreshToken', '')
+        vm.$cookies.set('UserInfo', '')
+        vm.$cookies.set('admin', '')
         window.location.href = window.location.origin + window.location.pathname + "#/"
         window.location.reload()
       },

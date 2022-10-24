@@ -6,9 +6,11 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
-            <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="width: 100%">
-          </a>
+          <div style="text-align: center;">
+            <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+              <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
+            </a>
+          </div>
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -140,9 +142,10 @@
                 :headers="headersKetQuaCaNhan"
                 :items="danhSachKetQuaCaNhan"
                 :items-per-page="itemsPerPage"
+                group-by="Nội dung thi"
                 item-key="primKey"
                 hide-default-footer
-                class="table-base mt-2"
+                class="table-base mt-2 table-kq"
                 no-data-text="Không có"
                 :loading="loadingDataKetQuaCaNhan"
                 loading-text="Đang tải... "
@@ -166,13 +169,17 @@
                 :items-per-page="itemsPerPage"
                 item-key="primKey"
                 hide-default-footer
-                class="table-base mt-2"
+                class="table-base mt-2 table-kq"
                 no-data-text="Không có"
                 :loading="loadingDataKetQuaDongDoi"
+                group-by="Nội dung thi"
                 loading-text="Đang tải... "
               >
                 <template v-slot:item.index="{ item, index }">
                   <div>{{ (pageKetQuaDongDoi+1) * itemsPerPage - itemsPerPage + index + 1 }}</div>
+                </template>
+                <template v-slot:item.thiSinh="{ item, index }">
+                  <p class="mb-1" v-for="(item2, index2) in item.thiSinh" :key="index2">- {{ item2.hoTen }}</p>
                 </template>
               </v-data-table>
               <pagination v-if="pageCountKetQuaDongDoi" :pageInput="pageKetQuaDongDoi" :total="totalKetQuaDongDoi" :pageCount="pageCountKetQuaDongDoi" @tiny:change-page="changePage"></pagination>
@@ -269,7 +276,7 @@ export default {
               sortable: false,
               text: 'Tên thí sinh',
               align: 'left',
-              value: 'hoTen',
+              value: 'tenThiSinh',
               class: 'th-center py-2'
           },
           {
@@ -283,14 +290,14 @@ export default {
               sortable: false,
               text: 'Đoàn thi',
               align: 'left',
-              value: 'doanThiId',
+              value: 'tenDoanThi',
               class: 'th-center py-2'
           },
           {
               sortable: false,
               text: 'Giải thưởng',
               align: 'center',
-              value: 'datGiaiThuong',
+              value: 'hangGiaiThuong',
               class: 'th-center',
               width: 200
           }
@@ -313,21 +320,21 @@ export default {
               sortable: false,
               text: 'Tên đội thi',
               align: 'left',
-              value: 'tenGoi',
+              value: 'tenDoiThi',
               class: 'th-center py-2'
           },
           {
               sortable: false,
-              text: 'Số báo danh',
+              text: 'Thí sinh',
               align: 'left',
-              value: 'soBaoDanh',
+              value: 'thiSinh',
               class: 'th-center'
           },
           {
               sortable: false,
               text: 'Đoàn thi',
               align: 'left',
-              value: 'doanThiId',
+              value: 'tenDoanThi',
               class: 'th-center py-2'
           },
           {
@@ -348,14 +355,15 @@ export default {
         editThanhPhan: false,
         thanhPhanEdit: '',
         loadingAction: false,
+        danhSachKhoiThiCaNhan: [],
+        danhSachKhoiThiTapThe: []
       }
     },
     created () {
       let vm = this
       vm.getChiTietCuocThi()
       vm.getdanhSachDoanThi('reset')
-      vm.getdanhSachKetQuaCaNhan('reset')
-      vm.getdanhSachKetQuaDongDoi('reset')
+      vm.getDanhSachKhoiThi()
     },
     computed: {
       breakpointName () {
@@ -370,8 +378,7 @@ export default {
         let vm = this
         vm.getChiTietCuocThi()
         vm.getdanhSachDoanThi('reset')
-        vm.getdanhSachKetQuaCaNhan('reset')
-        vm.getdanhSachKetQuaDongDoi('reset')
+        vm.getDanhSachKhoiThi()
       }
     },
     methods: {
@@ -532,13 +539,61 @@ export default {
           vm.loadingDataTongHopDangKy = false
         })
       },
-      getdanhSachKetQuaCaNhan (type) {
+      getDanhSachKhoiThi () {
         let vm = this
-        if (type === 'reset') {
-          vm.totalKetQuaCaNhan = 0
-          vm.pageCountKetQuaCaNhan = 0
-          vm.pageKetQuaCaNhan = 0
+        let filter = {
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'khoithis',
+          data: {}
         }
+        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+          response = vm.dataLocal.danhSachKhoiThi
+          vm.danhSachKhoiThiCaNhan = response.filter(function (item) {
+            return item.thiSangTao
+          })
+          vm.danhSachKhoiThiTapThe = response.filter(function (item) {
+            return item.thiTapThe
+          })
+
+          var arrCaNhan = []
+          for (let index = 0; index < vm.danhSachKhoiThiCaNhan.length; index++) {
+            let filter = {
+              collectionName: 'cuocthis',
+              collectionId: vm.id,
+              collectionNameChild: 'khoithis',
+              collectionChildId: vm.danhSachKhoiThiCaNhan[index]['id'],
+              collectionNameChild2: 'giaicanhan',
+              data: {}
+            }
+            arrCaNhan.push(vm.$store.dispatch('collectionFilterLevel3', filter))
+          }
+          Promise.all(arrCaNhan).then(values => {
+            // console.log('values', values)
+            // vm.danhSachKetQuaCaNhan = response
+            vm.danhSachKetQuaCaNhan = vm.dataLocal.danhSachGiaiCaNhan
+          })
+          var arrTapThe = []
+          for (let index = 0; index < vm.danhSachKhoiThiTapThe.length; index++) {
+            let filter = {
+              collectionName: 'cuocthis',
+              collectionId: vm.id,
+              collectionNameChild: 'khoithis',
+              collectionChildId: vm.danhSachKhoiThiTapThe[index]['id'],
+              collectionNameChild2: 'giaitapthe',
+              data: {}
+            }
+            arrTapThe.push(vm.$store.dispatch('collectionFilterLevel3', filter))
+          }
+          Promise.all(arrTapThe).then(values => {
+            // console.log('values', values)
+            // vm.danhSachKetQuaDongDoi = response
+            vm.danhSachKetQuaDongDoi = vm.dataLocal.danhSachGiaiTapThe
+          })
+        }).catch(function () {})
+      },
+      getdanhSachKetQuaCaNhan (khoiThiId) {
+        let vm = this
         if (vm.loadingDataKetQuaCaNhan) {
           return
         }
@@ -546,28 +601,20 @@ export default {
         let filter = {
           collectionName: 'cuocthis',
           collectionId: vm.id,
-          collectionNameChild: 'thisinhs',
-          data: {
-            // page: vm.pageKetQuaCaNhan,
-            // size: vm.itemsPerPage
-          }
+          collectionNameChild: 'khoithis',
+          collectionChildId: khoiThiId,
+          collectionNameChild2: 'giaicanhan',
+          data: {}
         }
-        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.danhSachKetQuaCaNhan = response
-          vm.totalKetQuaCaNhan = response.totalElements
-          vm.pageCountKetQuaCaNhan = response.totalPages
           vm.loadingDataKetQuaCaNhan = false
         }).catch(function () {
           vm.loadingDataKetQuaCaNhan = false
         })
       },
-      getdanhSachKetQuaDongDoi (type) {
+      getdanhSachKetQuaDongDoi (khoiThiId) {
         let vm = this
-        if (type === 'reset') {
-          vm.totalKetQuaDongDoi = 0
-          vm.pageCountKetQuaDongDoi = 0
-          vm.pageKetQuaDongDoi = 0
-        }
         if (vm.loadingDataKetQuaDongDoi) {
           return
         }
@@ -575,16 +622,13 @@ export default {
         let filter = {
           collectionName: 'cuocthis',
           collectionId: vm.id,
-          collectionNameChild: 'doithis',
-          data: {
-            // page: vm.pageKetQuaDongDoi,
-            // size: vm.itemsPerPage
-          }
+          collectionNameChild: 'khoithis',
+          collectionChildId: khoiThiId,
+          collectionNameChild2: 'giaitapthe',
+          data: {}
         }
-        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.danhSachKetQuaDongDoi = response
-          vm.totalKetQuaDongDoi = response.totalElements
-          vm.pageCountKetQuaDongDoi = response.totalPages
           vm.loadingDataKetQuaDongDoi = false
         }).catch(function () {
           vm.loadingDataKetQuaDongDoi = false
@@ -720,6 +764,9 @@ export default {
   .table-tong-hop td{
     padding-left: 0px !important;
     padding-right: 0px !important;
+  }
+  .table-kq td button {
+    display: none !important;
   }
   .nav-content {
     border-right: 1px solid #DDDDDD;

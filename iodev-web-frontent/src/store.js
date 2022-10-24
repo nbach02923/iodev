@@ -186,6 +186,26 @@ export default new Vuex.Store({
         })
       })
     },
+    collectionFilterLevel3 ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let config = {
+          method: 'get',
+          url: '/api/' + filter.collectionName + '/' + filter.collectionId + '/' + filter.collectionNameChild + '/' + filter.collectionChildId + '/' + filter.collectionNameChild2,
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data: {},
+          params: filter.data
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error)
+        })
+      })
+    },
     collectionDetail ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let config = {
