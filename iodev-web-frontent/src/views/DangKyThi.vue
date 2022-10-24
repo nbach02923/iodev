@@ -795,7 +795,9 @@ export default {
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
-          vm.thongTinDoanThi = response && response.length ? response[0] : ''
+          vm.thongTinDoanThi = response && response.length ? response.filter(function (item) {
+            return item.cuocThiId == vm.id
+          }) : ''
           vm.getDanhSachThiSinh()
           vm.getDanhSachHlv()
         }).catch(function () {
@@ -849,7 +851,7 @@ export default {
             // size: vm.itemsPerPage
           }
         }
-        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.danhSachHlv = response
           vm.loadingDataDanhSachHlv = false
         }).catch(function () {
