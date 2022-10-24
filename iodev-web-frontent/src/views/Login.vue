@@ -188,38 +188,33 @@
                 vm.$cookies.set('RefreshToken', result.refreshToken ? result.refreshToken : '', result.refresh_expires_in)
                 axios.defaults.headers['Authorization'] = 'Bearer ' + result.accessToken
                 vm.$store.commit('SET_ISSIGNED', true)
-                if (admin) {
-                  vm.$cookies.set('admin', true, result.expires_in)
-                  let dataUser1 = {
-                    hoVaTen: 'Quản trị',
-                    viTriChucDanh: 'Quản trị hệ thống',
-                    vaiTroSuDung: '',
-                    email: vm.userName
-                  }
-                  vm.$cookies.set('UserInfo', dataUser1, result.expires_in)
-                  vm.$cookies.set('Roles', '', result.expires_in)
-                  vm.goToPage()
-                } else {
+                // if (admin) {
+                //   vm.$cookies.set('admin', true, result.expires_in)
+                //   let dataUser1 = {
+                //     hoVaTen: 'Quản trị',
+                //     viTriChucDanh: 'Quản trị hệ thống',
+                //     vaiTroSuDung: '',
+                //     email: vm.userName
+                //   }
+                //   vm.$cookies.set('UserInfo', dataUser1, result.expires_in)
+                //   vm.$cookies.set('Roles', '', result.expires_in)
+                //   vm.goToPage()
+                // } else {
                   let filter = {
                     token: 'Bearer ' + result.accessToken,
                     email: vm.userName
                   }
                   vm.$store.dispatch('getThongTinUserDangNhap', filter).then(function (result) {
                     let vaiTroSuDung = ''
-                    let dataUser2 = {
-                      hoVaTen: 'Người dùng',
-                      viTriChucDanh: '',
-                      vaiTroSuDung: '',
-                      email: vm.userName
-                    }
+                    let dataUser2 = result
                     if (result.vaiTros && result.vaiTros.length) {
                       vaiTroSuDung = []
                       vaiTroSuDung = Array.from(result.vaiTros, function (item) {
                         return item.ten
                       }).toString()
-                      dataUser.vaiTroSuDung = vaiTroSuDung
-                      let isAdmin = vaiTroSuDung.find(function (item) {
-                        return item == 'VAITRO_QUANTRIHETHONG'
+                      dataUser2.vaiTroSuDung = vaiTroSuDung
+                      let isAdmin = result.vaiTros.find(function (item) {
+                        return item.ten == 'VAITRO_QUANTRIHETHONG'
                       })
                       if (isAdmin) {
                         vm.$cookies.set('admin', true, result.expires_in)
@@ -250,7 +245,7 @@
                       vm.goToPage()
                     }, 200)
                   })
-                }                
+                // }                
               } else {
                 vm.loading = false
                 vm.overlay = false
@@ -280,8 +275,8 @@
         let vm = this
         vm.signed = false
         vm.$store.commit('SET_ISSIGNED', false)
-        localStorage.setItem('user', null)
         vm.$cookies.set('Token', '')
+        vm.$cookies.set('UserInfo', '')
         vm.$cookies.set('RefreshToken', '')
         // vm.$store.dispatch('logoutKeyCloak').then(function (result) {
         //   let redirect_uri = process.env.VUE_APP_PATH_REDIRECT_SSO
