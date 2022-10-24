@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import vn.iodev.iosecurity.IOConstants;
 import vn.iodev.iosecurity.model.ELoaiTaiKhoan;
 import vn.iodev.iosecurity.model.EVaiTro;
+import vn.iodev.iosecurity.model.IOUserDetails;
 import vn.iodev.iosecurity.model.LoaiTinhTrang;
 import vn.iodev.iosecurity.model.MailQueue;
 import vn.iodev.iosecurity.model.QueueStatus;
@@ -107,8 +111,19 @@ public class TaiKhoanController {
     }
 
     @GetMapping("/taikhoans/{email}")
-    public ResponseEntity<TaiKhoan> getTaiKhoanById(@PathVariable("email") String email) {
+    public ResponseEntity<TaiKhoan> getTaiKhoanById(@PathVariable("email") String email, Authentication authentication) {
         log.info("API GET /taikhoans/{email}");
+        IOUserDetails userDetails = (IOUserDetails)authentication.getPrincipal();
+        boolean isAdmin = false;
+        for (GrantedAuthority sga : authentication.getAuthorities()) {
+            if (sga.getAuthority().equals(EVaiTro.VAITRO_QUANTRIHETHONG.toString())) {
+                isAdmin = true;
+                break;
+            }
+        }
+        if (!userDetails.getUsername().equals(email) && !isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
         if (taiKhoanData.isPresent()) {
             return new ResponseEntity<>(taiKhoanData.get(), HttpStatus.OK);
@@ -202,8 +217,20 @@ public class TaiKhoanController {
     }
 
     @PutMapping("/taikhoans/{id}")
-    public ResponseEntity<TaiKhoan> updateTaiKhoan(@PathVariable("id") String email, @Valid @RequestBody TaiKhoan taiKhoan) {
+    public ResponseEntity<TaiKhoan> updateTaiKhoan(@PathVariable("id") String email, @Valid @RequestBody TaiKhoan taiKhoan, Authentication authentication) {
         log.info("API PUT /taikhoans/{id}");
+        IOUserDetails userDetails = (IOUserDetails)authentication.getPrincipal();
+        boolean isAdmin = false;
+        for (GrantedAuthority sga : authentication.getAuthorities()) {
+            if (sga.getAuthority().equals(EVaiTro.VAITRO_QUANTRIHETHONG.toString())) {
+                isAdmin = true;
+                break;
+            }
+        }
+        if (!userDetails.getUsername().equals(email) && !isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {
@@ -255,8 +282,18 @@ public class TaiKhoanController {
     }
 
     @PutMapping("/taikhoans/{id}/kichhoat")
-    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email) {
+    public ResponseEntity<TaiKhoan> updateKichHoat(@PathVariable("id") String email, Authentication authentication) {
         log.info("API PUT /taikhoans/{id}/kichhoat");
+        boolean isAdmin = false;
+        for (GrantedAuthority sga : authentication.getAuthorities()) {
+            if (sga.getAuthority().equals(EVaiTro.VAITRO_QUANTRIHETHONG.toString())) {
+                isAdmin = true;
+                break;
+            }
+        }
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
         log.info("User email: " + email);
         if (taiKhoanData.isPresent()) {
@@ -405,8 +442,19 @@ public class TaiKhoanController {
     }
 
     @PutMapping("/taikhoans/{id}/dongtaikhoan")
-    public ResponseEntity<TaiKhoan> dongTaiKhoan(@PathVariable("id") String email) {
+    public ResponseEntity<TaiKhoan> dongTaiKhoan(@PathVariable("id") String email, Authentication authentication) {
         log.info("API PUT /taikhoans/{id}/dongtaikhoan");
+        boolean isAdmin = false;
+        for (GrantedAuthority sga : authentication.getAuthorities()) {
+            if (sga.getAuthority().equals(EVaiTro.VAITRO_QUANTRIHETHONG.toString())) {
+                isAdmin = true;
+                break;
+            }
+        }
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
 
         if (taiKhoanData.isPresent()) {

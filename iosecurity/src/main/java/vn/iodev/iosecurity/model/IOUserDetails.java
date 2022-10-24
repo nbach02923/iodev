@@ -9,6 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class IOUserDetails implements UserDetails {
     TaiKhoan taiKhoan;
     private Collection<? extends GrantedAuthority> authorities;

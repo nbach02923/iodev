@@ -3,6 +3,7 @@ package vn.iodev.iosecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -60,7 +61,10 @@ public class WebSecurityConfig {
             .authorizeRequests()
                 .antMatchers("/api/authenticate/**", "/api/auth/**").permitAll()
                 .antMatchers("/api/mail/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
-                .antMatchers("/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
+                .antMatchers(HttpMethod.GET, "/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG", "VAITRO_NGUOIDUNG", "VAITRO_QUANTRITOCHUC")
+                .antMatchers(HttpMethod.PUT, "/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG", "VAITRO_NGUOIDUNG", "VAITRO_QUANTRITOCHUC")
+                .antMatchers(HttpMethod.POST, "/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
+                .antMatchers(HttpMethod.DELETE, "/api/taikhoans/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
                 .antMatchers("/api/vaitros/**").hasAnyAuthority("VAITRO_QUANTRIHETHONG")
             .anyRequest().authenticated();
 
