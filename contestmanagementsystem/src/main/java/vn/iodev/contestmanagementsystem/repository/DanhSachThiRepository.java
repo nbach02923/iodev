@@ -25,6 +25,8 @@ public interface DanhSachThiRepository extends JpaRepository<DanhSachThi, Long> 
     void deleteByCuocThiId(String cuocThiId);
 
     List<DanhSachThi> findByCuocThiIdAndKhoiThiId(String cuocThiId, String khoiThiId);
+    List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndDoiThiId(String cuocThiId, String khoiThiId, String doiThiId);
+    List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndThiSinhId(String cuocThiId, String khoiThiId, String thiSinhId);
     List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(String cuocThiId, String khoiThiId, List<String> thiSinhIds);
     List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(String cuocThiId, String khoiThiId, List<String> doiThiIds);
 

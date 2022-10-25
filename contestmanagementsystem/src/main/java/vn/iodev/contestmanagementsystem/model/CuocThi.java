@@ -156,6 +156,17 @@ public class CuocThi {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private Date ngayKetThuc;
 
+    @Column(name = "diaDiemToChuc", length = 1024)
+    private String diaDiemToChuc;
+
+    public String getDiaDiemToChuc() {
+        return diaDiemToChuc;
+    }
+
+    public void setDiaDiemToChuc(String diaDiemToChuc) {
+        this.diaDiemToChuc = diaDiemToChuc;
+    }
+
     @Column(name = "thongTinMoTa", columnDefinition = "TEXT")
     private String thongTinMoTa;
 
@@ -170,11 +181,42 @@ public class CuocThi {
     
     public CuocThi() {}
 
+    public CuocThi(
+        String id,
+        String tenGoi,
+        String tiengAnh,
+        String serieCuocThi,
+        Integer lanToChuc,
+        String donViToChuc,
+        String diaDiemToChuc,
+        String toChucId,
+        Date ngayBatDau,
+        Date ngayKetThuc,
+        String thongTinMoTa,
+        String website,
+        Integer tinhTrang
+        ) {
+            this.id = id;
+            this.tenGoi = tenGoi;
+            this.tiengAnh = tiengAnh;
+            this.serieCuocThi = serieCuocThi;
+            this.lanToChuc = lanToChuc;
+            this.donViToChuc = donViToChuc;
+            this.diaDiemToChuc = diaDiemToChuc;
+            this.toChucId = toChucId;
+            this.ngayBatDau = ngayBatDau;
+            this.ngayKetThuc = ngayKetThuc;
+            this.thongTinMoTa = thongTinMoTa;
+            this.website = website;
+            this.tinhTrang = tinhTrang;
+    }
+
     public CuocThi(String tenGoi,
         String tiengAnh,
         String serieCuocThi,
         Integer lanToChuc,
         String donViToChuc,
+        String diaDiemToChuc,
         String toChucId,
         Date ngayBatDau,
         Date ngayKetThuc,
@@ -187,11 +229,12 @@ public class CuocThi {
             this.serieCuocThi = serieCuocThi;
             this.lanToChuc = lanToChuc;
             this.donViToChuc = donViToChuc;
+            this.diaDiemToChuc = diaDiemToChuc;
             this.toChucId = toChucId;
             this.ngayBatDau = ngayBatDau;
             this.ngayKetThuc = ngayKetThuc;
             this.thongTinMoTa = thongTinMoTa;
             this.website = website;
             this.tinhTrang = tinhTrang;
-        }
+    }
 }

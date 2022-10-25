@@ -17,7 +17,8 @@ import vn.iodev.contestmanagementsystem.model.ThiSinh;
 public interface ThiSinhRepository extends JpaRepository<ThiSinh, String> {
     List<ThiSinh> findByCuocThiId(String cuocThiId, Pageable pageable);
     List<ThiSinh> findByCuocThiId(String cuocThiId);
-    Optional<ThiSinh> findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTao(String hoTen, Integer gioiTinh, Date ngaySinh, String nganhDaoTao);
+    List<ThiSinh> findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTao(String hoTen, Integer gioiTinh, Date ngaySinh, String nganhDaoTao);
+    Optional<ThiSinh> findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(String hoTen, Integer gioiTinh, Date ngaySinh, String nganhDaoTao, String cuocThiId);
     
     @Query("SELECT ts FROM T_ThiSinh ts WHERE (:tuKhoa is null OR ts.hoTen like %:tuKhoa%) AND (:cuocThi is null OR ts.cuocThi = :cuocThi) AND (:doanThiId is null OR ts.doanThiId = :doanThiId)")
     List<ThiSinh> findThiSinhByMultipleConditions(@Param("tuKhoa") String tuKhoa, @Param("cuocThi") CuocThi cuocThi, @Param("doanThiId") String doanThiId, Pageable pageable);
@@ -27,4 +28,6 @@ public interface ThiSinhRepository extends JpaRepository<ThiSinh, String> {
 
     long countByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
     List<ThiSinh> findByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
+    Optional<ThiSinh> findByHoTenAndCuocThiIdAndDoanThiId(String hoTen, String cuocThiId, String doanThiId);
+    Optional<ThiSinh> findByHoTenAndDoanThiId(String hoTen, String doanThiId);
 }

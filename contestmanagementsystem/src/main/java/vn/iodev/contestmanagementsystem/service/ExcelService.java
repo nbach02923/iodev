@@ -11,12 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
+import vn.iodev.contestmanagementsystem.helper.KetQuaThi;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
+import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangToChuc;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
@@ -59,7 +61,6 @@ public class ExcelService {
         try {
             List<DoanThi> doanthis = ExcelHelper.excelXlsxToDoanThis(file.getInputStream());
             for (DoanThi dt : doanthis) {
-                log.info("Doan Thi: " + dt.getTenGoi());
                 Optional<DoanThi> doanThiData = doanThiRepository.findByTenGoiOrTiengAnh(dt.getTenGoi(), dt.getTiengAnh());
                 if (doanThiData.isPresent()) {
                     dt.setId(doanThiData.get().getId());
@@ -72,7 +73,7 @@ public class ExcelService {
             doanThiRepository.saveAll(doanthis);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importDoanThi", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -83,8 +84,7 @@ public class ExcelService {
             List<ThiSinh> thisinhs = ExcelHelper.excelXlsxToThiSinhs(file.getInputStream());
             for (ThiSinh ts : thisinhs) {
                 ts.setCuocThi(cuocThi);
-                log.info("Thi Sinh: " + ts.getHoTen());
-                Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTao(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao());
+                Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), cuocThi.getId());
                 if (thiSinhData.isPresent()) {
                     ts.setId(thiSinhData.get().getId());
                 }
@@ -96,7 +96,7 @@ public class ExcelService {
             thiSinhRepository.saveAll(thisinhs);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importThiSinh", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -107,7 +107,6 @@ public class ExcelService {
             List<HuanLuyenVien> huanluyenviens = ExcelHelper.excelXlsxToHuanLuyenViens(file.getInputStream());
             for (HuanLuyenVien hlv : huanluyenviens) {
                 hlv.setCuocThi(cuocThi);
-                log.info("Huan Luyen Vien: " + hlv.getHoTen());
                 Optional<HuanLuyenVien> huanLuyenVienData = huanLuyenVienRepository.findByHoTenAndEmailAndSoDienThoai(hlv.getHoTen(), hlv.getEmail(), hlv.getSoDienThoai());
                 if (huanLuyenVienData.isPresent()) {
                     hlv.setId(huanLuyenVienData.get().getId());
@@ -120,7 +119,7 @@ public class ExcelService {
             huanLuyenVienRepository.saveAll(huanluyenviens);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importHuanLuyenVien", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -132,9 +131,8 @@ public class ExcelService {
         try {
             List<ToChucResponse> tochucs = ExcelHelper.excelXlsxToToChucs(file.getInputStream());
             for (ToChucResponse tcr : tochucs) {
-                log.info("Find ToChuc: " + tcr.getTenGoi());
+                tcr.setTinhTrang(LoaiTinhTrangToChuc.DA_CHINH_THUC);
                 ToChucResponse[] findTC = toChucService.getToChucByTenGoi(tcr.getTenGoi());
-                log.info("Find ToChuc: " + tcr.getTenGoi() + ", result: " + findTC.length);
                 if (findTC.length > 0) {
                     lstToChucs.add(findTC[0]);
                 }
@@ -145,7 +143,7 @@ public class ExcelService {
             }
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importToChuc", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -173,7 +171,7 @@ public class ExcelService {
             return cuocThiRepository.saveAll(cuocthis);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importCuocThi", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -199,7 +197,7 @@ public class ExcelService {
             return khoiThiRepository.saveAll(khoithis);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importKhoiThi", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -229,7 +227,6 @@ public class ExcelService {
                             doanthis.add(dtKQ);
 
                             huanLuyenVien.setDoanThiId(dtKQ.getId());
-                            log.info("Find huan luyen vien: " + huanLuyenVien.getHoTen() + ", " + cuocThi.getId() + ", " + huanLuyenVien.getDoanThiId() + ", " + huanLuyenVien.getEmail() + ", " + huanLuyenVien.getSoDienThoai());
                             Optional<HuanLuyenVien> oldHuanLuyenVien = huanLuyenVienRepository.findByHoTenAndCuocThiIdAndDoanThiIdAndEmailAndSoDienThoai(huanLuyenVien.getHoTen(), cuocThi.getId(), huanLuyenVien.getDoanThiId(), huanLuyenVien.getEmail(), huanLuyenVien.getSoDienThoai());
                             
                             if (oldHuanLuyenVien.isPresent()) {
@@ -246,7 +243,7 @@ public class ExcelService {
             return huanLuyenVienRepository.saveAll(huanLuyenViens);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            log.debug("importHuanLuyenVien", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
@@ -290,10 +287,11 @@ public class ExcelService {
                     //         break;
                     //     }
                     // }                    
-                    log.info("Thi Sinh: " + ts.getHoTen());
-                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTao(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao());
+                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), ts.getCuocThi().getId());
                     if (thiSinhData.isPresent()) {
-                        ts.setId(thiSinhData.get().getId());
+                        ThiSinh tempTs = thiSinhData.get();
+                        if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId()) && tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
+                            ts.setId(thiSinhData.get().getId());
                     }
                     else {
                         ts.setThoiGianTao(System.currentTimeMillis());
@@ -320,10 +318,11 @@ public class ExcelService {
                         }
                     }
                     Optional<DoiThi> doiThiData = doiThiRepository.findByTenGoiAndCuocThiIdAndDoanThiIdAndKhoiThiId(ts.getTenDoiThi(), ts.getCuocThi() != null ? ts.getCuocThi().getId() : null, doanThi != null ? doanThi.getId() : null, khoiThi != null ? khoiThi.getId() : null);
-                    log.info("Thi Sinh: " + ts.getHoTen());
-                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTao(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao());
+                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), ts.getCuocThi().getId());
                     if (thiSinhData.isPresent()) {
-                        ts.setId(thiSinhData.get().getId());
+                        ThiSinh tempTs = thiSinhData.get();
+                        if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId()) && tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
+                            ts.setId(thiSinhData.get().getId());
                     }
                     else {
                         ts.setThoiGianTao(System.currentTimeMillis());
@@ -354,7 +353,76 @@ public class ExcelService {
             
         }
         catch (IOException e) {
+            log.debug("importDanhSachThi", e);
+            
+            throw new RuntimeException("fail to store excel data: " + e.getMessage());
+        }
+    } 
+
+    public void importDanhSachThi(MultipartFile file, List<CuocThi> cuocthis, List<KhoiThi> khoithis) {
+        try {
+            ExcelHelper.excelXlsxToTongHopThiSinh(file.getInputStream());
+        } catch (IOException e) {
             e.printStackTrace();
+        }
+    } 
+
+    public void importKetQuaCuocThi(MultipartFile file, CuocThi cuocThi) {
+        try {
+            List<KetQuaThi> ketQuaThis = ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPSIEUCUP);
+            ketQuaThis.addAll(ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPCHUYENTIN));
+            ketQuaThis.addAll(ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPKHONGCHUYENTIN));
+            ketQuaThis.addAll(ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPCAODANG));
+            ketQuaThis.addAll(ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPPROCON));
+            ketQuaThis.addAll(ExcelHelper.excelToKetQuaDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_KETQUATHI_OLPPMNM));
+
+            for (KetQuaThi ketQuaThi : ketQuaThis) {
+                String tenKhoiThi = ketQuaThi.getKhoiThi();
+                Optional<KhoiThi> khoiThiData = khoiThiRepository.findByTenGoiAndCuocThiId(tenKhoiThi, cuocThi.getId());
+                
+                ToChucResponse[] toChucResponse = toChucService.getToChucByTenGoi(ketQuaThi.getTenTruong());
+                String toChucId = toChucResponse[0].getId();
+                List<DoanThi> doanThis = doanThiRepository.findByToChucIdAndCuocThiId(toChucId, cuocThi.getId());
+                if (khoiThiData.isPresent() && doanThis.size() > 0) {
+                    KhoiThi khoiThi = khoiThiData.get();
+                    if (khoiThi.getThiTapThe()) {
+                        Optional<DoiThi> doiThiData = doiThiRepository.findByTenGoiAndCuocThiIdAndDoanThiIdAndKhoiThiId(ketQuaThi.getDoiTuong(), cuocThi.getId(), doanThis.get(0).getId(), khoiThi.getId());
+                        
+                        if (doiThiData.isPresent()) {
+                            DoiThi doiThi = doiThiData.get();
+                            List<DanhSachThi> danhSachThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndDoiThiId(cuocThi.getId(), khoiThi.getId(), doiThiData.get().getId());
+                            for (DanhSachThi danhSachThi : danhSachThis) {
+                                danhSachThi.setThuTuXepHang(ketQuaThi.getSTT());
+                                danhSachThi.setHangGiaiThuong(ketQuaThi.getGiaiThuong());
+                            }
+                            danhSachThiRepository.saveAll(danhSachThis);
+                            doiThi.setThuTuXepHang(ketQuaThi.getSTT());
+                            doiThi.setHangGiaiThuong(ketQuaThi.getGiaiThuong());
+                            doiThiRepository.save(doiThi);
+                        }
+                    }
+                    else {
+                        log.info("Find " + ketQuaThi.getDoiTuong() + "," + cuocThi.getId() + ", " + doanThis.get(0).getId());
+
+                        Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndCuocThiIdAndDoanThiId(ketQuaThi.getDoiTuong(), cuocThi.getId(), doanThis.get(0).getId());
+                        if (thiSinhData.isPresent()) {
+                            ThiSinh thiSinh = thiSinhData.get();
+                            log.info("Found " + thiSinh.getId());
+
+                            List<DanhSachThi> danhSachThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndThiSinhId(cuocThi.getId(), khoiThi.getId(), thiSinh.getId());
+                            for (DanhSachThi danhSachThi : danhSachThis) {
+                                danhSachThi.setThuTuXepHang(ketQuaThi.getSTT());
+                                danhSachThi.setHangGiaiThuong(ketQuaThi.getGiaiThuong());
+                            }
+                            danhSachThiRepository.saveAll(danhSachThis);
+                        }
+                    }
+                }
+            }
+            
+        }
+        catch (IOException e) {
+            log.debug("importKetQuaCuocThi", e);
             
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }

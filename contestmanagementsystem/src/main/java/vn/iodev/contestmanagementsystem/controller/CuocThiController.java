@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.config.CMSConfiguration;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
+import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DanhMuc;
 import vn.iodev.contestmanagementsystem.model.DanhMucId;
@@ -41,6 +43,7 @@ import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.FileIO;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
+import vn.iodev.contestmanagementsystem.model.ImportResponse;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangCuocThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
@@ -63,6 +66,7 @@ import vn.iodev.contestmanagementsystem.repository.HuanLuyenVienRepository;
 import vn.iodev.contestmanagementsystem.repository.KhoiThiRepository;
 import vn.iodev.contestmanagementsystem.repository.ThiSinhRepository;
 import vn.iodev.contestmanagementsystem.security.VaiTroChecker;
+import vn.iodev.contestmanagementsystem.service.ExcelService;
 import vn.iodev.contestmanagementsystem.service.FileStorageService;
 import vn.iodev.contestmanagementsystem.service.ToChucService;
 import vn.iodev.contestmanagementsystem.validator.CuocThiValidator;
@@ -106,6 +110,9 @@ public class CuocThiController {
     
     @Autowired
     DanhMucRepository danhMucRepository;
+
+    @Autowired
+    ExcelService fileService;
 
     @Autowired
     VaiTroChecker vaiTroChecker;
@@ -204,11 +211,13 @@ public class CuocThiController {
             if (vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
                 validateRelationConstraint(cuocThi);
                 CuocThiValidator.getInstance().validate(cuocThi);
-                CuocThi _cuocThi = cuocThiRepository.save(new CuocThi(cuocThi.getTenGoi(), 
+                CuocThi _cuocThi = cuocThiRepository.save(new CuocThi(
+                                                            cuocThi.getTenGoi(), 
                                                             cuocThi.getTiengAnh(), 
                                                             cuocThi.getSerieCuocThi(), 
                                                             cuocThi.getLanToChuc(), 
                                                             cuocThi.getDonViToChuc(), 
+                                                            cuocThi.getDiaDiemToChuc(),
                                                             cuocThi.getToChucId(), 
                                                             cuocThi.getNgayBatDau(), 
                                                             cuocThi.getNgayKetThuc(), 
@@ -431,16 +440,33 @@ public class CuocThiController {
                 List<String> thiSinhIds = new ArrayList<>();
                 List<String> doiThiIds = new ArrayList<>();
                 for (ThiSinh thiSinh : lstThiSinhs) {
-                    thiSinhIds.add(thiSinh.getId());
+                    if (!thiSinhIds.contains(thiSinh.getId())) {
+                        thiSinhIds.add(thiSinh.getId());
+                    }
                 }
                 for (DoiThi doiThi : lstDoiThis) {
-                    doiThiIds.add(doiThi.getId());
+                    if (!doiThiIds.contains(doiThi.getId())) {
+                        doiThiIds.add(doiThi.getId());
+                    }
                 }
                 List<DanhSachThi> thiSinhThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(cuocThiId, khoiThi.getId(), thiSinhIds);
                 List<DanhSachThi> doiThiThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(cuocThiId, khoiThi.getId(), doiThiIds);
 
-                noiDungThi.setSoDoi(doiThiThamGiaThis.size());
-                noiDungThi.setSoThiSinh(thiSinhThamGiaThis.size());
+                thiSinhIds.clear();
+                for (DanhSachThi dst : thiSinhThamGiaThis) {
+                    if (!thiSinhIds.contains(dst.getThiSinhId())) {
+                        thiSinhIds.add(dst.getThiSinhId());
+                    }
+                }
+                doiThiIds.clear();
+                for (DanhSachThi dst : doiThiThamGiaThis) {
+                    if (!doiThiIds.contains(dst.getDoiThiId())) {
+                        doiThiIds.add(dst.getDoiThiId());
+                    }
+                }
+
+                noiDungThi.setSoDoi(doiThiIds.size());
+                noiDungThi.setSoThiSinh(thiSinhIds.size());
 
                 lstNoiDungThi.add(noiDungThi);
             }
@@ -627,5 +653,60 @@ public class CuocThiController {
             }
         }
         return ResponseEntity.ok().body(lstKetquas);
+    }
+
+    @PostMapping("/cuocthis/import")
+    public ResponseEntity<ImportResponse> importDuLieuCuocThi(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/import");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        long size = multipartFile.getSize();
+        String message = "";
+
+        if (ExcelHelper.hasExcelFormat(multipartFile)) {
+            List<ToChucResponse> tochucs = fileService.importToChuc(multipartFile);
+
+            List<CuocThi> cuocthis = fileService.importCuocThi(multipartFile);
+            
+            List<KhoiThi> khoithis = fileService.importKhoiThi(multipartFile, cuocthis);
+            List<DoanThi> doanthis = new ArrayList<>();
+
+            fileService.importDanhSachThi(multipartFile, cuocthis, khoithis);
+
+            message = "Import contest data successfully: " + multipartFile.getOriginalFilename();
+            return ResponseEntity.status(HttpStatus.OK).body(new ImportResponse(fileName, size, message));
+        }
+
+        message = "Please import an excel file!";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ImportResponse(fileName, size, message));
+    }
+
+    @PostMapping("/cuocthis/{id}/ketqua/import")
+    public ResponseEntity<ImportResponse> importKetQuaCuocThi(@PathVariable(value = "id") String id, @RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/{id}/ketqua/import");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        long size = multipartFile.getSize();
+        String message = "";
+        Optional<CuocThi> cuocThiData = cuocThiRepository.findById(id);
+        if (!cuocThiData.isPresent()) {
+            message = "Please correct CuocThi id!";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ImportResponse(fileName, size, message));
+        }
+        else {
+            if (ExcelHelper.hasExcelFormat(multipartFile)) {
+                fileService.importKetQuaCuocThi(multipartFile, cuocThiData.get());
+                message = "Import contest result data successfully: " + multipartFile.getOriginalFilename();
+                return ResponseEntity.status(HttpStatus.OK).body(new ImportResponse(fileName, size, message));
+            }
+        }   
+        message = "Please import an excel file!";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ImportResponse(fileName, size, message));
     }
 }

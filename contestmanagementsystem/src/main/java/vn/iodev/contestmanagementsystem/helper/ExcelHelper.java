@@ -13,7 +13,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
@@ -29,6 +31,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+@Slf4j
 public class ExcelHelper {
     public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     static String[] DOANTHI_HEADERs = { "Tên gọi", "Tiếng Anh", "Địa chỉ hoạt động", "Email", "ToChuc_ID", "CuocThi_ID", "Thứ tự xếp hạng" };
@@ -48,6 +51,8 @@ public class ExcelHelper {
 
     static String[] HEADERs_KHOITHI = { "Tên gọi", "Cuộc thi", "Nội dung thi", "Vòng sơ loại", "Thi tập thể", "Thi sáng tạo", "Số đăng ký tối đa", "Số thí sinh tối đa" };
     static String SHEET_KHOITHI = "Khối thi";
+
+    static String SHEET_DANHSACHTHI = "Danh sách thi";
 
     static String[] DANHSACHTHI_HEADERs = { "Họ tên", "Giới tính", "Ngày sinh", "Email", "Số điện thoại", "Đối tượng thi", "Ngành đào tạo", "Đạt giải thưởng", "Đoàn thi", "Cuộc thi", "Tham gia", "Đội thi" };
     public static final String SHEET_DANHSACHTHI_OLPCHUYENTIN = "OLP chuyên tin";
@@ -73,6 +78,15 @@ public class ExcelHelper {
     private static final String FALSE_STR = "Không";
 
     private static final String VN_DATE_FORMAT = "dd/MM/yyyy";
+
+    public static final String SHEET_KETQUATHI_OLPCHUYENTIN = "OLP chuyên tin";
+    public static final String SHEET_KETQUATHI_OLPKHONGCHUYENTIN = "OLP không chuyên tin";
+    public static final String SHEET_KETQUATHI_ICPCCHUYENTIN = "ICPC chuyên tin";
+    public static final String SHEET_KETQUATHI_ICPCKHONGCHUYENTIN = "ICPC không chuyên tin";
+    public static final String SHEET_KETQUATHI_OLPCAODANG = "OLP cao đẳng";
+    public static final String SHEET_KETQUATHI_OLPPROCON = "OLP PROCON";
+    public static final String SHEET_KETQUATHI_OLPPMNM = "OLP PMNM";
+    public static final String SHEET_KETQUATHI_OLPSIEUCUP = "OLP siêu cúp";
 
     public static boolean hasExcelFormat(MultipartFile file) {
         if (!TYPE.equals(file.getContentType())) {
@@ -167,7 +181,8 @@ public class ExcelHelper {
     
             return tochucs;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToToChucs", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     }
 
@@ -250,7 +265,8 @@ public class ExcelHelper {
     
             return doanthis;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToDoanThis", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     } 
     
@@ -307,7 +323,7 @@ public class ExcelHelper {
                                     parsed = format.parse(ngaySinhStr);
                                     thiSinh.setNgaySinh(new java.sql.Date(parsed.getTime()));
                                 } catch (ParseException e) {
-                                    e.printStackTrace();
+                                    log.debug("excelXlsxToThiSinhs", e);
                                 }
                             }
                             break;
@@ -356,7 +372,8 @@ public class ExcelHelper {
     
             return thisinhs;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToThiSinhs", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     } 
 
@@ -439,7 +456,8 @@ public class ExcelHelper {
     
             return huanluyenviens;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToHuanLuyenViens", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     }
 
@@ -465,42 +483,55 @@ public class ExcelHelper {
                 CuocThi cuocThi = new CuocThi();
 
                 int cellIdx = 0;
-                for (int i = 0; i <= 9; i++) {
+                for (int i = 0; i <= 11; i++) {
                     Cell currentCell = currentRow.getCell(i);
                     cellIdx = i;
                     
                     switch (cellIdx) {
                         case 0:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
-                                cuocThi.setTenGoi(currentCell.getStringCellValue());
+                                cuocThi.setId(currentCell.getStringCellValue());
                             }
                             break;
-    
+
                         case 1:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
-                                cuocThi.setTiengAnh(currentCell.getStringCellValue());
+                                cuocThi.setTenGoi(currentCell.getStringCellValue());
                             }
                             break;
     
                         case 2:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
-                                cuocThi.setSerieCuocThi(currentCell.getStringCellValue());
+                                cuocThi.setTiengAnh(currentCell.getStringCellValue());
                             }
                             break;
     
                         case 3:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                cuocThi.setSerieCuocThi(currentCell.getStringCellValue());
+                            }
+                            break;
+    
+                        case 4:
                             if (currentCell != null && currentCell.getCellType() == CellType.NUMERIC) {
                                 cuocThi.setLanToChuc((int)currentCell.getNumericCellValue());
                             }
                             break;
-                        case 4:
+                        case 5:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
                                 String tenDonViToChuc = currentCell.getStringCellValue();
                                 cuocThi.setDonViToChuc(tenDonViToChuc);
                             }
                             break;
-                        
-                        case 5:
+
+                        case 6:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                String diaDiemToChuc = currentCell.getStringCellValue();
+                                cuocThi.setDiaDiemToChuc(diaDiemToChuc);
+                            }
+                            break;
+
+                        case 7:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {  
                                 String ngayBatDauStr = currentCell.getStringCellValue();
                                 Date parsed;
@@ -508,12 +539,12 @@ public class ExcelHelper {
                                     parsed = format.parse(ngayBatDauStr);
                                     cuocThi.setNgayBatDau(new java.sql.Date(parsed.getTime()));
                                 } catch (ParseException e) {
-                                    e.printStackTrace();
+                                    log.debug("excelXlsxToCuocThis", e);
                                 }
                             }
                             break;
                         
-                        case 6:
+                        case 8:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
                                 String ngayKetThucStr = currentCell.getStringCellValue();
                                 Date parsed;
@@ -521,24 +552,24 @@ public class ExcelHelper {
                                     parsed = format.parse(ngayKetThucStr);
                                     cuocThi.setNgayKetThuc(new java.sql.Date(parsed.getTime()));
                                 } catch (ParseException e) {
-                                    e.printStackTrace();
+                                    log.debug("excelXlsxToCuocThis", e);
                                 }
                             }
                             break;
                         
-                        case 7:
+                        case 9:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
                                 cuocThi.setThongTinMoTa(currentCell.getStringCellValue());
                             }
                             break;
 
-                        case 8:
+                        case 10:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
                                 cuocThi.setWebsite(currentCell.getStringCellValue());
                             }
                             break;
 
-                        case 9:
+                        case 11:
                             if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
                                 String tinhTrangStr = currentCell.getStringCellValue();
                                 if (TINHTRANG_CUOCTHI_MODANGKI.equals(tinhTrangStr.trim())) {
@@ -567,7 +598,8 @@ public class ExcelHelper {
     
             return cuocthis;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToCuocThis", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     }
 
@@ -674,18 +706,24 @@ public class ExcelHelper {
     
             return khoithis;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToKhoiThis", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     }
 
     public static List<ThiSinh> excelXlsxToDanhSachThis(InputStream is, String sheetName) {
         try {
+            List<ThiSinh> thisinhs = new ArrayList<ThiSinh>();
+
             Workbook workbook = new XSSFWorkbook(is);
     
             Sheet sheet = workbook.getSheet(sheetName);
+            if (sheet == null) {
+                workbook.close();
+                return thisinhs;
+            }
             Iterator<Row> rows = sheet.iterator();
     
-            List<ThiSinh> thisinhs = new ArrayList<ThiSinh>();
             SimpleDateFormat format = new SimpleDateFormat(VN_DATE_FORMAT);
 
             int rowNumber = 0;
@@ -731,7 +769,7 @@ public class ExcelHelper {
                                     parsed = format.parse(ngaySinhStr);
                                     thiSinh.setNgaySinh(new java.sql.Date(parsed.getTime()));
                                 } catch (ParseException e) {
-                                    e.printStackTrace();
+                                    log.debug("excelXlsxToDanhSachThis", e);
                                 }
                             }
                             break;
@@ -810,6 +848,48 @@ public class ExcelHelper {
                     }
                 }
     
+                if (thiSinh.isThamGia()) {
+                    thisinhs.add(thiSinh);
+                }
+            }
+    
+            workbook.close();
+    
+            return thisinhs;
+        } catch (IOException e) {
+            log.debug("excelXlsxToDanhSachThis", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+        }
+    } 
+
+    public static List<ThiSinh> excelXlsxToTongHopThiSinh(InputStream is) {
+        try {
+            Workbook workbook = new XSSFWorkbook(is);
+    
+            Sheet sheet = workbook.getSheet(SHEET_DANHSACHTHI);
+            Iterator<Row> rows = sheet.iterator();
+    
+            List<ThiSinh> thisinhs = new ArrayList<ThiSinh>();
+            SimpleDateFormat format = new SimpleDateFormat(VN_DATE_FORMAT);
+
+            int rowNumber = 0;
+            while (rows.hasNext()) {
+                Row currentRow = rows.next();
+    
+                if (rowNumber < 9) {
+                    rowNumber++;
+                    continue;
+                }
+    
+                ThiSinh thiSinh = new ThiSinh();
+
+                int cellIdx = 0;
+
+                Cell thuTuCell = currentRow.getCell(3);
+                if (thuTuCell != null && thuTuCell.getCellType() == CellType.NUMERIC) {
+                    log.info("Cell: " + thuTuCell.getNumericCellValue());
+                }
+    
                 thisinhs.add(thiSinh);
             }
     
@@ -817,7 +897,84 @@ public class ExcelHelper {
     
             return thisinhs;
         } catch (IOException e) {
-          throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+            log.debug("excelXlsxToTongHopThiSinh", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     } 
+
+    public static List<KetQuaThi> excelToKetQuaDanhSachThis(InputStream is, String sheetName) {
+        try {
+            List<KetQuaThi> ketQuaThis = new ArrayList<KetQuaThi>();
+
+            Workbook workbook = new XSSFWorkbook(is);
+    
+            Sheet sheet = workbook.getSheet(sheetName);
+            if (sheet == null) {
+                workbook.close();
+                return ketQuaThis;
+            }
+            Iterator<Row> rows = sheet.iterator();
+    
+            int rowNumber = 0;
+            while (rows.hasNext()) {
+                Row currentRow = rows.next();
+    
+                if (rowNumber == 0) {
+                    rowNumber++;
+                    continue;
+                }
+    
+                KetQuaThi ketQuaThi = new KetQuaThi();
+
+                int cellIdx = 0;
+                for (int i = 0; i <= 4; i++) {
+                    Cell currentCell = currentRow.getCell(i);
+                    cellIdx = i;
+                    
+                    switch (cellIdx) {
+                        case 0:
+                            if (currentCell != null && currentCell.getCellType() == CellType.NUMERIC) {
+                                ketQuaThi.setSTT((int)currentCell.getNumericCellValue());
+                            }
+                            break;
+    
+                        case 1:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                ketQuaThi.setDoiTuong(currentCell.getStringCellValue());
+                            }
+                            break;
+    
+                        case 2:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                ketQuaThi.setTenTruong(currentCell.getStringCellValue());
+                            }
+                            break;
+    
+                        case 3:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                ketQuaThi.setGiaiThuong(currentCell.getStringCellValue());
+                            }
+                            break;
+
+                        case 4:
+                            if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+                                ketQuaThi.setKhoiThi(currentCell.getStringCellValue());
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+    
+                ketQuaThis.add(ketQuaThi);
+            }
+    
+            workbook.close();
+    
+            return ketQuaThis;
+        } catch (IOException e) {
+            log.debug("excelToKetQuaDanhSachThis", e);
+            throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+        }
+    }
 }
