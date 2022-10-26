@@ -605,6 +605,7 @@ public class CuocThiController {
             for (ThiSinh thiSinh : thiSinhs) {
                 List<DanhSachThi> danhSachThis = danhSachThiRepository.getDanhSachThamGiaCuaCaNhan(cuocThiData.get(), thiSinh.getId());
                 DanhSachThiSinhTrongDoanResponse row = new DanhSachThiSinhTrongDoanResponse();
+                row.setId(thiSinh.getId());
                 row.setHoTen(thiSinh.getHoTen());
                 row.setGioiTinh(thiSinh.getGioiTinh());
                 row.setDoiTuongThi(thiSinh.getDoiTuongThi());
@@ -644,7 +645,8 @@ public class CuocThiController {
                 row.setHoTen(huanLuyenVien.getHoTen());
                 row.setSoDienThoai(huanLuyenVien.getSoDienThoai());
                 row.setEmail(huanLuyenVien.getEmail());
-
+                row.setId(huanLuyenVien.getId());
+                
                 List<String> khoiThiIds = Arrays.asList(huanLuyenVien.getKhoiThiId().split(","));
             
                 List<KhoiThi> noiDungThi = khoiThiRepository.findByIdIn(khoiThiIds);

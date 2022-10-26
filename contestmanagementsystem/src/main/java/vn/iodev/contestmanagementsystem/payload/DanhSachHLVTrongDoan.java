@@ -39,6 +39,13 @@ public class DanhSachHLVTrongDoan {
     private Integer truongPhoDoan;
     private String email;
     private String soDienThoai;
+    private String id;
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
     private List<KhoiThi> noiDungThi;
     public DanhSachHLVTrongDoan() {}
 }
