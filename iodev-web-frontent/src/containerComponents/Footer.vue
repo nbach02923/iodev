@@ -11,11 +11,11 @@
             </v-flex>
             <v-flex class="text-2">
               <v-icon size="18" color="#2161B1">mdi-phone-in-talk-outline</v-icon>&nbsp;
-              <span>Điện thoại: (024) 3.822.1111 </span>
+              <span>Điện thoại: (024) 3.821.1725 </span>
             </v-flex>
             <v-flex class="text-3">
               <v-icon size="18" color="#2161B1">mdi-email-outline</v-icon>&nbsp;
-              <span>Email: contact@gov.vn</span>
+              <span>Email: office@vaip.vn</span>
             </v-flex>
           </v-layout>
         </v-flex>

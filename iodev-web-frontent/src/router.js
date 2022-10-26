@@ -28,6 +28,12 @@ export default new Router({
           name: 'DangKyThi',
           component: () => import('@/views/DangKyThi'),
           props: true
+        },
+        {
+          path: '/to-chuc/:id',
+          name: 'ThongTinToChuc',
+          component: () => import('@/views/ThongTinToChuc'),
+          props: true
         }
       ],
     },

@@ -42,10 +42,17 @@
               text
             >
               <v-icon color="#fff" class="mr-3">mdi-account-circle</v-icon>
-              <span style="color: #fff">{{userInfo.email}}</span>
+              <span style="color: #fff">{{userInfo ? userInfo.email : ''}}</span>
             </v-btn>
           </template>
           <v-list>
+            <v-list-item @click.stop="goToProfile">
+              <v-list-item-title>
+                <v-icon color="#2161b1" class="mr-3">mdi-account-edit</v-icon>
+                <span style="color: #2161b1" v-if="userInfo && userInfo.loaiTaiKhoan == 0">Thông tin tổ chức</span>
+                <span style="color: #2161b1" v-else>Thông tin cá nhân</span>
+              </v-list-item-title>
+            </v-list-item>
             <v-list-item @click.stop="submitLogout">
               <v-list-item-title>
                 <v-icon color="#2161b1" class="mr-3">mdi-logout</v-icon>
@@ -110,6 +117,14 @@
       login () {
         let vm = this
         vm.$router.push({ path: '/dang-nhap'})
+      },
+      goToProfile () {
+        let vm = this
+        if (vm.userInfo.loaiTaiKhoan == 0) {
+          vm.$router.push({ path: '/to-chuc/' + vm.userInfo.id})
+        } else {
+          vm.$router.push({ path: '/ca-nhan/' + vm.userInfo.id})
+        }
       },
       submitLogout () {
         let vm = this

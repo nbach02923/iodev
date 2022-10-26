@@ -381,8 +381,6 @@
 
 <style lang="sass">
   $image-login: $public-path + '/images/bg-login.png?t=39123'
-  .v-application--wrap
-    min-height: 0 !important
   .wrap-dashboard
     width: 100%
     margin: 0 auto
