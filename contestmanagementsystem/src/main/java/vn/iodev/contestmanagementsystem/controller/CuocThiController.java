@@ -434,6 +434,9 @@ public class CuocThiController {
             for (KhoiThi khoiThi : khoithis) {
                 NoiDungThi noiDungThi = new NoiDungThi();
                 noiDungThi.setTenNoiDung(khoiThi.getTenGoi());
+                noiDungThi.setKhoiThiId(khoiThi.getId());
+                noiDungThi.setThiTapThe(khoiThi.getThiTapThe());
+                noiDungThi.setThiSangTao(khoiThi.getThiSangTao());
                 
                 List<ThiSinh> lstThiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
                 List<DoiThi> lstDoiThis = doiThiRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());

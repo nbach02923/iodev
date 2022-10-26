@@ -20,6 +20,28 @@ public class NoiDungThi {
         this.soThiSinh = soThiSinh;
     }
     private String tenNoiDung;
+    private String khoiThiId;
+    private Boolean thiTapThe;
+    private Boolean thiSangTao;
+    public Boolean getThiTapThe() {
+        return thiTapThe;
+    }
+    public void setThiTapThe(Boolean thiTapThe) {
+        this.thiTapThe = thiTapThe;
+    }
+    public Boolean getThiSangTao() {
+        return thiSangTao;
+    }
+    public void setThiSangTao(Boolean thiSangTao) {
+        this.thiSangTao = thiSangTao;
+    }
+    public String getKhoiThiId() {
+        return khoiThiId;
+    }
+    public void setKhoiThiId(String khoiThiId) {
+        this.khoiThiId = khoiThiId;
+    }
+    
     private Integer soDoi;
     private Integer soThiSinh;
     public NoiDungThi() {}
