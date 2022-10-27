@@ -64,9 +64,9 @@
                     <div class="status-contest mx-4" :style="item.tinhTrang == 1 ? 'color: green' : (item.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(item.tinhTrang)}}
                     </div>
-                    <v-card-title class="py-0">{{item.tenGoi}}</v-card-title>
-                    <v-card-text height="200">
-                      <div v-snip="{ lines: 5 }" class="my-0 text-subtitle-1">
+                    <v-card-title class="py-0" style="word-break: break-word;">{{item.tenGoi}}</v-card-title>
+                    <v-card-text style="min-height: 90px;">
+                      <div v-snip="{ lines: 3 }" class="my-0 text-subtitle-1">
                         {{item.thongTinMoTa}}
                       </div>
                     </v-card-text>
@@ -99,6 +99,23 @@
             </v-col>
             <v-spacer></v-spacer>
             <v-col cols="4">
+              <v-autocomplete
+                class="flex input-form mt-2"
+                hide-no-data
+                :items="itemsSerie"
+                v-model="serieSearch"
+                item-text="giaTri"
+                item-value="maDanhMuc"
+                dense
+                solo
+                hide-details="auto"
+                placeholder="Serie cuộc thi"
+                clearable
+                @change="getDanhSachCuocThi('reset')"
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="4">
               <v-text-field
                   class="input-form mt-2"
                   v-model="keywordSearch"
@@ -107,6 +124,7 @@
                   placeholder="Tên cuộc thi ..."
                   hide-details="auto"
                   @keyup.enter="getDanhSachCuocThi('reset')"
+                  clearable
               >
                 <template v-slot:append>
                   <v-icon @click="getDanhSachCuocThi('reset')" size="18" color="#2161B1">mdi-magnify</v-icon>
@@ -208,6 +226,8 @@
       danhSachTatCaCuocThi: [],
       loading: false,
       loadingDataTable: false,
+      itemsSerie: [],
+      serieSearch: '',
       keywordSearch: '',
       headers: [
         {
@@ -257,6 +277,7 @@
       let vm = this
       vm.getDanhSachCuocThi('reset')
       vm.getDanhSachCuocThiStatus('1,2')
+      vm.getDanhMuc('C_SERIECUOCTHI')
     },
     computed: {
       breakpointName () {
@@ -271,9 +292,23 @@
         let vm = this
         vm.getDanhSachCuocThi('reset')
         vm.getDanhSachCuocThiStatus('1,2')
+        vm.getDanhMuc('C_SERIECUOCTHI')
       }
     },
     methods: {
+      getDanhMuc (danhmuc) {
+        let vm = this
+        let filter = {
+          collectionName: 'danhmucs',
+          data: {
+            loaiDanhMuc: danhmuc
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.itemsSerie = response
+        }).catch(function () {
+        })
+      },
       getDanhSachCuocThi (type) {
         let vm = this
         if (type === 'reset') {
@@ -284,16 +319,20 @@
         let filter = {
           collectionName: 'cuocthis',
           data: {
+            tuKhoa: vm.keywordSearch,
             // page: vm.page,
             // size: vm.itemsPerPage
           }
+        }
+        if (vm.serieSearch) {
+          filter.data['serieCuocThi'] = vm.serieSearch
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           let data = response
           vm.danhSachTatCaCuocThi = vm.orderCuocThi(data)
           vm.total = response.length
           vm.pageCount = response.totalPages
-          console.log('data', data)
+          // console.log('data', data)
         }).catch(function () {
         })
       },
@@ -331,9 +370,9 @@
       dangKyThi (item) {
         let vm = this
         if (vm.isSigned) {
-          vm.$router.push({ path: '/dang-ky/' + item.id})
+          vm.$router.push({ path: '/dang-ky-thi/' + item.id})
         } else {
-          let ref = '/dang-ky/' + item.id
+          let ref = '/dang-ky-thi/' + item.id
           vm.$router.push({ path: '/dang-nhap?redirect=' + ref})
         }
       },

@@ -24,7 +24,7 @@ export default new Router({
           props: true
         },
         {
-          path: '/dang-ky/:id',
+          path: '/dang-ky-thi/:id',
           name: 'DangKyThi',
           component: () => import('@/views/DangKyThi'),
           props: true

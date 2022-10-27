@@ -42,7 +42,8 @@
               text
             >
               <v-icon color="#fff" class="mr-3">mdi-account-circle</v-icon>
-              <span style="color: #fff">{{userInfo ? userInfo.email : ''}}</span>
+              <span style="color: #fff" v-if="userInfo && userInfo.loaiTaiKhoan == 0">{{thongTinToChuc ? thongTinToChuc.tenGoi : ''}}</span>
+              <span style="color: #fff" v-if="userInfo && userInfo.loaiTaiKhoan == 1">{{userInfo ? userInfo.email : ''}}</span>
             </v-btn>
           </template>
           <v-list>
@@ -78,6 +79,7 @@
     data: () => ({
       // isSigned: false,
       userInfo: '',
+      thongTinToChuc: '',
       appName: process.env.NODE_ENV,
       title: process.env.VUE_APP_BASE_TITLE,
       publicPath: process.env.VUE_APP_PULIC_PATH,
@@ -90,6 +92,34 @@
       //   vm.isSigned = false
       // }
       vm.userInfo = vm.$cookies.get('UserInfo', '')
+      if (vm.userInfo && vm.userInfo.id && vm.userInfo.loaiTaiKhoan == 0) {
+        let info = ''
+        try {
+          info = JSON.parse(localStorage.getItem('thongTinTaiKhoan'))
+        } catch (error) {
+        }
+        if (!info) {
+          vm.getThongTinToChuc(vm.userInfo.id)
+        } else {
+          vm.thongTinToChuc = info
+        }
+      }
+    },
+    '$route': function (newRoute, oldRoute) {
+      let vm = this
+      vm.userInfo = vm.$cookies.get('UserInfo', '')
+      if (vm.userInfo && vm.userInfo.id && vm.userInfo.loaiTaiKhoan == 0) {
+        let info = ''
+        try {
+          info = JSON.parse(localStorage.getItem('thongTinTaiKhoan'))
+        } catch (error) {
+        }
+        if (!info) {
+          vm.getThongTinToChuc(vm.userInfo.id)
+        } else {
+          vm.thongTinToChuc = info
+        }
+      }
     },
     mounted () {
       let vm = this
@@ -102,9 +132,22 @@
         return this.$cookies.get('Token') ? true : false
       },
     },
-    watch: {
-    },
     methods: {
+      getThongTinToChuc (idtochuc) {
+        let vm = this
+        let filter = {
+          collectionName: 'tochucs',
+          id: idtochuc
+        }
+        vm.$store.dispatch('collectionDetail', filter).then(function (response) {
+          vm.thongTinToChuc = response
+          try {
+            localStorage.setItem('thongTinTaiKhoan', JSON.stringify(vm.thongTinToChuc))
+          } catch (error) {
+          }
+        }).catch(function () {
+        })
+      },
       changeDrawer () {
         let vm = this
         let drawer = vm.$store.state.drawer
@@ -133,6 +176,10 @@
         vm.$cookies.set('RefreshToken', '')
         vm.$cookies.set('UserInfo', '')
         vm.$cookies.set('admin', '')
+        try {
+          localStorage.setItem('thongTinTaiKhoan', '')
+        } catch (error) {
+        }
         window.location.href = window.location.origin + window.location.pathname + "#/"
         window.location.reload()
       },

@@ -145,7 +145,7 @@
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" class="py-0 mb-2">
-                        <label>Tên tiếng anh</label>
+                        <label>Tên viết tắt</label>
                         <v-text-field
                           class="flex input-form"
                           v-model="thongTinEdit['tenVietTat']"

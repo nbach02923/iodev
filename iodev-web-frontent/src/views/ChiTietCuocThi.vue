@@ -108,21 +108,33 @@
                   <v-layout>
                     <v-flex class="py-2 px-2" v-for="(itemNd2, indexNd2) in item.noiDungThi" :key="indexNd2" :style="'width:' + maxLengthHeader + 'px'" style="border-right: 1px solid #dedede">
                       <p v-if="itemNd2.thiTapThe" class="mb-1">Số đội: 
-                        <span v-if="itemNd2.soDoi == 0" style="color: #2161B1">{{itemNd2.soDoi}}</span>
-                        <a v-else href="javascript:;" style="color: #2161B1" @click.stop="showDsDoiThi(itemNd2)">{{itemNd2.soDoi}}</a>
+                        <span  style="color: #2161B1">{{itemNd2.soDoi}}</span>
+                        <!-- <a v-else href="javascript:;" style="color: #2161B1" @click.stop="showDsDoiThi(item, itemNd2)">{{itemNd2.soDoi}}</a> -->
                       </p>
-                      <p class="mb-1" style="cursor: pointer" @click.stop="showDsThiSinh(itemNd2)">Số thí sinh: 
+                      <p class="mb-1" style="cursor: pointer" @click.stop="showDsThiSinh(item, itemNd2)">Số thí sinh: 
                         <span v-if="itemNd2.soThiSinh == 0" style="color: #2161B1">{{itemNd2.soThiSinh}}</span>
                         <a v-else href="javascript:;" style="color: #2161B1" >{{itemNd2.soThiSinh}}</a>
                       </p>
                     </v-flex>
                   </v-layout>
                 </template>
+                <template v-slot:item.soThiSinh="{ item, index }">
+                  <p class="mb-1" style="cursor: pointer" @click.stop="showDsThiSinh(item)">
+                    <span v-if="item.soThiSinh == 0" style="color: #2161B1">{{item.soThiSinh}}</span>
+                    <a v-else href="javascript:;" style="color: #2161B1" >{{item.soThiSinh}}</a>
+                  </p>
+                </template>
+                <template v-slot:item.soHuanLuyenVien="{ item, index }">
+                  <p class="mb-1" style="cursor: pointer" @click.stop="showDsHlv(item)">
+                    <span v-if="item.soHuanLuyenVien == 0" style="color: #2161B1">{{item.soHuanLuyenVien}}</span>
+                    <a v-else href="javascript:;" style="color: #2161B1" >{{item.soHuanLuyenVien}}</a>
+                  </p>
+                </template>
                 <template v-slot:item.doanThi="{ item, index }">
                   <div class="px-2">{{item.doanThi.tenGoi}}</div>
                 </template>
               </v-data-table>
-              <pagination :pageInput="pageTongHopDangKy-1" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
+              <pagination v-if="totalTongHopDangKy" :pageInput="pageTongHopDangKy-1" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
             </v-col>
           </v-row>
         </div>
@@ -140,6 +152,36 @@
           <v-row class="my-0 py-0 pt-3 mx-0">
             <v-col cols="12" class="py-0 px-0 mb-2 col col-12 my-2" style="color: #2161b1;font-weight: bold;">
               <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
+              NỘI DUNG ĐỒNG ĐỘI
+            </v-col>
+            <v-col cols="12"  class="pt-0 px-0">
+              <v-data-table
+                :headers="headersKetQuaDongDoi"
+                :items="danhSachKetQuaDongDoi"
+                :page.sync="pageKetQuaDongDoi"
+                :items-per-page="10000"
+                item-key="primKey"
+                hide-default-footer
+                class="table-base mt-2 table-kq"
+                no-data-text="Không có"
+                :loading="loadingDataKetQuaDongDoi"
+                group-by="Nội dung thi"
+                loading-text="Đang tải... "
+              >
+                <!-- <template v-slot:item.index="{ item, index }">
+                  <div>{{ (pageKetQuaDongDoi) * itemsPerPage - itemsPerPage + index + 1 }}</div>
+                </template> -->
+                <template v-slot:item.thiSinh="{ item, index }">
+                  <p class="mb-1" v-for="(item2, index2) in item.thiSinh" :key="index2">- {{ item2.hoTen }}</p>
+                </template>
+              </v-data-table>
+              <!-- <pagination v-if="pageCountKetQuaDongDoi" :pageInput="pageKetQuaDongDoi - 1" :total="totalKetQuaDongDoi" :pageCount="pageCountKetQuaDongDoi" @tiny:change-page="changePageKqDongDoi"></pagination> -->
+            </v-col>
+          </v-row>
+          <!--  -->
+          <v-row class="my-0 py-0 pt-3 mx-0">
+            <v-col cols="12" class="py-0 px-0 mb-2 col col-12 my-2" style="color: #2161b1;font-weight: bold;">
+              <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
               NỘI DUNG CÁ NHÂN
             </v-col>
             <v-col cols="12"  class="pt-0 px-0">
@@ -147,7 +189,7 @@
                 :headers="headersKetQuaCaNhan"
                 :items="danhSachKetQuaCaNhan"
                 :page.sync="pageKetQuaCaNhan"
-                :items-per-page="itemsPerPage"
+                :items-per-page="10000"
                 group-by="Nội dung thi"
                 item-key="primKey"
                 hide-default-footer
@@ -160,36 +202,7 @@
                   <div>{{ (pageKetQuaCaNhan) * itemsPerPage - itemsPerPage + index + 1 }}</div>
                 </template>
               </v-data-table>
-              <pagination v-if="pageCountKetQuaCaNhan" :pageInput="pageKetQuaCaNhan - 1" :total="totalKetQuaCaNhan" :pageCount="pageCountKetQuaCaNhan" @tiny:change-page="changePageKqCaNhan"></pagination>
-            </v-col>
-          </v-row>
-          <v-row class="my-0 py-0 pt-3 mx-0">
-            <v-col cols="12" class="py-0 px-0 mb-2 col col-12 my-2" style="color: #2161b1;font-weight: bold;">
-              <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-              NỘI DUNG ĐỒNG ĐỘI
-            </v-col>
-            <v-col cols="12"  class="pt-0 px-0">
-              <v-data-table
-                :headers="headersKetQuaDongDoi"
-                :items="danhSachKetQuaDongDoi"
-                :page.sync="pageKetQuaDongDoi"
-                :items-per-page="itemsPerPage"
-                item-key="primKey"
-                hide-default-footer
-                class="table-base mt-2 table-kq"
-                no-data-text="Không có"
-                :loading="loadingDataKetQuaDongDoi"
-                group-by="Nội dung thi"
-                loading-text="Đang tải... "
-              >
-                <template v-slot:item.index="{ item, index }">
-                  <div>{{ (pageKetQuaDongDoi) * itemsPerPage - itemsPerPage + index + 1 }}</div>
-                </template>
-                <template v-slot:item.thiSinh="{ item, index }">
-                  <p class="mb-1" v-for="(item2, index2) in item.thiSinh" :key="index2">- {{ item2.hoTen }}</p>
-                </template>
-              </v-data-table>
-              <pagination v-if="pageCountKetQuaDongDoi" :pageInput="pageKetQuaDongDoi - 1" :total="totalKetQuaDongDoi" :pageCount="pageCountKetQuaDongDoi" @tiny:change-page="changePageKqDongDoi"></pagination>
+              <!-- <pagination v-if="pageCountKetQuaCaNhan" :pageInput="pageKetQuaCaNhan - 1" :total="totalKetQuaCaNhan" :pageCount="pageCountKetQuaCaNhan" @tiny:change-page="changePageKqCaNhan"></pagination> -->
             </v-col>
           </v-row>
         </div>
@@ -242,6 +255,62 @@
         </v-card-text>
         <v-card-actions class="justify-end pb-3 px-2">
           <v-btn small color="red" class="white--text mx-0" @click="dialogDsThiSinh = false">
+            <v-icon left>
+              mdi-close
+            </v-icon>
+            Thoát
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--  -->
+    <!--  -->
+    <v-dialog
+      max-width="1200"
+      v-model="dialogDsHlv"
+      persistent
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="primary" class="px-3"
+        >
+          <v-toolbar-title>Danh sách huấn luyện viên</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <v-btn
+              small
+              icon
+              dark
+              @click="dialogDsHlv = false"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card-text class="mt-5 px-2">
+          <v-data-table
+            :headers="headersDanhSachHlv"
+            :items="danhSachHlv"
+            :items-per-page="itemsPerPageDanhSachHlv"
+            :page.sync="pageDanhSachHlv"
+            hide-default-footer
+            class="table-base mt-2"
+            no-data-text="Không có"
+            :loading="loadingDataDanhSachHlv"
+            loading-text="Đang tải... "
+          >
+            <template v-slot:item.index="{ item, index }">
+              <div>{{ (pageDanhSachHlv) * itemsPerPageDanhSachHlv - itemsPerPageDanhSachHlv + index + 1 }}</div>
+            </template>
+            <template v-slot:item.truongPhoDoan="{ item, index }">
+              <div>{{ item.truongPhoDoan == 0 ? 'Phó đoàn' : 'Trưởng đoàn'}}</div>
+            </template>
+          </v-data-table>
+          <pagination :getAll="true" :pageInput="pageDanhSachHlv -1" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePageDanhSachHlv"></pagination>
+        </v-card-text>
+        <v-card-actions class="justify-end pb-3 px-2">
+          <v-btn small color="red" class="white--text mx-0" @click="dialogDsHlv = false">
             <v-icon left>
               mdi-close
             </v-icon>
@@ -328,13 +397,13 @@ export default {
 
         danhSachKetQuaCaNhan: [],
         headersKetQuaCaNhan: [
-          {
-              sortable: false,
-              text: 'STT',
-              align: 'center',
-              value: 'index',
-              width: 50
-          },
+          // {
+          //     sortable: false,
+          //     text: 'STT',
+          //     align: 'center',
+          //     value: 'index',
+          //     width: 50
+          // },
           {
               sortable: false,
               text: 'Tên thí sinh',
@@ -372,13 +441,13 @@ export default {
 
         danhSachKetQuaDongDoi: [],
         headersKetQuaDongDoi: [
-          {
-              sortable: false,
-              text: 'STT',
-              align: 'center',
-              value: 'index',
-              width: 50
-          },
+          // {
+          //     sortable: false,
+          //     text: 'STT',
+          //     align: 'center',
+          //     value: 'index',
+          //     width: 50
+          // },
           {
               sortable: false,
               text: 'Tên đội thi',
@@ -492,7 +561,53 @@ export default {
         pageDanhSachThiSinh: 1,
         totalDanhSachThiSinh: 0,
         pageCountDanhSachThiSinh: 0,
-        itemsPerPageDanhSachThiSinh: 15
+        itemsPerPageDanhSachThiSinh: 15,
+
+        headersDanhSachHlv: [
+          {
+              sortable: false,
+              text: 'STT',
+              align: 'center',
+              value: 'index',
+              width: 50
+          },
+          {
+              sortable: false,
+              text: 'Họ tên',
+              align: 'left',
+              value: 'hoTen',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Số điện thoại',
+              align: 'left',
+              value: 'soDienThoai',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Email',
+              align: 'left',
+              value: 'email',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Chức danh',
+              align: 'left',
+              value: 'truongPhoDoan',
+              class: 'th-center',
+              width: 150
+          }
+        ],
+        dialogDsHlv: false,
+        loadingDataDanhSachHlv:false,
+        danhSachHlv: [],
+        pageDanhSachHlv: 1,
+        totalDanhSachHlv: 0,
+        pageCountDanhSachHlv: 0,
+        itemsPerPageDanhSachHlv: 15
       }
     },
     created () {
@@ -567,7 +682,7 @@ export default {
                   class: 'th-center py-2'
                 }
               })
-              console.log('headerNoiDung', vm.headerNoiDung)
+              // console.log('headerNoiDung', vm.headerNoiDung)
             }
           }
           vm.loadingDataTongHopDangKy = false
@@ -605,6 +720,16 @@ export default {
             arrCaNhan.push(vm.$store.dispatch('collectionFilterLevel3', filter))
           }
           Promise.all(arrCaNhan).then(values => {
+            for (let index = 0; index < values.length; index++) {
+              values[index] = values[index].filter(function (itemGt) {
+                return itemGt.hangGiaiThuong
+              })
+              if (values[index].length) {
+                values[index].forEach(element => {
+                  element['Nội dung thi'] = vm.danhSachKhoiThiCaNhan[index] ? vm.danhSachKhoiThiCaNhan[index]['tenGoi'] : ''
+                })
+              }
+            }
             vm.danhSachKetQuaCaNhan = [].concat(...values)
             vm.totalKetQuaCaNhan = vm.danhSachKetQuaCaNhan.length
             vm.pageKetQuaCaNhan = 1
@@ -624,6 +749,16 @@ export default {
             arrTapThe.push(vm.$store.dispatch('collectionFilterLevel3', filter))
           }
           Promise.all(arrTapThe).then(values => {
+            for (let index = 0; index < values.length; index++) {
+              values[index] = values[index].filter(function (itemGt) {
+                return itemGt.hangGiaiThuong
+              })
+              if (values[index].length) {
+                values[index].forEach(element => {
+                  element['Nội dung thi'] = vm.danhSachKhoiThiTapThe[index]['tenGoi']
+                })
+              }
+            }
             vm.danhSachKetQuaDongDoi = [].concat(...values)
             vm.totalKetQuaDongDoi = vm.danhSachKetQuaDongDoi.length
             vm.pageKetQuaDongDoi = 1
@@ -632,62 +767,28 @@ export default {
           })
         }).catch(function () {})
       },
-      getdanhSachKetQuaCaNhan (khoiThiId) {
-        let vm = this
-        if (vm.loadingDataKetQuaCaNhan) {
-          return
-        }
-        vm.loadingDataKetQuaCaNhan = true
-        let filter = {
-          collectionName: 'cuocthis',
-          collectionId: vm.id,
-          collectionNameChild: 'khoithis',
-          collectionChildId: khoiThiId,
-          collectionNameChild2: 'giaicanhan',
-          data: {}
-        }
-        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
-          vm.danhSachKetQuaCaNhan = response
-          vm.loadingDataKetQuaCaNhan = false
-        }).catch(function () {
-          vm.loadingDataKetQuaCaNhan = false
-        })
-      },
-      getdanhSachKetQuaDongDoi (khoiThiId) {
-        let vm = this
-        if (vm.loadingDataKetQuaDongDoi) {
-          return
-        }
-        vm.loadingDataKetQuaDongDoi = true
-        let filter = {
-          collectionName: 'cuocthis',
-          collectionId: vm.id,
-          collectionNameChild: 'khoithis',
-          collectionChildId: khoiThiId,
-          collectionNameChild2: 'giaitapthe',
-          data: {}
-        }
-        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
-          vm.danhSachKetQuaDongDoi = response
-          vm.loadingDataKetQuaDongDoi = false
-        }).catch(function () {
-          vm.loadingDataKetQuaDongDoi = false
-        })
-      },
-      showDsThiSinh (item) {
+      showDsThiSinh (item, noidung) {
         let vm = this
         vm.dialogDsThiSinh = true
         vm.loadingDataDanhSachThiSinh = true
         let filter = {
           collectionName: 'cuocthis',
           collectionId: vm.id,
-          collectionNameChild: 'thisinhs',
-          data: {
-            khoiThiId: item.khoiThiId ? item.khoiThiId : ''
-          }
+          collectionNameChild: 'doanthis',
+          collectionChildId: item.doanThi.id,
+          collectionNameChild2: 'thisinhs',
+          data: {}
         }
-        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.pageDanhSachThiSinh = 1
+          if (noidung) {
+            response = response.filter(function (item) {
+              let exits = item.noiDungThi.find(function (item2) {
+                return item2.id == noidung.khoiThiId
+              })
+              return exits
+            })
+          }
           vm.danhSachThiSinh = response
           vm.totalDanhSachThiSinh = vm.danhSachThiSinh.length
           vm.pageCountDanhSachThiSinh = Math.ceil(vm.totalDanhSachThiSinh / vm.itemsPerPageDanhSachThiSinh)
@@ -696,20 +797,58 @@ export default {
           vm.loadingDataDanhSachThiSinh = false
         })
       },
+      showDsHlv (item, noidung) {
+        let vm = this
+        vm.dialogDsHlv = true
+        vm.loadingDataDanhSachHlv = true
+        let filter = {
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'doanthis',
+          collectionChildId: item.doanThi.id,
+          collectionNameChild2: 'huanluyenviens',
+          data: {}
+        }
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
+          vm.pageDanhSachHlv = 1
+          vm.danhSachHlv = response
+          vm.totalDanhSachHlv = vm.danhSachHlv.length
+          vm.pageCountDanhSachHlv = Math.ceil(vm.totalDanhSachHlv / vm.itemsPerPageDanhSachHlv)
+          vm.loadingDataDanhSachHlv = false
+        }).catch(function () {
+          vm.loadingDataDanhSachHlv = false
+        })
+      },
       changePageDanhSachThiSinh (config) {
         let vm = this
-        console.log('page', config.page)
         vm.pageDanhSachThiSinh = config.page + 1
       },
-      showDsDoiThi (item) {
+      changePageDanhSachHlv () {
         let vm = this
+        vm.pageDanhSachHlv = config.page + 1
+      },
+      showDsDoiThi (item, noidung) {
+        let vm = this
+        let filter = {
+          collectionName: 'doithis',
+          data: {
+            cuocThiId: vm.id,
+            khoiThiId: noidung.khoiThiId,
+            doanThiId: item.doanThi.id
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          console.log('resDoiThi', response)
+        }).catch(function () {
+          
+        })
       },
       dangKyThi (item) {
         let vm = this
         if (vm.isSigned) {
-          vm.$router.push({ path: '/dang-ky/' + item.id})
+          vm.$router.push({ path: '/dang-ky-thi/' + item.id})
         } else {
-          let ref = '/dang-ky/' + item.id
+          let ref = '/dang-ky-thi/' + item.id
           vm.$router.push({ path: '/dang-nhap?redirect=' + ref})
         }
       },
@@ -842,8 +981,11 @@ export default {
     padding-left: 0px !important;
     padding-right: 0px !important;
   }
-  .table-kq td button {
+  .table-kq td button:nth-child(2) {
     display: none !important;
+  }
+  .table-kq .v-row-group__header {
+    font-weight: 600;
   }
   .nav-content {
     border-right: 1px solid #DDDDDD;
