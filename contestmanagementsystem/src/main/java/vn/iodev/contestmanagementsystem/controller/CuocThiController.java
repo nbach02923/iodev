@@ -646,6 +646,7 @@ public class CuocThiController {
                 row.setSoDienThoai(huanLuyenVien.getSoDienThoai());
                 row.setEmail(huanLuyenVien.getEmail());
                 row.setId(huanLuyenVien.getId());
+                row.setTruongPhoDoan(huanLuyenVien.getTruongPhoDoan());
                 
                 List<String> khoiThiIds = Arrays.asList(huanLuyenVien.getKhoiThiId().split(","));
             

@@ -115,9 +115,12 @@ public class HuanLuyenVienController {
             }
         }
         if (huanLuyenVien.getKhoiThiId() != null) {
-            Optional<KhoiThi> khoiThi = khoiThiRepository.findById(huanLuyenVien.getKhoiThiId());
-            if (!khoiThi.isPresent()) {
-                throw new ValidationException("KhoiThi is not exists!");
+            String[] khoiThiIds = huanLuyenVien.getKhoiThiId().split(",");
+            for (String khoiThiId : khoiThiIds) {
+                Optional<KhoiThi> khoiThi = khoiThiRepository.findById(khoiThiId);
+                if (!khoiThi.isPresent()) {
+                    throw new ValidationException("KhoiThi is not exists!");
+                }
             }
         }
     }
