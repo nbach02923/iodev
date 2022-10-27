@@ -26,13 +26,35 @@ export default {
   },
 
   data: () => ({
-    //
   }),
   created () {
+    let vm = this
     // let router = this.$router.history.current
     // if (router.path === '/') {
     //   this.$router.push({ path: '/dang-nhap' })
     // }
+    let searchParams = window.location.href.split("?")[1]
+    if (searchParams) {
+      let email = decodeURIComponent(String(vm.getSearchParams(searchParams, "email")))
+      let active = decodeURIComponent(String(vm.getSearchParams(searchParams, "active")))
+      if (window.location.href.indexOf("/dang-ky") && email && active) {
+        window.location.href = window.location.origin + '/#/dang-ky' + window.location.search
+      }
+    }
+  },
+  methods: {
+    getSearchParams (prams, key) {
+      let value = ""
+      let headers = prams.split("&")
+      headers.forEach(function (header) {
+        header = header.split("=");
+        let keyHeader = header[0];
+        if (keyHeader === key) {
+          value = header[1]
+        }
+      });
+      return value
+    }
   }
 };
 </script>

@@ -64,6 +64,10 @@
         showTong: {
           type: Boolean,
           default: true
+        },
+        getAll: {
+          type: Boolean,
+          default: false
         }
     },
     data () {
@@ -122,7 +126,7 @@
         vm.$emit('tiny:change-page', {
           page: vm.currentPage
         })
-        console.log('vm.currentPage1', vm.currentPage)
+        // console.log('vm.currentPage1', vm.currentPage)
       },
       nextPage () {
         let vm = this
@@ -131,7 +135,7 @@
         vm.$emit('tiny:change-page', {
           page: vm.currentPage
         })
-        console.log('vm.currentPage2', vm.currentPage)
+        // console.log('vm.currentPage2', vm.currentPage)
       },
     },
   }

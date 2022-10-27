@@ -211,13 +211,15 @@
       }
       
       let router = vm.$router.history.current
-      console.log('router', router)
       let searchParams = window.location.href.split("?")[1]
-      let email = decodeURIComponent(String(vm.getSearchParams(searchParams, "email")))
-      let active = decodeURIComponent(String(vm.getSearchParams(searchParams, "active")))
-      if (email && active && !vm.signed) {
-        vm.dialogActive = true
-        vm.emailActive = email
+      if (searchParams) {
+        let email = decodeURIComponent(String(vm.getSearchParams(searchParams, "email")))
+        let active = decodeURIComponent(String(vm.getSearchParams(searchParams, "active")))
+        if (email && active && !vm.signed) {
+          vm.dialogActive = true
+          vm.emailActive = email
+          vm.maKichHoat = active
+        }
       }
     },
     computed: {
