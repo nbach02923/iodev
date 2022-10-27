@@ -42,10 +42,18 @@
               text
             >
               <v-icon color="#fff" class="mr-3">mdi-account-circle</v-icon>
-              <span style="color: #fff">{{userInfo.email}}</span>
+              <span style="color: #fff" v-if="userInfo && userInfo.loaiTaiKhoan == 0">{{thongTinToChuc ? thongTinToChuc.tenGoi : ''}}</span>
+              <span style="color: #fff" v-if="userInfo && userInfo.loaiTaiKhoan == 1">{{userInfo ? userInfo.email : ''}}</span>
             </v-btn>
           </template>
           <v-list>
+            <v-list-item @click.stop="goToProfile">
+              <v-list-item-title>
+                <v-icon color="#2161b1" class="mr-3">mdi-account-edit</v-icon>
+                <span style="color: #2161b1" v-if="userInfo && userInfo.loaiTaiKhoan == 0">Thông tin tổ chức</span>
+                <span style="color: #2161b1" v-else>Thông tin cá nhân</span>
+              </v-list-item-title>
+            </v-list-item>
             <v-list-item @click.stop="submitLogout">
               <v-list-item-title>
                 <v-icon color="#2161b1" class="mr-3">mdi-logout</v-icon>
@@ -71,6 +79,7 @@
     data: () => ({
       // isSigned: false,
       userInfo: '',
+      thongTinToChuc: '',
       appName: process.env.NODE_ENV,
       title: process.env.VUE_APP_BASE_TITLE,
       publicPath: process.env.VUE_APP_PULIC_PATH,
@@ -83,6 +92,34 @@
       //   vm.isSigned = false
       // }
       vm.userInfo = vm.$cookies.get('UserInfo', '')
+      if (vm.userInfo && vm.userInfo.id && vm.userInfo.loaiTaiKhoan == 0) {
+        let info = ''
+        try {
+          info = JSON.parse(localStorage.getItem('thongTinTaiKhoan'))
+        } catch (error) {
+        }
+        if (!info) {
+          vm.getThongTinToChuc(vm.userInfo.id)
+        } else {
+          vm.thongTinToChuc = info
+        }
+      }
+    },
+    '$route': function (newRoute, oldRoute) {
+      let vm = this
+      vm.userInfo = vm.$cookies.get('UserInfo', '')
+      if (vm.userInfo && vm.userInfo.id && vm.userInfo.loaiTaiKhoan == 0) {
+        let info = ''
+        try {
+          info = JSON.parse(localStorage.getItem('thongTinTaiKhoan'))
+        } catch (error) {
+        }
+        if (!info) {
+          vm.getThongTinToChuc(vm.userInfo.id)
+        } else {
+          vm.thongTinToChuc = info
+        }
+      }
     },
     mounted () {
       let vm = this
@@ -95,9 +132,22 @@
         return this.$cookies.get('Token') ? true : false
       },
     },
-    watch: {
-    },
     methods: {
+      getThongTinToChuc (idtochuc) {
+        let vm = this
+        let filter = {
+          collectionName: 'tochucs',
+          id: idtochuc
+        }
+        vm.$store.dispatch('collectionDetail', filter).then(function (response) {
+          vm.thongTinToChuc = response
+          try {
+            localStorage.setItem('thongTinTaiKhoan', JSON.stringify(vm.thongTinToChuc))
+          } catch (error) {
+          }
+        }).catch(function () {
+        })
+      },
       changeDrawer () {
         let vm = this
         let drawer = vm.$store.state.drawer
@@ -111,6 +161,14 @@
         let vm = this
         vm.$router.push({ path: '/dang-nhap'})
       },
+      goToProfile () {
+        let vm = this
+        if (vm.userInfo.loaiTaiKhoan == 0) {
+          vm.$router.push({ path: '/to-chuc/' + vm.userInfo.id})
+        } else {
+          vm.$router.push({ path: '/ca-nhan/' + vm.userInfo.id})
+        }
+      },
       submitLogout () {
         let vm = this
         vm.$store.commit('SET_ISSIGNED', false)
@@ -118,6 +176,10 @@
         vm.$cookies.set('RefreshToken', '')
         vm.$cookies.set('UserInfo', '')
         vm.$cookies.set('admin', '')
+        try {
+          localStorage.setItem('thongTinTaiKhoan', '')
+        } catch (error) {
+        }
         window.location.href = window.location.origin + window.location.pathname + "#/"
         window.location.reload()
       },

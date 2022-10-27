@@ -278,6 +278,10 @@
         vm.$cookies.set('Token', '')
         vm.$cookies.set('UserInfo', '')
         vm.$cookies.set('RefreshToken', '')
+        try {
+          localStorage.setItem('thongTinTaiKhoan', '')
+        } catch (error) {
+        }
         // vm.$store.dispatch('logoutKeyCloak').then(function (result) {
         //   let redirect_uri = process.env.VUE_APP_PATH_REDIRECT_SSO
         //   window.location.href = result.endpoint + '?redirect_uri='+ redirect_uri
