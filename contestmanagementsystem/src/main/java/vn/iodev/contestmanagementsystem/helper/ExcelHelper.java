@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
-import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
@@ -28,6 +27,7 @@ import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -907,7 +907,8 @@ public class ExcelHelper {
             List<KetQuaThi> ketQuaThis = new ArrayList<KetQuaThi>();
 
             Workbook workbook = new XSSFWorkbook(is);
-    
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
+            
             Sheet sheet = workbook.getSheet(sheetName);
             if (sheet == null) {
                 workbook.close();
@@ -933,8 +934,17 @@ public class ExcelHelper {
                     
                     switch (cellIdx) {
                         case 0:
-                            if (currentCell != null && currentCell.getCellType() == CellType.NUMERIC) {
-                                ketQuaThi.setSTT((int)currentCell.getNumericCellValue());
+                            if (currentCell != null && (currentCell.getCellType() == CellType.NUMERIC || currentCell.getCellType() == CellType.FORMULA)) {
+                                if (currentCell.getCellType() == CellType.NUMERIC) {
+                                    log.info("STT: " + currentCell.getNumericCellValue());
+                                    ketQuaThi.setSTT((int)currentCell.getNumericCellValue());
+                                }
+                                else {
+                                    if (evaluator.evaluateFormulaCell(currentCell) == CellType.NUMERIC) {
+                                        log.info("STT: " + currentCell.getNumericCellValue());
+                                        ketQuaThi.setSTT((int)currentCell.getNumericCellValue());
+                                    }
+                                }
                             }
                             break;
     
