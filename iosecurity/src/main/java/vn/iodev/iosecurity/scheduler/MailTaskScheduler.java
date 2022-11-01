@@ -13,12 +13,14 @@ import org.springframework.scheduling.support.CronTrigger;
 // import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.iodev.iosecurity.model.MailQueue;
 import vn.iodev.iosecurity.model.QueueStatus;
 import vn.iodev.iosecurity.repository.MailQueueRepository;
 import vn.iodev.iosecurity.service.EmailService;
 
 @Component
+@Slf4j
 public class MailTaskScheduler {
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
@@ -56,7 +58,7 @@ public class MailTaskScheduler {
 
         @Override
         public void run() {
-            System.out.println("Scanning mail queue " + message + " on thread " + Thread.currentThread().getName());
+            log.info("Scanning mail queue " + message + " on thread " + Thread.currentThread().getName());
             List<Integer> statuses = new ArrayList<>();
             statuses.add(QueueStatus.WAITED);
             statuses.add(QueueStatus.SEND_FAILED);
@@ -72,7 +74,7 @@ public class MailTaskScheduler {
                     mailQueueRepository.save(mailQueue);
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    log.debug("IN MAIL SCHEDULER", e);
                     mailQueue.setStatus(QueueStatus.SEND_FAILED);
                     mailQueue.setRetry(mailQueue.getRetry() + 1);
                     mailQueueRepository.save(mailQueue);

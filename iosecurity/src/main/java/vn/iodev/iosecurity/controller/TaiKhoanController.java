@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,6 +74,9 @@ public class TaiKhoanController {
 
     @Value("${io.app.active.expired:24}")
     private int activeExpired;
+
+    @Value("${io.app.active.url:}")
+    private String linkKichHoat;
 
     @Autowired
     ThymeleafService thymeleafService;
@@ -145,6 +147,9 @@ public class TaiKhoanController {
                             if (tkCuData.isPresent()) {
                                 return new ResponseEntity<>(null, HttpStatus.CONFLICT);
                             }
+                            else {
+                                taiKhoan.setId(caNhan.getId());
+                            }
                         }
                         else {
                             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -156,6 +161,9 @@ public class TaiKhoanController {
                             Optional<TaiKhoan> tkCuData = taiKhoanRepository.findById(toChuc.getId());
                             if (tkCuData.isPresent()) {
                                 return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+                            }
+                            else {
+                                taiKhoan.setId(toChuc.getId());
                             }
                         }
                         else {
@@ -202,6 +210,7 @@ public class TaiKhoanController {
                 .save(taiKhoanMoi);
             HashMap<String, Object> activeVariables = new HashMap<>();
             activeVariables.put("MaKichHoat", taiKhoan.getMaKichHoat());
+            activeVariables.put("LinkKichHoat", linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&active=" + _taiKhoan.getMaKichHoat());
                 
             String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
             MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
@@ -342,6 +351,9 @@ public class TaiKhoanController {
                                 if (tkCuData.isPresent()) {
                                     return new ResponseEntity<>(null, HttpStatus.CONFLICT);
                                 }
+                                else {
+                                    id = caNhan.getId();
+                                }
                             }
                         }
                         catch (Exception e1) {
@@ -368,6 +380,18 @@ public class TaiKhoanController {
                         }
                         catch (Exception e) {
                             log.debug("API POST /auth/register", e);
+                            ToChucRequest request = new ToChucRequest();
+                            request.setEmail(taiKhoan.getEmail());
+                            request.setTenGoi(taiKhoan.getEmail());
+                            
+                            try {
+                                ToChucResponse result = humanResourceService.createToChuc(request);
+                                id = result.getId();
+                            }
+                            catch (Exception e2) {
+                                log.debug("API POST /auth/register", e2);
+                                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                            }
                         }
                         if (toChuc != null && toChuc.getId() != null) {
                             id = toChuc.getId();
@@ -381,7 +405,6 @@ public class TaiKhoanController {
                                 ToChucRequest request = new ToChucRequest();
                                 request.setEmail(taiKhoan.getEmail());
                                 request.setTenGoi(taiKhoan.getEmail());
-                                request.setLoaiToChuc("");
                                 try {
                                     ToChucResponse result = humanResourceService.createToChuc(request);
                                     id = result.getId();
@@ -427,15 +450,17 @@ public class TaiKhoanController {
                 .save(taiKhoanMoi);
             HashMap<String, Object> activeVariables = new HashMap<>();
             activeVariables.put("MaKichHoat", taiKhoanMoi.getMaKichHoat());
+            activeVariables.put("LinkKichHoat", linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&active=" + _taiKhoan.getMaKichHoat());
                 
             String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
-            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
+            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.SEND_SUCCESS, 0);
             mailQueueRepository.save(mailQueue);
             
             // emailService.sendActiveUserHtmlMail(_taiKhoan);
 
             return new ResponseEntity<>(_taiKhoan, HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             log.debug("API POST /auth/register", e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

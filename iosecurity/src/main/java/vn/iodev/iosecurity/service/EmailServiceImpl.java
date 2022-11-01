@@ -166,5 +166,6 @@ public class EmailServiceImpl implements EmailService {
  
         catch (Exception e) {
             return "Error while Sending Mail";
-        }    }
+        }    
+    }
 }
