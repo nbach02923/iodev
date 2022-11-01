@@ -380,18 +380,6 @@ public class TaiKhoanController {
                         }
                         catch (Exception e) {
                             log.debug("API POST /auth/register", e);
-                            ToChucRequest request = new ToChucRequest();
-                            request.setEmail(taiKhoan.getEmail());
-                            request.setTenGoi(taiKhoan.getEmail());
-                            
-                            try {
-                                ToChucResponse result = humanResourceService.createToChuc(request);
-                                id = result.getId();
-                            }
-                            catch (Exception e2) {
-                                log.debug("API POST /auth/register", e2);
-                                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-                            }
                         }
                         if (toChuc != null && toChuc.getId() != null) {
                             id = toChuc.getId();
@@ -399,12 +387,13 @@ public class TaiKhoanController {
                         else {
                             isOrganizeAdmin = true;
 
-                            if (toChuc != null && toChuc.getEmail().equals(taiKhoan.getEmail())) {
+                            if (toChuc != null && !isOrganizeAdmin) {
                             }
                             else {
                                 ToChucRequest request = new ToChucRequest();
                                 request.setEmail(taiKhoan.getEmail());
                                 request.setTenGoi(taiKhoan.getEmail());
+                                request.setLoaiToChuc("");
                                 try {
                                     ToChucResponse result = humanResourceService.createToChuc(request);
                                     id = result.getId();
@@ -453,7 +442,7 @@ public class TaiKhoanController {
             activeVariables.put("LinkKichHoat", linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&active=" + _taiKhoan.getMaKichHoat());
                 
             String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
-            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.SEND_SUCCESS, 0);
+            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
             mailQueueRepository.save(mailQueue);
             
             // emailService.sendActiveUserHtmlMail(_taiKhoan);
