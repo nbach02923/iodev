@@ -413,6 +413,34 @@ public class CuocThiController {
         }
     }
 
+    private List<DanhSachThi> filterByThiSinhIds(List<DanhSachThi> lDanhSachThis, List<String> thiSinhIds) {
+        List<DanhSachThi> lstResult = new ArrayList<>();
+        if (lDanhSachThis == null) {
+            return lstResult;
+        }
+        for (DanhSachThi dst : lDanhSachThis) {
+            if (thiSinhIds.contains(dst.getThiSinhId())) {
+                lstResult.add(dst);
+            }
+        }
+
+        return lstResult;
+    }
+
+    private List<DanhSachThi> filterByDoiThiIds(List<DanhSachThi> lDanhSachThis, List<String> doiThiIds) {
+        List<DanhSachThi> lstResult = new ArrayList<>();
+        if (lDanhSachThis == null) {
+            return lstResult;
+        }
+        for (DanhSachThi dst : lDanhSachThis) {
+            if (doiThiIds.contains(dst.getDoiThiId())) {
+                lstResult.add(dst);
+            }
+        }
+
+        return lstResult;
+    }
+
     @GetMapping(value = "/cuocthis/{cuocThiId}/thongke")
     public ResponseEntity<List<DongThongKeResponse>> thongKe(@PathVariable("cuocThiId") String cuocThiId) {
         log.info("API DELETE /cuocthis/{cuocThiId}/thongke");
@@ -423,12 +451,79 @@ public class CuocThiController {
         List<KhoiThi> khoithis = khoiThiRepository.findByCuocThiId(cuocThiId);
 
         List<DoanThi> lstDoanThi = doanThiRepository.findByCuocThiId(cuocThiId);
+        List<HuanLuyenVien> lstAllHuanLuyenViens = huanLuyenVienRepository.findByCuocThiId(cuocThiId);
+        List<ThiSinh> lstAllThiSinhs = thiSinhRepository.findByCuocThiId(cuocThiId);
+        List<DoiThi> lstAllDoiThis = doiThiRepository.findByCuocThiId(cuocThiId);
+        Map<String, List<HuanLuyenVien>> mapDoanThiHlvs = new HashMap<>();
+        Map<String, List<ThiSinh>> mapDoanThiTs = new HashMap<>();
+        Map<String, List<DoiThi>> mapDoanThiDoiThis = new HashMap<>();
+
+        for (HuanLuyenVien hlv : lstAllHuanLuyenViens) {
+            List<HuanLuyenVien> tempHlvs = null;
+            if (mapDoanThiHlvs.containsKey(hlv.getDoanThiId())) {
+                tempHlvs = mapDoanThiHlvs.get(hlv.getDoanThiId());
+            }
+            else {
+                tempHlvs = new ArrayList<>();
+                mapDoanThiHlvs.put(hlv.getDoanThiId(), tempHlvs);
+            }
+            if (tempHlvs != null && !tempHlvs.contains(hlv)) {
+                tempHlvs.add(hlv);
+            }
+        }
+        for (ThiSinh ts : lstAllThiSinhs) {
+            List<ThiSinh> tempTs = null;
+            if (mapDoanThiTs.containsKey(ts.getDoanThiId())) {
+                tempTs = mapDoanThiTs.get(ts.getDoanThiId());
+            }
+            else {
+                tempTs = new ArrayList<>();
+                mapDoanThiTs.put(ts.getDoanThiId(), tempTs);
+            }
+            if (tempTs != null && !tempTs.contains(ts)) {
+                tempTs.add(ts);
+            }
+        }
+        for (DoiThi dt : lstAllDoiThis) {
+            List<DoiThi> tempDt = null;
+            if (mapDoanThiDoiThis.containsKey(dt.getDoanThiId())) {
+                tempDt = mapDoanThiDoiThis.get(dt.getDoanThiId());
+            }
+            else {
+                tempDt = new ArrayList<>();
+                mapDoanThiDoiThis.put(dt.getDoanThiId(), tempDt);
+            }
+            if (tempDt != null && !tempDt.contains(dt)) {
+                tempDt.add(dt);
+            }
+        }
+        List<DanhSachThi> lDanhSachThis = danhSachThiRepository.findByCuocThiId(cuocThiId);
+        Map<String, List<DanhSachThi>> mapKhoiThiDst = new HashMap<>();
+        for (DanhSachThi dst : lDanhSachThis) {
+            List<DanhSachThi> tempDst = null;
+            if (mapKhoiThiDst.containsKey(dst.getKhoiThiId())) {
+                tempDst = mapKhoiThiDst.get(dst.getKhoiThiId());
+            }
+            else {
+                tempDst = new ArrayList<>();
+                mapKhoiThiDst.put(dst.getKhoiThiId(), tempDst);
+            }
+            if (tempDst != null && !tempDst.contains(dst)) {
+                tempDst.add(dst);
+            }
+        }
+
         for (DoanThi doanThi : lstDoanThi) {
             DongThongKeResponse response = new DongThongKeResponse();
             response.setDoanThi(doanThi);
-            response.setSoHuanLuyenVien(huanLuyenVienRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
-            response.setSoThiSinh(thiSinhRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
-
+            // response.setSoHuanLuyenVien(huanLuyenVienRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
+            // response.setSoThiSinh(thiSinhRepository.countByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId()));
+            if (mapDoanThiHlvs.containsKey(doanThi.getId())) {
+                response.setSoHuanLuyenVien((long)mapDoanThiHlvs.get(doanThi.getId()).size());
+            }
+            if (mapDoanThiTs.containsKey(doanThi.getId())) {
+                response.setSoThiSinh((long)mapDoanThiTs.get(doanThi.getId()).size());
+            }
             List<NoiDungThi> lstNoiDungThi = new ArrayList<>();
 
             for (KhoiThi khoiThi : khoithis) {
@@ -438,8 +533,11 @@ public class CuocThiController {
                 noiDungThi.setThiTapThe(khoiThi.getThiTapThe());
                 noiDungThi.setThiSangTao(khoiThi.getThiSangTao());
                 
-                List<ThiSinh> lstThiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
-                List<DoiThi> lstDoiThis = doiThiRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
+                // List<ThiSinh> lstThiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
+                // List<DoiThi> lstDoiThis = doiThiRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThi.getId());
+                List<ThiSinh> lstThiSinhs = mapDoanThiTs.containsKey(doanThi.getId()) ? mapDoanThiTs.get(doanThi.getId()) : new ArrayList<>();
+                List<DoiThi> lstDoiThis = mapDoanThiDoiThis.containsKey(doanThi.getId()) ? mapDoanThiDoiThis.get(doanThi.getId()) : new ArrayList<>();
+
                 List<String> thiSinhIds = new ArrayList<>();
                 List<String> doiThiIds = new ArrayList<>();
                 for (ThiSinh thiSinh : lstThiSinhs) {
@@ -452,8 +550,11 @@ public class CuocThiController {
                         doiThiIds.add(doiThi.getId());
                     }
                 }
-                List<DanhSachThi> thiSinhThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(cuocThiId, khoiThi.getId(), thiSinhIds);
-                List<DanhSachThi> doiThiThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(cuocThiId, khoiThi.getId(), doiThiIds);
+                // List<DanhSachThi> thiSinhThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(cuocThiId, khoiThi.getId(), thiSinhIds);
+                // List<DanhSachThi> doiThiThamGiaThis = danhSachThiRepository.findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(cuocThiId, khoiThi.getId(), doiThiIds);
+
+                List<DanhSachThi> thiSinhThamGiaThis = filterByThiSinhIds(mapKhoiThiDst.get(khoiThi.getId()), thiSinhIds);
+                List<DanhSachThi> doiThiThamGiaThis = filterByDoiThiIds(mapKhoiThiDst.get(khoiThi.getId()), doiThiIds);
 
                 thiSinhIds.clear();
                 for (DanhSachThi dst : thiSinhThamGiaThis) {

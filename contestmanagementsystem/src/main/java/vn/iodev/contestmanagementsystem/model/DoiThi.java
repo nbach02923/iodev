@@ -168,4 +168,15 @@ public class DoiThi {
         this.thoiGianTao = System.currentTimeMillis();
         this.thoiGianCapNhat = System.currentTimeMillis();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof DoiThi) {
+            DoiThi temp = (DoiThi)o;
+            return (id != null && id.contentEquals(temp.getId()));
+        }
+        else {
+            return false;
+        }
+    }
 }

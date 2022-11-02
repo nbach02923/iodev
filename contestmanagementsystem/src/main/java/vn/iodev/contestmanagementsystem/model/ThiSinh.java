@@ -275,4 +275,15 @@ public class ThiSinh {
         this.thoiGianTao = System.currentTimeMillis();
         this.thoiGianCapNhat = System.currentTimeMillis();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ThiSinh) {
+            ThiSinh temp = (ThiSinh)o;
+            return (id != null && id.contentEquals(temp.getId()));
+        }
+        else {
+            return false;
+        }
+    }
 }

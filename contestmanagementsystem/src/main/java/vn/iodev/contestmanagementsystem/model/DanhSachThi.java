@@ -199,4 +199,15 @@ public class DanhSachThi {
     public void setBangDiemThi(Map<String, Object> bangDiemThi) {
         this.bangDiemThi = bangDiemThi;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof DanhSachThi) {
+            DanhSachThi temp = (DanhSachThi)o;
+            return danhSachThiId == temp.getDanhSachThiId();
+        }
+        else {
+            return false;
+        }
+    }
 }
