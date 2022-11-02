@@ -120,34 +120,38 @@
                   <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
                 </template>
                 <template v-slot:item.noiDungThi="{ item, index }">
-                  <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">{{index2 + 1}}. {{ item2.noiDungThi }}</p>
+                  <div class="py-1">
+                    <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">
+                      {{index2 + 1}}. {{ item2.tenGoi }} - {{ item2.noiDungThi }}
+                    </p>
+                  </div>
                 </template>
                 
                 <template v-slot:item.action="{ item }">
                   <div v-if="chiTietCuocThi.tinhTrang == 1">
-                    <v-tooltip top>
+                    <!-- <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn small @click.stop="showEditThiSinh(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-pencil</v-icon>
                         </v-btn>
                       </template>
                       <span>Sửa</span>
-                    </v-tooltip>
+                    </v-tooltip> -->
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn small @click.stop="deleteThiSinh(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-delete</v-icon>
                         </v-btn>
                       </template>
-                      <span>Xóa</span>
+                      <span>Xóa đăng ký</span>
                     </v-tooltip>
                   </div>
                 </template>
               </v-data-table>
-              <pagination v-if="pageCountDanhSachThiSinh" :pageInput="pageDanhSachThiSinh" :total="totalDanhSachThiSinh" :pageCount="pageCountDanhSachThiSinh" @tiny:change-page="changePage"></pagination>
+              <!-- <pagination v-if="pageCountDanhSachThiSinh" :pageInput="pageDanhSachThiSinh" :total="totalDanhSachThiSinh" :pageCount="pageCountDanhSachThiSinh" @tiny:change-page="changePage"></pagination> -->
             </v-col>
           </v-row>
-          <v-row class="my-0 py-0 pt-3 mx-0">
+          <v-row class="my-0 py-0 pt-3 mx-0 mb-5">
              <v-flex>
               <v-row justify="end" class="my-0 mx-0 mt-3">
                 <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
@@ -183,30 +187,34 @@
                   <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : 'Phó đoàn'}}</div>
                 </template>
                 <template v-slot:item.noiDungThi="{ item, index }">
-                  <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">{{index2 + 1}}. {{ item2.noiDungThi }}</p>
+                  <div class="py-1">
+                    <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">
+                      {{index2 + 1}}. {{ item2.tenGoi }} - {{ item2.noiDungThi }}
+                    </p>
+                  </div>
                 </template>
                 <template v-slot:item.action="{ item }" >
                   <div v-if="chiTietCuocThi.tinhTrang == 1">
-                    <v-tooltip top>
+                    <!-- <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn small @click.stop="showEditHlv(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-pencil</v-icon>
                         </v-btn>
                       </template>
                       <span>Sửa</span>
-                    </v-tooltip>
+                    </v-tooltip> -->
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn small @click.stop="deleteHlv(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
                           <v-icon size="22">mdi-delete</v-icon>
                         </v-btn>
                       </template>
-                      <span>Xóa</span>
+                      <span>Xóa đăng ký</span>
                     </v-tooltip>
                   </div>
                 </template>
               </v-data-table>
-              <pagination v-if="pageCountDanhSachHlv" :pageInput="pageDanhSachHlv" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePage"></pagination>
+              <!-- <pagination v-if="pageCountDanhSachHlv" :pageInput="pageDanhSachHlv" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePage"></pagination> -->
             </v-col>
           </v-row>
         </div>
@@ -366,16 +374,18 @@
                     hide-details="auto"
                     return-object
                   >
-                    <!-- <template v-slot:selection="data">
-                      <span>{{data.item.noiDungThi}}</span>
+                    <template v-slot:selection="data">
+                      <span>{{data.item.tenGoi}}</span>
                       <span>&nbsp;-&nbsp;</span>
-                      <span>{{data.item.thiTapThe ? '(Thi đồng đội)' : '(Thi cá nhân)'}}</span>
+                      <span>{{data.item.noiDungThi}}</span>
                     </template>
                     <template v-slot:item="data">
-                      <span>{{data.item.noiDungThi}}</span>
+                      <span>{{data.item.tenGoi}}</span>
                       <span>&nbsp;-&nbsp;</span>
-                      <span>{{data.item.thiTapThe ? '(Thi đồng đội)' : '(Thi cá nhân)'}}</span>
-                    </template> -->
+                      <span>{{data.item.noiDungThi}}</span>
+                      <span v-if="data.item.maxDangKi">&nbsp; (Tối đa {{data.item.maxDangKi}} thí sinh)</span>
+                      <span v-if="data.item.maxThiSinh">&nbsp; (Tối đa {{data.item.maxThiSinh}} thí sinh / đội thi)</span>
+                    </template>
                   </v-autocomplete>
                   <v-btn small class="mr-0 ml-3" color="primary" :loading="loading" :disabled="loading" @click="addNoiDungThi">
                     <v-icon left>
@@ -394,6 +404,9 @@
                   class="table-base mt-2"
                   no-data-text="Không có"
                 >
+                  <template v-slot:item.tenNoiDung="{ item, index }">
+                    <div>{{ item.tenKhoiThi }} - {{ item.tenNoiDung }}</div>
+                  </template>
                   <template v-slot:item.thiTapThe="{ item, index }">
                     <div>{{ item.thiTapThe ? 'Đồng đội' : 'Cá nhân' }}</div>
                   </template>
@@ -403,7 +416,7 @@
                         class="flex input-form"
                         placeholder="Yêu cầu chọn đội thi"
                         hide-no-data
-                        :items="danhSachDoiThi"
+                        :items="filterDoiThiTheoKhoi(danhSachDoiThi, item)"
                         v-model="item.doiThiId"
                         item-text="tenGoi"
                         item-value="doiThiId"
@@ -571,11 +584,11 @@
                   return-object
                   multiple
                 >
-                  <!-- <template v-slot:item="data">
-                    <span>{{data.item.noiDungThi}}</span>
+                  <template v-slot:item="data">
+                    <span>{{data.item.tenGoi}}</span>
                     <span>&nbsp;-&nbsp;</span>
-                    <span>{{data.item.thiTapThe ? '(Thi đồng đội)' : '(Thi cá nhân)'}}</span>
-                  </template> -->
+                    <span>{{data.item.noiDungThi}}</span>
+                  </template>
                 </v-autocomplete>
               </v-col>
             </v-layout>
@@ -754,11 +767,12 @@ export default {
         dataInput: '',
         formData: '',
         chiTietCuocThi: '',
-        itemsPerPage: 30,
+        itemsPerPage: 500,
         keywordSearch: '',
         dialogTaoDoanThi: false,
         validFormTaoDoanThi: false,
         tenDoanThi: '',
+        danhSachDangKyThi: [],
         danhSachThiSinh: [],
         headersDanhSachThiSinh: [
           {
@@ -823,13 +837,14 @@ export default {
               align: 'left',
               value: 'noiDungThi',
               class: 'th-center',
-              width: 200
+              width: 400
           },
           {
               sortable: false,
               text: 'Thao tác',
               align: 'center',
-              value: 'action'
+              value: 'action',
+              width: 100
           }
         ],
         danhSachNoiDungThiThiSinh: [],
@@ -906,8 +921,7 @@ export default {
               text: 'Email',
               align: 'left',
               value: 'email',
-              class: 'th-center',
-              width: 200
+              class: 'th-center'
           },
           {
               sortable: false,
@@ -915,13 +929,14 @@ export default {
               align: 'left',
               value: 'noiDungThi',
               class: 'th-center',
-              width: 200
+              width: 400
           },
           {
               sortable: false,
               text: 'Thao tác',
               align: 'center',
-              value: 'action'
+              value: 'action',
+              width: 100
           }
         ],
         loadingDataDanhSachHlv: false,
@@ -963,10 +978,6 @@ export default {
       let vm = this
       vm.getChiTietCuocThi()
       vm.getDanhSachKhoiThi()
-      // 
-      vm.getDanhSachThi()
-      // 
-      console.log('userLogin', vm.userLogin)
       if (vm.userLogin.loaiTaiKhoan == 0) {
         vm.getThongTinToChuc()
       }
@@ -1102,9 +1113,27 @@ export default {
         vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.danhSachThiSinh = response
           vm.loadingDataDanhSachThiSinh = false
+          let dsNoiDungDaDangKy = []
+          for (let index = 0; index < vm.danhSachThiSinh.length; index++) {
+            const element = vm.danhSachThiSinh[index]
+            if (element && element['noiDungThi'].length) {
+              dsNoiDungDaDangKy = dsNoiDungDaDangKy.concat(element['noiDungThi'])
+            }
+          }
+          if (dsNoiDungDaDangKy.length) {
+            vm.danhSachKhoiThi.forEach(element => {
+              let counter = dsNoiDungDaDangKy.filter(function (item) {
+                return item.id == element.id
+              }).length
+              element['countThiSinh'] = counter
+            })
+          }
+          console.log('danhSachThiSinh', vm.danhSachThiSinh)
+          console.log('danhSachKhoiThi', vm.danhSachKhoiThi)
         }).catch(function () {
           vm.loadingDataDanhSachThiSinh = false
         })
+        vm.getDanhSachThi()
       },
       getDanhSachHlv (type) {
         let vm = this
@@ -1140,11 +1169,13 @@ export default {
         let filter = {
           collectionName: 'danhsachthis',
           data: {
-            cuocThiId: vm.id
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
-          console.log('danhSachThi', response)
+          vm.danhSachDangKyThi = response
         }).catch(function () {
         })
       },
@@ -1162,7 +1193,26 @@ export default {
             element['doiThiId'] = element.id
           });
           vm.danhSachDoiThi = response
-          console.log('danhSachDoiThi', vm.danhSachDoiThi)
+          // 
+          if (vm.danhSachDoiThi.length) {
+            vm.danhSachKhoiThi.forEach(element => {
+              let counter = vm.danhSachDoiThi.filter(function (item) {
+                return item.khoiThiId == element.id
+              }).length
+              element['countDoiThi'] = counter
+            })
+          }
+          //
+          if (vm.danhSachDangKyThi.length) {
+            vm.danhSachDoiThi.forEach(element => {
+              let counter = vm.danhSachDangKyThi.filter(function (item) {
+                return item.doiThiId == element.id
+              }).length
+              element['countThiSinh'] = counter
+            })
+          }
+          // 
+          console.log('danhSachDoiThi2', vm.danhSachDoiThi)
         }).catch(function () {
         })
       },
@@ -1205,7 +1255,10 @@ export default {
                 khoiThiId: el.id,
                 thiTapThe: el.thiTapThe,
                 doiThiId: doiThiId,
-                tenDoiThi: ''
+                tenDoiThi: '',
+                tenKhoiThi: el.tenGoi,
+                maxDangKi: el.maxDangKi,
+                maxThiSinh: el.maxThiSinh
               }
               vm.danhSachNoiDungThiThiSinh.push(item3)
             }
@@ -1218,6 +1271,7 @@ export default {
         let vm = this
         vm.typeAction = 'create'
         vm.getDanhSachDoiThi()
+        vm.danhSachNoiDungThiThiSinh = []
         vm.dialogAddThiSinh = true
         setTimeout(function () {
           vm.thongTinThiSinh = {
@@ -1303,12 +1357,21 @@ export default {
             toastr.error('Nội dung thi đã đăng ký')
             return
           }
+          // 
+          if (!vm.noiDungDuThiThiSinh.thiTapThe && vm.noiDungDuThiThiSinh.maxDangKi == vm.noiDungDuThiThiSinh.countThiSinh) {
+            toastr.error('Nội dung thi chỉ được đăng ký tối đa ' + vm.noiDungDuThiThiSinh.maxDangKi + ' thí sinh')
+            return
+          }
+          // 
           let item = {
-            tenNoiDung: vm.noiDungDuThiThiSinh.tenGoi,
+            tenNoiDung: vm.noiDungDuThiThiSinh.noiDungThi,
             khoiThiId: vm.noiDungDuThiThiSinh.id,
             thiTapThe: vm.noiDungDuThiThiSinh.thiTapThe,
             doiThiId: '',
-            tenDoiThi: ''
+            tenDoiThi: '',
+            tenKhoiThi: vm.noiDungDuThiThiSinh.tenGoi,
+            maxThiSinh: vm.noiDungDuThiThiSinh.maxThiSinh,
+            maxDangKi: vm.noiDungDuThiThiSinh.maxDangKi
           }
           vm.danhSachNoiDungThiThiSinh.push(item)
           vm.$refs.formAddThiSinh.validate()
@@ -1325,6 +1388,7 @@ export default {
         let vm = this
         vm.indexNoiDungThiUpDate = index
         vm.noiDungThiUpDate = item
+        vm.tenDoiThiTaoMoi = ''
         vm.dialogAddDoiThi = true
       },
       submitCreateDoiThi () {
@@ -1390,6 +1454,7 @@ export default {
       showCreateHlv () {
         let vm = this
         vm.typeAction = 'create'
+        vm.noiDungDuThiHlv = []
         vm.dialogAddHlv = true
         setTimeout(function () {
           vm.thongTinHlv = {
@@ -1482,34 +1547,57 @@ export default {
       },
       deleteThiSinh (item) {
         let vm = this
+        let danhSachThi = []
+        danhSachThi = vm.danhSachDangKyThi ? vm.danhSachDangKyThi.filter(function (item2) {
+          return item2.thiSinhId == item.id
+        }) : []
         vm.$store.commit('SET_SHOWCONFIRM', true)
         let confirm = {
           auth: false,
           title: 'Xóa thí sinh',
-          message: 'Bạn có chắc chắn muốn xóa "' + item.hoTen + '"',
+          message: 'Bạn có chắc chắn muốn xóa thí sinh "' + item.hoTen + '"',
           button: {
             yes: 'Có',
             no: 'Không'
           },
           callback: () => {
-            let filter = {
-              collectionName: 'thisinhs',
-              id: item.id
+            if (danhSachThi && danhSachThi.length) {
+              let arrDsThi = []
+              for (let index = 0; index < danhSachThi.length; index++) {
+                let filter = {
+                  collectionName: 'danhsachthis',
+                  id: danhSachThi[index]['danhSachThiId']
+                }
+                arrDsThi.push(vm.$store.dispatch('collectionDelete', filter).then(function (result) {}))
+              }
+              Promise.all(arrDsThi).then(values => {
+                vm.xoaThiSinh(item.id)
+              }).catch(function () {
+              })
+            } else {
+              vm.xoaThiSinh(item.id)
             }
-            vm.loading = true
-            vm.$store.dispatch('collectionDelete', filter).then(function (result) {
-              vm.loading = false
-              toastr.remove()
-              toastr.success('Xóa thí sinh thành công')
-              vm.getDanhSachThiSinh()
-            }).catch(function (response) {
-              vm.loading = false
-              toastr.remove()
-              toastr.error('Xóa thí sinh thất bại')
-            })
           }
         }
         vm.$store.commit('SET_CONFIG_CONFIRM_DIALOG', confirm)
+      },
+      xoaThiSinh (thisinhid) {
+        let vm = this
+        let filter = {
+          collectionName: 'thisinhs',
+          id: thisinhid
+        }
+        vm.loading = true
+        vm.$store.dispatch('collectionDelete', filter).then(function (result) {
+          vm.loading = false
+          toastr.remove()
+          toastr.success('Xóa thí sinh thành công')
+          vm.getDanhSachThiSinh()
+        }).catch(function (response) {
+          vm.loading = false
+          toastr.remove()
+          toastr.error('Xóa thí sinh thất bại')
+        })
       },
       deleteHlv (item) {
         let vm = this
@@ -1541,6 +1629,22 @@ export default {
           }
         }
         vm.$store.commit('SET_CONFIG_CONFIRM_DIALOG', confirm)
+      },
+      filterDoiThiTheoKhoi (doithis, noidungthi) {
+        if (!doithis || !doithis.length) {
+          return []
+        } else {
+          let doiThiKhoi = doithis.filter(function (item) {
+            return item.khoiThiId == noidungthi.khoiThiId
+          })
+          // console.log('23123123123', doithis, noidungthi)
+          if (noidungthi.thiTapThe && noidungthi.maxThiSinh) {
+            doiThiKhoi = doithis.filter(function (item) {
+              return item.khoiThiId == noidungthi.khoiThiId && item.countThiSinh < noidungthi.maxThiSinh
+            })
+          }
+          return doiThiKhoi
+        }
       },
       checkRoleAction (role) {
         let vm = this
@@ -1624,7 +1728,6 @@ export default {
       changePage (config) {
         let vm = this
         vm.pageDanhSachThiSinh = config.page
-        vm.getDanhSachThiSinh()
       },
       changePageDanhSachHlv (config) {
         let vm = this
