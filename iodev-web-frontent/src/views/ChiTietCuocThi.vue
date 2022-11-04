@@ -6,11 +6,88 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <div style="text-align: center;">
-            <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
-              <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
-            </a>
-          </div>
+          <v-row class="mx-0 my-0 py-0" style="">
+            <v-col cols="12" md="6" class="py-2">
+              <div style="text-align: center;">
+                <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+                  <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
+                </a>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6" class="py-4">
+              <v-layout wrap>
+                <v-card
+                  color="#fff"
+                  dark
+                  height="95"
+                  class="mt-5"
+                  style="max-width: 320px; background: #397cbf;margin: 0 auto"
+                >
+                  <v-card-title class="align-start" >
+                    <div class="overflow-hidden mt-n9 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
+                    style="max-width: 100%;">
+                      <div class="pa-5">
+                        <v-icon size="36">mdi-bank</v-icon>
+                      </div>
+                    </div>
+                    <div class="v-card--material__title" style="width: 200px">
+                      <div style="color: #fff; font-size: 18px;" class="mb-2 text-right"> Số đoàn thi tham dự</div>
+                      <div class="text-right" style="font-size: 36px;font-weight: 400; color: #fff">
+                        20
+                      </div>
+                    </div>
+                  </v-card-title>
+                </v-card>
+
+                <v-card
+                  color="#fff"
+                  dark
+                  height="95"
+                  class="mt-5"
+                  style="max-width: 320px; background: #397cbf;margin: 0 auto"
+                >
+                  <v-card-title class="align-start" >
+                    <div class="overflow-hidden mt-n9 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
+                    style="max-width: 100%;">
+                      <div class="pa-5" style="background: #4caf50">
+                        <v-icon size="36">mdi-account-group-outline</v-icon>
+                      </div>
+                    </div>
+                    <div class="v-card--material__title" style="width: 200px">
+                      <div style="color: #fff; font-size: 18px;" class="mb-2 text-right"> Số đội tham dự</div>
+                      <div class="text-right" style="font-size: 36px;font-weight: 400; color: #fff">
+                        2
+                      </div>
+                    </div>
+                  </v-card-title>
+                </v-card> 
+
+                <v-card
+                  color="#fff"
+                  dark
+                  height="95"
+                  class=""
+                  style="max-width: 320px; background: #397cbf;margin: 0 auto; margin-top: 50px"
+                >
+                  <v-card-title class="align-start" >
+                    <div class="overflow-hidden mt-n9 v-card--material__sheet v-sheet theme--light elevation-6 rounded"
+                    style="max-width: 100%;">
+                      <div class="pa-5" style="background: #e91e63">
+                        <v-icon size="36">mdi-account-circle-outline</v-icon>
+                      </div>
+                    </div>
+                    <div class="v-card--material__title" style="width: 200px">
+                      <div style="color: #fff; font-size: 18px;" class="mb-2 text-right"> Số thí sinh tham dự</div>
+                      <div class="text-right" style="font-size: 36px;font-weight: 400; color: #fff">
+                        15
+                      </div>
+                    </div>
+                  </v-card-title>
+                </v-card>
+              </v-layout>
+            </v-col>
+          </v-row>
+
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -34,6 +111,7 @@
               </v-btn>
             </v-col>
           </v-row>
+          
           <div>
             <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px;">
               <v-col cols="12" class="py-2">
@@ -71,7 +149,7 @@
           </div>
         </div>
 
-        <div>
+        <!-- <div>
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -109,7 +187,6 @@
                     <v-flex class="py-2 px-2" v-for="(itemNd2, indexNd2) in item.noiDungThi" :key="indexNd2" :style="'width:' + maxLengthHeader + 'px'" style="border-right: 1px solid #dedede">
                       <p v-if="itemNd2.thiTapThe" class="mb-1">Số đội: 
                         <span  style="color: #2161B1">{{itemNd2.soDoi}}</span>
-                        <!-- <a v-else href="javascript:;" style="color: #2161B1" @click.stop="showDsDoiThi(item, itemNd2)">{{itemNd2.soDoi}}</a> -->
                       </p>
                       <p class="mb-1" style="cursor: pointer" @click.stop="showDsThiSinh(item, itemNd2)">Số thí sinh: 
                         <span v-if="itemNd2.soThiSinh == 0" style="color: #2161B1">{{itemNd2.soThiSinh}}</span>
@@ -137,7 +214,7 @@
               <pagination v-if="totalTongHopDangKy" :pageInput="pageTongHopDangKy-1" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
             </v-col>
           </v-row>
-        </div>
+        </div> -->
 
         <div>
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">

@@ -6,12 +6,62 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <div style="text-align: center;">
-            <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
-              <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
-            </a>
-          </div>
-          
+          <v-row class="mx-0 my-0 py-0" style="">
+            <v-col cols="12" md="7" class="py-2">
+              <div style="text-align: center;">
+                <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
+                  <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
+                </a>
+              </div>
+            </v-col>
+            <v-col cols="12" md="5" class="py-2">
+              <v-card
+                color="#fff"
+                dark
+                height="95"
+                class="mt-5"
+                style="max-width: 320px; background: #397cbf;margin: 0 auto"
+              >
+                <v-card-title class="align-start" >
+                  <div class="overflow-hidden mt-n9 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
+                   style="max-width: 100%;">
+                    <div class="pa-5">
+                      <v-icon size="36">mdi-account-group-outline</v-icon>
+                    </div>
+                  </div>
+                  <div class="v-card--material__title" style="width: 200px">
+                    <div style="color: #fff; font-size: 18px;" class="mb-2 text-right"> Số đội đăng ký</div>
+                    <div class="text-right" style="font-size: 36px;font-weight: 400; color: #fff">
+                      2
+                    </div>
+                  </div>
+                </v-card-title>
+              </v-card>
+
+              <v-card
+                color="#fff"
+                dark
+                height="95"
+                class=""
+                style="max-width: 320px; background: #397cbf;margin: 0 auto; margin-top: 50px"
+              >
+                <v-card-title class="align-start" >
+                  <div class="overflow-hidden mt-n9 v-card--material__sheet v-sheet theme--light elevation-6 rounded"
+                   style="max-width: 100%;">
+                    <div class="pa-5" style="background: #e91e63">
+                      <v-icon size="36">mdi-account-circle-outline</v-icon>
+                    </div>
+                  </div>
+                  <div class="v-card--material__title" style="width: 200px">
+                    <div style="color: #fff; font-size: 18px;" class="mb-2 text-right"> Số thí sinh đăng ký</div>
+                    <div class="text-right" style="font-size: 36px;font-weight: 400; color: #fff">
+                      15
+                    </div>
+                  </div>
+                </v-card-title>
+              </v-card>
+            </v-col>
+          </v-row>
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -78,14 +128,14 @@
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
-                Danh sách dự thi
+                Danh sách đăng ký dự thi
               </div>
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
           </v-row>
           <v-row class="my-0 py-0 pt-3 mx-0">
-            <v-flex>
+            <!-- <v-flex>
               <v-row justify="end" class="my-0 mx-0 mt-3">
                 <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
                   <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
@@ -100,122 +150,122 @@
                   </v-btn>
                 </v-col>
               </v-row>
-            </v-flex>
-            <v-col cols="12"  class="pt-0 px-0">
+            </v-flex> -->
+            <v-col cols="12"  class="py-0 px-0">
               <v-data-table
                 :headers="headersDanhSachThiSinh"
-                :items="danhSachThiSinh"
+                :items="[]"
                 :items-per-page="itemsPerPage"
                 item-key="id"
                 hide-default-footer
-                class="table-base mt-2"
+                class="table-thisinh table-base mt-2"
                 no-data-text="Không có"
                 :loading="loadingDataDanhSachThiSinh"
                 loading-text="Đang tải... "
               >
-                <template v-slot:item.index="{ item, index }">
-                  <div>{{ (pageDanhSachThiSinh+1) * itemsPerPage - itemsPerPage + index + 1 }}</div>
-                </template>
-                <template v-slot:item.gioiTinh="{ item, index }">
-                  <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
-                </template>
-                <template v-slot:item.noiDungThi="{ item, index }">
-                  <div class="py-1">
-                    <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">
-                      {{index2 + 1}}. {{ item2.tenGoi }} - {{ item2.noiDungThi }}
-                    </p>
-                  </div>
-                </template>
-                
-                <template v-slot:item.action="{ item }">
-                  <div v-if="chiTietCuocThi.tinhTrang == 1">
-                    <!-- <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="showEditThiSinh(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
-                          <v-icon size="22">mdi-pencil</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Sửa</span>
-                    </v-tooltip> -->
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="deleteThiSinh(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
-                          <v-icon size="22">mdi-delete</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Xóa đăng ký</span>
-                    </v-tooltip>
-                  </div>
-                </template>
               </v-data-table>
-              <!-- <pagination v-if="pageCountDanhSachThiSinh" :pageInput="pageDanhSachThiSinh" :total="totalDanhSachThiSinh" :pageCount="pageCountDanhSachThiSinh" @tiny:change-page="changePage"></pagination> -->
             </v-col>
           </v-row>
-          <v-row class="my-0 py-0 pt-3 mx-0 mb-5">
-             <v-flex>
-              <v-row justify="end" class="my-0 mx-0 mt-3">
-                <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
-                  <div class="background-triangle-small"> <v-icon size="20" color="white">mdi-view-dashboard-outline</v-icon></div>
-                  DANH SÁCH HUẤN LUYỆN VIÊN ĐĂNG KÝ
-                </v-col>
-                <v-spacer></v-spacer>
-            
-                <v-col v-if="thongTinToChuc && userLogin.loaiTaiKhoan == 0 && chiTietCuocThi.tinhTrang == 1" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
-                  <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateHlv">
-                    <v-icon size="18">mdi-plus</v-icon>&nbsp;
-                    Thêm huấn luyện viên
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-flex>
-            <v-col cols="12"  class="pt-0 px-0">
-              <v-data-table
-                :headers="headersDanhSachHlv"
-                :items="danhSachHlv"
-                :items-per-page="itemsPerPage"
-                item-key="id"
-                hide-default-footer
-                class="table-base mt-2"
-                no-data-text="Không có"
-                :loading="loadingDataDanhSachHlv"
-                loading-text="Đang tải... "
+          <v-row class="wrap-noidung-thi my-0 py-0 mx-0 pb-5">
+            <v-expansion-panels flat v-model="panelModel" multiple>
+              <v-expansion-panel
+                v-for="(item2,i) in danhSachKhoiThi"
+                :key="i"
+                readonly
               >
-                <template v-slot:item.index="{ item, index }">
-                  <div>{{ (pageDanhSachHlv+1) * itemsPerPage - itemsPerPage + index + 1 }}</div>
-                </template>
-                <template v-slot:item.truongPhoDoan="{ item, index }">
-                  <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : 'Phó đoàn'}}</div>
-                </template>
-                <template v-slot:item.noiDungThi="{ item, index }">
-                  <div class="py-1">
-                    <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">
-                      {{index2 + 1}}. {{ item2.tenGoi }} - {{ item2.noiDungThi }}
-                    </p>
+                <v-expansion-panel-header>
+                  <div class="text-header">
+                    {{ item2.tenGoi }} - {{ item2.noiDungThi }}
+                    <span v-if="item2.maxDangKi">&nbsp; (Tối đa {{item2.maxDangKi}} thí sinh)</span>
+                    <span v-if="item2.maxThiSinh">&nbsp; (Tối đa {{item2.maxThiSinh}} thí sinh / đội thi)</span>
                   </div>
-                </template>
-                <template v-slot:item.action="{ item }" >
-                  <div v-if="chiTietCuocThi.tinhTrang == 1">
-                    <!-- <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="showEditHlv(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
-                          <v-icon size="22">mdi-pencil</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Sửa</span>
-                    </v-tooltip> -->
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn small @click.stop="deleteHlv(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
-                          <v-icon size="22">mdi-delete</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>Xóa đăng ký</span>
-                    </v-tooltip>
-                  </div>
-                </template>
-              </v-data-table>
-              <!-- <pagination v-if="pageCountDanhSachHlv" :pageInput="pageDanhSachHlv" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePage"></pagination> -->
-            </v-col>
+                  
+                  <v-autocomplete
+                    style="max-width: 350px"
+                    class="flex input-form mr-2"
+                    hide-no-data
+                    :items="itemsGioiTinh"
+                    v-model="thongTinThiSinh['gioiTinh']"
+                    item-text="tenMuc"
+                    item-value="maMuc"
+                    dense
+                    solo
+                    hide-details="auto"
+                    placeholder="Chọn thí sinh"
+                  >
+                    <template v-slot:append>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn small class="" v-bind="attrs" v-on="on" color="primary" @click="showCreateThiSinh" style="margin-right: -15px">
+                            <v-icon size="18">
+                              mdi-plus
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Tạo thí sinh mới</span>
+                      </v-tooltip>
+                    </template>
+                  </v-autocomplete>
+                  <v-btn small color="primary" class="btn-form mx-0 text-white ml-2" @click="" style="max-width: 120px">
+                    <v-icon size="18">mdi-content-save-move-outline</v-icon>&nbsp;
+                    Đăng ký
+                  </v-btn>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <v-data-table
+                    v-if="item2.thiSinhs.length"
+                    :headers="headersDanhSachThiSinh"
+                    :items="item2.thiSinhs"
+                    :items-per-page="itemsPerPage"
+                    item-key="id"
+                    hide-default-footer
+                    hide-default-header
+                    class="table-group-thisinh table-base"
+                    no-data-text="Không có"
+                    :loading="loadingDataDanhSachThiSinh"
+                    loading-text="Đang tải... "
+                  >
+                    <template v-slot:item.index="{ item, index }">
+                      <div>{{ index + 1 }}</div>
+                    </template>
+                    <template v-slot:item.gioiTinh="{ item }">
+                      <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
+                    </template>
+                    <template v-slot:item.hoTen="{ item }">
+                      <div>{{ item.hoTen}}</div>
+                    </template>
+                    <template v-slot:item.ngaySinh="{ item }">
+                      <div>{{ item.ngaySinh}}</div>
+                    </template>
+                    <template v-slot:item.doiTuongThi="{ item }">
+                      <div>{{ item.doiTuongThi}}</div>
+                    </template>
+                    <template v-slot:item.nganhDaoTao="{ item }">
+                      <div>{{ item.nganhDaoTao}}</div>
+                    </template>
+                    <template v-slot:item.soDienThoai="{ item }">
+                      <div>{{ item.soDienThoai}}</div>
+                    </template>
+                    <template v-slot:item.email="{ item }">
+                      <div>{{ item.email}}</div>
+                    </template>
+                    <template v-slot:item.action="{ item }">
+                      <div v-if="chiTietCuocThi.tinhTrang == 1">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn small @click.stop="deleteThiSinh(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
+                              <v-icon size="22">mdi-delete</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Xóa đăng ký</span>
+                        </v-tooltip>
+                      </div>
+                    </template>
+                  </v-data-table>
+                  <div v-else class="ml-5 py-2">KHÔNG CÓ THÍ SINH</div>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-row>
         </div>
       </v-flex>
@@ -231,7 +281,7 @@
           dark
           color="primary" class="px-3"
         >
-          <v-toolbar-title v-if="typeAction === 'create'">Đăng ký thí sinh</v-toolbar-title>
+          <v-toolbar-title v-if="typeAction === 'create'">Tạo mới thí sinh</v-toolbar-title>
           <v-toolbar-title v-else>Cập nhật thông tin thí sinh</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
@@ -359,7 +409,7 @@
                   hide-details="auto"
                 ></v-textarea>
               </v-col>
-              <v-col cols="12" class="py-0 mb-2">
+              <!-- <v-col cols="12" class="py-0 mb-2">
                 <label>Nội dung dự thi</label>
                 <v-layout>
                   <v-autocomplete
@@ -452,7 +502,7 @@
                     </div>
                   </template>
                 </v-data-table>
-              </v-col>
+              </v-col> -->
             </v-layout>
           </v-form>
         </v-card-text>
@@ -467,7 +517,7 @@
             <v-icon left>
               mdi-content-save
             </v-icon>
-            <span>Đăng ký</span>
+            <span>Tạo mới</span>
           </v-btn>
           <v-btn small v-else class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="submitUpdateThiSinh">
             <v-icon left>
@@ -780,35 +830,39 @@ export default {
               text: 'STT',
               align: 'center',
               value: 'index',
-              width: 50
+              width: '5%'
           },
           {
               sortable: false,
               text: 'Tên thí sinh',
               align: 'left',
               value: 'hoTen',
-              class: 'th-center py-2'
+              class: 'th-center py-2',
+              width: '20%'
           },
           {
               sortable: false,
               text: 'Giới tính',
               align: 'left',
               value: 'gioiTinh',
-              class: 'th-center'
+              class: 'th-center',
+              width: '10%'
           },
           {
               sortable: false,
               text: 'Ngày sinh',
               align: 'left',
               value: 'ngaySinh',
-              class: 'th-center'
+              class: 'th-center',
+              width: '10%'
           },
           {
               sortable: false,
               text: 'Đối tượng thi',
               align: 'left',
               value: 'doiTuongThi',
-              class: 'th-center py-2'
+              class: 'th-center py-2',
+              width: '10%'
           },
           {
               sortable: false,
@@ -822,29 +876,23 @@ export default {
               text: 'Số điện thoại',
               align: 'left',
               value: 'soDienThoai',
-              class: 'th-center py-2'
+              class: 'th-center py-2',
+              width: '10%'
           },
           {
               sortable: false,
               text: 'Email',
               align: 'left',
               value: 'email',
-              class: 'th-center py-2'
-          },
-          {
-              sortable: false,
-              text: 'Nội dung thi',
-              align: 'left',
-              value: 'noiDungThi',
-              class: 'th-center',
-              width: 400
+              class: 'th-center py-2',
+              width: '15%'
           },
           {
               sortable: false,
               text: 'Thao tác',
               align: 'center',
               value: 'action',
-              width: 100
+              width: '7%'
           }
         ],
         danhSachNoiDungThiThiSinh: [],
@@ -972,6 +1020,7 @@ export default {
         required: [
           v => (v !== '' && v !== null && v !== undefined) || 'Thông tin bắt buộc'
         ],
+        panelModel: []
       }
     },
     created () {
@@ -1022,7 +1071,45 @@ export default {
           }
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+          response.forEach(element => {
+            element.thiSinhs = [
+              {
+                  "id": "d127f858-5aef-420e-a3a4-db79f418c2fe",
+                  "hoTen": "Mai Văn Quang",
+                  "gioiTinh": 0,
+                  "ngaySinh": "31-12-2000",
+                  "email": null,
+                  "soDienThoai": null,
+                  "doiTuongThi": null,
+                  "nganhDaoTao": "KHMT",
+                  "datGiaiThuong": "",
+                  "caNhanId": null,
+                  "doanThiId": "89338b7b-d010-459e-ab6d-d56f8aafdec4",
+                  "thoiGianTao": 1666756906699,
+                  "thoiGianCapNhat": 1666756906699
+              },
+              {
+                  "id": "c1ad921b-beff-4e8a-ac60-6a74971c81a9",
+                  "hoTen": "Lê Phước Anh Kha",
+                  "gioiTinh": 0,
+                  "ngaySinh": "10-04-2003",
+                  "email": "lephuocanhkha2003@gmail.com",
+                  "soDienThoai": "0354042370",
+                  "doiTuongThi": null,
+                  "nganhDaoTao": "CNTT",
+                  "datGiaiThuong": "",
+                  "caNhanId": null,
+                  "doanThiId": "2a81cc88-2ecf-4dbe-8a2c-9a959fc4fe8e",
+                  "thoiGianTao": 1666756900696,
+                  "thoiGianCapNhat": 1666756900696
+              }
+            ]
+          })
           vm.danhSachKhoiThi = response
+          vm.panelModel = Array.from(vm.danhSachKhoiThi, function (item, index) {
+            return index
+          })
+          console.log('dsKhoithi', vm.danhSachKhoiThi)
         }).catch(function () {
         })
       },
@@ -1270,7 +1357,7 @@ export default {
       showCreateThiSinh () {
         let vm = this
         vm.typeAction = 'create'
-        vm.getDanhSachDoiThi()
+        // vm.getDanhSachDoiThi()
         vm.danhSachNoiDungThiThiSinh = []
         vm.dialogAddThiSinh = true
         setTimeout(function () {
@@ -1291,16 +1378,16 @@ export default {
       submitCreateThiSinh () {
         let vm = this
         console.log('vm.thongTinThiSinh', vm.thongTinThiSinh)
-        console.log('vm.thongTinThiSinh', vm.danhSachNoiDungThiThiSinh)
+        // console.log('vm.thongTinThiSinh', vm.danhSachNoiDungThiThiSinh)
         if (vm.loading) {
           return
         }
         vm.loading = true
         if (vm.$refs.formAddThiSinh.validate()) {
-          if (!vm.danhSachNoiDungThiThiSinh.length) {
-            toastr.error('Vui lòng chọn nội dung đăng ký dự thi')
-            return
-          }
+          // if (!vm.danhSachNoiDungThiThiSinh.length) {
+          //   toastr.error('Vui lòng chọn nội dung đăng ký dự thi')
+          //   return
+          // }
           vm.thongTinThiSinh.ngaySinh = vm.formatDateInput(vm.ngaySinhCreate)
           vm.thongTinThiSinh.doanThiId = vm.thongTinDoanThi.id
           let filter = {
@@ -1314,7 +1401,7 @@ export default {
             toastr.remove()
             toastr.success('Thêm mới thành công')
             vm.dialogAddThiSinh = false
-            vm.taoDanhSachThi(result.id)
+            // vm.taoDanhSachThi(result.id)
           }).catch(function (response) {
             vm.loading = false
             toastr.remove()
@@ -1783,5 +1870,59 @@ export default {
     box-sizing: border-box;
     // border-radius: 7px;
     height: 100%;
+  }
+  .wrap-noidung-thi .v-expansion-panel-header__icon, .table-thisinh tbody {
+    display: none;
+  }
+  .wrap-noidung-thi .v-expansion-panel {
+    border: 1px solid #dedede;
+    border-radius: 0px !important;
+    border-top: 0;
+  }
+  .wrap-noidung-thi .v-expansion-panel-header {
+    background: #ebebeb;
+    font-size: 14px;
+    border-bottom: 1px solid #dedede;
+    padding: 8px 16px;
+    min-height: 48px !important;
+  }
+  .wrap-noidung-thi .v-expansion-panel-header .text-header {
+    font-weight: 600;
+    color: #2161b1;
+  }
+  .wrap-noidung-thi .v-expansion-panel--active + .v-expansion-panel {
+    margin-top: 0px !important;
+  }
+  .wrap-noidung-thi .v-expansion-panel-content__wrap {
+    // padding: 8px 16px;
+    padding: 0px;
+  }
+  .wrap-noidung-thi .v-expansion-panel--active {
+    margin-top: 0px !important;
+  }
+  .table-group-thisinh tbody  tr  td:nth-child(1){
+    width: 5% !important;
+  }
+  .table-group-thisinh tbody tr td:nth-child(2){
+    width: 20% !important;
+  }
+  .table-group-thisinh tbody > tr > td:nth-child(3){
+    width: 10%;
+  }
+  .table-group-thisinh tbody > tr > td:nth-child(4){
+    width: 10%;
+  }
+  .table-group-thisinh tbody > tr > td:nth-child(5){
+    width: 10%;
+  }
+  
+  .table-group-thisinh tbody > tr > td:nth-child(7){
+    width: 10%;
+  }
+  .table-group-thisinh tbody > tr > td:nth-child(8){
+    width: 15%;
+  }
+  .table-group-thisinh tbody > tr > td:nth-child(9){
+    width: 7%;
   }
 </style>
