@@ -113,6 +113,27 @@ public class DanhSachThiController {
         return ResponseEntity.ok().body(danhSachThi);
     }
 
+    private void validateLimited(DanhSachThi danhSachThi, KhoiThi khoiThi) throws Exception {
+        if (khoiThi.getThiTapThe()) {
+            List<DoiThi> lstDoiThis = doiThiRepository.findByCuocThiIdAndKhoiThiId(danhSachThi.getCuocThi().getId(), khoiThi.getId());
+
+            int maxDoi = khoiThi.getMaxDangKi();
+            if (maxDoi <= lstDoiThis.size()) {
+                throw new ValidationException("Number of DoiThi limited!");
+            }
+        }
+        else if (khoiThi.getThiSangTao()) {
+
+        }
+        else {
+            int maxThiSinh = khoiThi.getMaxThiSinh();
+            List<DanhSachThi> lstDst = danhSachThiRepository.findByCuocThiIdAndKhoiThiId(danhSachThi.getCuocThi().getId(), danhSachThi.getKhoiThiId());
+            if (maxThiSinh <= lstDst.size()) {
+                throw new ValidationException("Number of ThiSinh limited!");
+            }
+        }
+    }
+
     private void validateRelationConstraint(DanhSachThi danhSachThi) throws Exception {
         Optional<ThiSinh> thiSinh = thiSinhRepository.findById(danhSachThi.getThiSinhId());
         if (!thiSinh.isPresent()) {
@@ -122,6 +143,9 @@ public class DanhSachThiController {
             Optional<KhoiThi> khoiThi = khoiThiRepository.findById(danhSachThi.getKhoiThiId());
             if (!khoiThi.isPresent()) {
                 throw new ValidationException("KhoiThi is not exists!");
+            }
+            else {
+                validateLimited(danhSachThi, khoiThi.get());
             }
         }
         if (danhSachThi.getDoiThiId() != null) {
