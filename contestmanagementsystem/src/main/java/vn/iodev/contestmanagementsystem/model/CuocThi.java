@@ -15,113 +15,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity(name = "T_CuocThi")
 @Table(name = "T_CuocThi")
+@Setter
+@Getter
+@NoArgsConstructor
 public class CuocThi {
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTenGoi() {
-        return tenGoi;
-    }
-
-    public void setTenGoi(String tenGoi) {
-        this.tenGoi = tenGoi;
-    }
-
-    public String getTiengAnh() {
-        return tiengAnh;
-    }
-
-    public void setTiengAnh(String tiengAnh) {
-        this.tiengAnh = tiengAnh;
-    }
-
-    public String getSerieCuocThi() {
-        return serieCuocThi;
-    }
-
-    public void setSerieCuocThi(String serieCuocThi) {
-        this.serieCuocThi = serieCuocThi;
-    }
-
-    public Integer getLanToChuc() {
-        return lanToChuc;
-    }
-
-    public void setLanToChuc(Integer lanToChuc) {
-        this.lanToChuc = lanToChuc;
-    }
-
-    public String getDonViToChuc() {
-        return donViToChuc;
-    }
-
-    public void setDonViToChuc(String donViToChuc) {
-        this.donViToChuc = donViToChuc;
-    }
-
-    public String getToChucId() {
-        return toChucId;
-    }
-
-    public void setToChucId(String toChucId) {
-        this.toChucId = toChucId;
-    }
-
-    public Date getNgayBatDau() {
-        return ngayBatDau;
-    }
-
-    public void setNgayBatDau(Date ngayBatDau) {
-        this.ngayBatDau = ngayBatDau;
-    }
-
-    public Date getNgayKetThuc() {
-        return ngayKetThuc;
-    }
-
-    public void setNgayKetThuc(Date ngayKetThuc) {
-        this.ngayKetThuc = ngayKetThuc;
-    }
-
-    public String getThongTinMoTa() {
-        return thongTinMoTa;
-    }
-
-    public void setThongTinMoTa(String thongTinMoTa) {
-        this.thongTinMoTa = thongTinMoTa;
-    }
-
-    public String getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
-    }
-
-    public String getHinhAnh() {
-        return hinhAnh;
-    }
-
-    public void setHinhAnh(String hinhAnh) {
-        this.hinhAnh = hinhAnh;
-    }
-
-    public Integer getTinhTrang() {
-        return tinhTrang;
-    }
-
-    public void setTinhTrang(Integer tinhTrang) {
-        this.tinhTrang = tinhTrang;
-    }
-
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
@@ -159,14 +62,6 @@ public class CuocThi {
     @Column(name = "diaDiemToChuc", length = 1024)
     private String diaDiemToChuc;
 
-    public String getDiaDiemToChuc() {
-        return diaDiemToChuc;
-    }
-
-    public void setDiaDiemToChuc(String diaDiemToChuc) {
-        this.diaDiemToChuc = diaDiemToChuc;
-    }
-
     @Column(name = "thongTinMoTa", columnDefinition = "TEXT")
     private String thongTinMoTa;
 
@@ -179,8 +74,6 @@ public class CuocThi {
     @Column(name = "tinhTrang")
     private Integer tinhTrang;
     
-    public CuocThi() {}
-
     public CuocThi(
         String id,
         String tenGoi,

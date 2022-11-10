@@ -17,89 +17,16 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity(name = "T_HuanLuyenVien")
 @Table(name = "T_HuanLuyenVien")
+@NoArgsConstructor
+@Setter
+@Getter
 public class HuanLuyenVien {
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getHoTen() {
-        return hoTen;
-    }
-
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
-
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
-
-    public String getCaNhanId() {
-        return caNhanId;
-    }
-
-    public void setCaNhanId(String caNhanId) {
-        this.caNhanId = caNhanId;
-    }
-
-    public String getDoanThiId() {
-        return doanThiId;
-    }
-
-    public void setDoanThiId(String doanThiId) {
-        this.doanThiId = doanThiId;
-    }
-
-    public String getKhoiThiId() {
-        return khoiThiId;
-    }
-
-    public void setKhoiThiId(String khoiThiId) {
-        this.khoiThiId = khoiThiId;
-    }
-
-    public Integer getTruongPhoDoan() {
-        return truongPhoDoan;
-    }
-
-    public void setTruongPhoDoan(Integer truongPhoDoan) {
-        this.truongPhoDoan = truongPhoDoan;
-    }
-
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
-    }
-
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
@@ -137,22 +64,6 @@ public class HuanLuyenVien {
     @Transient
     private String tenToChuc;
 
-    public String getTenToChuc() {
-        return tenToChuc;
-    }
-
-    public void setTenToChuc(String tenToChuc) {
-        this.tenToChuc = tenToChuc;
-    }
-
-    public String getTenDoanThi() {
-        return tenDoanThi;
-    }
-
-    public void setTenDoanThi(String tenDoanThi) {
-        this.tenDoanThi = tenDoanThi;
-    }
-
     @JsonIgnore
     @Transient
     private String tenDoanThi;
@@ -162,16 +73,6 @@ public class HuanLuyenVien {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private CuocThi cuocThi;
-
-    public CuocThi getCuocThi() {
-        return cuocThi;
-    }
-
-    public void setCuocThi(CuocThi cuocThi) {
-        this.cuocThi = cuocThi;
-    }
-    
-    public HuanLuyenVien() {}
 
     public HuanLuyenVien(
         String hoTen,

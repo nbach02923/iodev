@@ -18,91 +18,17 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import vn.iodev.contestmanagementsystem.converter.BangDiemThiConverter;
 
 @Entity(name = "T_DanhSachThi")
 @Table(name = "T_DanhSachThi")
+@NoArgsConstructor
+@Setter
+@Getter
 public class DanhSachThi {
-    public String getThiSinhId() {
-        return thiSinhId;
-    }
-
-    public void setThiSinhId(String thiSinhId) {
-        this.thiSinhId = thiSinhId;
-    }
-
-    public String getKhoiThiId() {
-        return khoiThiId;
-    }
-
-    public void setKhoiThiId(String khoiThiId) {
-        this.khoiThiId = khoiThiId;
-    }
-
-    public String getDoiThiId() {
-        return doiThiId;
-    }
-
-    public void setDoiThiId(String doiThiId) {
-        this.doiThiId = doiThiId;
-    }
-
-    public String getChuDeSangTao() {
-        return chuDeSangTao;
-    }
-
-    public void setChuDeSangTao(String chuDeSangTao) {
-        this.chuDeSangTao = chuDeSangTao;
-    }
-
-    public String getSoBaoDanh() {
-        return soBaoDanh;
-    }
-
-    public void setSoBaoDanh(String soBaoDanh) {
-        this.soBaoDanh = soBaoDanh;
-    }
-
-    public Integer getKetQuaSoLoai() {
-        return ketQuaSoLoai;
-    }
-
-    public void setKetQuaSoLoai(Integer ketQuaSoLoai) {
-        this.ketQuaSoLoai = ketQuaSoLoai;
-    }
-
-    public Integer getThuTuXepHang() {
-        return thuTuXepHang;
-    }
-
-    public void setThuTuXepHang(Integer thuTuXepHang) {
-        this.thuTuXepHang = thuTuXepHang;
-    }
-
-    public String getHangGiaiThuong() {
-        return hangGiaiThuong;
-    }
-
-    public void setHangGiaiThuong(String hangGiaiThuong) {
-        this.hangGiaiThuong = hangGiaiThuong;
-    }
-
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "danhSachThiId")
@@ -148,16 +74,6 @@ public class DanhSachThi {
     @JsonIgnore
     private CuocThi cuocThi;
 
-    public CuocThi getCuocThi() {
-        return cuocThi;
-    }
-
-    public void setCuocThi(CuocThi cuocThi) {
-        this.cuocThi = cuocThi;
-    }
-
-    public DanhSachThi() {}
-
     public DanhSachThi(
         String thiSinhId,
         CuocThi cuocThi,
@@ -182,22 +98,6 @@ public class DanhSachThi {
         this.hangGiaiThuong = hangGiaiThuong;
         this.thoiGianTao = System.currentTimeMillis();
         this.thoiGianCapNhat = System.currentTimeMillis();
-    }
-
-    public long getDanhSachThiId() {
-        return danhSachThiId;
-    }
-
-    public void setDanhSachThiId(long danhSachThiId) {
-        this.danhSachThiId = danhSachThiId;
-    }
-
-    public Map<String, Object> getBangDiemThi() {
-        return bangDiemThi;
-    }
-
-    public void setBangDiemThi(Map<String, Object> bangDiemThi) {
-        this.bangDiemThi = bangDiemThi;
     }
 
     @Override

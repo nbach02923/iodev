@@ -21,113 +21,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity(name = "T_ThiSinh")
 @Table(name = "T_ThiSinh")
+@NoArgsConstructor
+@Setter
+@Getter
 public class ThiSinh {
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getHoTen() {
-        return hoTen;
-    }
-
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
-    }
-
-    public Integer getGioiTinh() {
-        return gioiTinh;
-    }
-
-    public void setGioiTinh(Integer gioiTinh) {
-        this.gioiTinh = gioiTinh;
-    }
-
-    public Date getNgaySinh() {
-        return ngaySinh;
-    }
-
-    public void setNgaySinh(Date ngaySinh) {
-        this.ngaySinh = ngaySinh;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
-
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
-
-    public String getDoiTuongThi() {
-        return doiTuongThi;
-    }
-
-    public void setDoiTuongThi(String doiTuongThi) {
-        this.doiTuongThi = doiTuongThi;
-    }
-
-    public String getNganhDaoTao() {
-        return nganhDaoTao;
-    }
-
-    public void setNganhDaoTao(String nganhDaoTao) {
-        this.nganhDaoTao = nganhDaoTao;
-    }
-
-    public String getDatGiaiThuong() {
-        return datGiaiThuong;
-    }
-
-    public void setDatGiaiThuong(String datGiaiThuong) {
-        this.datGiaiThuong = datGiaiThuong;
-    }
-
-    public String getCaNhanId() {
-        return caNhanId;
-    }
-
-    public void setCaNhanId(String caNhanId) {
-        this.caNhanId = caNhanId;
-    }
-
-    public String getDoanThiId() {
-        return doanThiId;
-    }
-
-    public void setDoanThiId(String doanThiId) {
-        this.doanThiId = doanThiId;
-    }
-
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
-    }
-
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
@@ -192,61 +95,11 @@ public class ThiSinh {
     @Transient
     private String tenDoanThi;
 
-    public String getTenDoanThi() {
-        return tenDoanThi;
-    }
-
-    public void setTenDoanThi(String tenDoanThi) {
-        this.tenDoanThi = tenDoanThi;
-    }
-
-    public String getTenCuocThi() {
-        return tenCuocThi;
-    }
-
-    public void setTenCuocThi(String tenCuocThi) {
-        this.tenCuocThi = tenCuocThi;
-    }
-
-    public String getTenKhoiThi() {
-        return tenKhoiThi;
-    }
-
-    public void setTenKhoiThi(String tenKhoiThi) {
-        this.tenKhoiThi = tenKhoiThi;
-    }
-
-    public boolean isThamGia() {
-        return thamGia;
-    }
-
-    public void setThamGia(boolean thamGia) {
-        this.thamGia = thamGia;
-    }
-
-    public String getTenDoiThi() {
-        return tenDoiThi;
-    }
-
-    public void setTenDoiThi(String tenDoiThi) {
-        this.tenDoiThi = tenDoiThi;
-    }
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cuocThiId", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private CuocThi cuocThi;
-
-    public CuocThi getCuocThi() {
-        return cuocThi;
-    }
-
-    public void setCuocThi(CuocThi cuocThi) {
-        this.cuocThi = cuocThi;
-    }
-    
-    public ThiSinh() {}
 
     public ThiSinh(
         String hoTen,

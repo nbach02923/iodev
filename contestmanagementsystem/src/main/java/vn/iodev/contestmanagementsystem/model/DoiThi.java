@@ -16,81 +16,16 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity(name = "T_DoiThi")
 @Table(name = "T_DoiThi")
+@NoArgsConstructor
+@Setter
+@Getter
 public class DoiThi {
-    public String getId() {
-        return id;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
-    public String getTenGoi() {
-        return tenGoi;
-    }
-    public void setTenGoi(String tenGoi) {
-        this.tenGoi = tenGoi;
-    }
-    public String getDoanThiId() {
-        return doanThiId;
-    }
-    public void setDoanThiId(String doanThiId) {
-        this.doanThiId = doanThiId;
-    }
-    public String getKhoiThiId() {
-        return khoiThiId;
-    }
-    public void setKhoiThiId(String khoiThiId) {
-        this.khoiThiId = khoiThiId;
-    }
-    public String getChuDeSangTao() {
-        return chuDeSangTao;
-    }
-    public void setChuDeSangTao(String chuDeSangTao) {
-        this.chuDeSangTao = chuDeSangTao;
-    }
-    public String getHuanLuyenVienId() {
-        return huanLuyenVienId;
-    }
-    public void setHuanLuyenVienId(String huanLuyenVienId) {
-        this.huanLuyenVienId = huanLuyenVienId;
-    }
-    public Integer getKetQuaSoLoai() {
-        return ketQuaSoLoai;
-    }
-    public void setKetQuaSoLoai(Integer ketQuaSoLoai) {
-        this.ketQuaSoLoai = ketQuaSoLoai;
-    }
-    public Integer getThuTuXepHang() {
-        return thuTuXepHang;
-    }
-    public void setThuTuXepHang(Integer thuTuXepHang) {
-        this.thuTuXepHang = thuTuXepHang;
-    }
-    public String getBangDiemThi() {
-        return bangDiemThi;
-    }
-    public void setBangDiemThi(String bangDiemThi) {
-        this.bangDiemThi = bangDiemThi;
-    }
-    public String getHangGiaiThuong() {
-        return hangGiaiThuong;
-    }
-    public void setHangGiaiThuong(String hangGiaiThuong) {
-        this.hangGiaiThuong = hangGiaiThuong;
-    }
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
-    }
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
@@ -136,13 +71,6 @@ public class DoiThi {
     @JsonIgnore
     private CuocThi cuocThi;
     
-    public CuocThi getCuocThi() {
-        return cuocThi;
-    }
-    public void setCuocThi(CuocThi cuocThi) {
-        this.cuocThi = cuocThi;
-    }
-    public DoiThi() {}
     public DoiThi(
         String tenGoi,
         CuocThi cuocThi,

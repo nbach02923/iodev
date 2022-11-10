@@ -9,89 +9,16 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Table(name = "T_DoanThi")
+@NoArgsConstructor
+@Setter
+@Getter
 public class DoanThi {
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTenGoi() {
-        return tenGoi;
-    }
-
-    public void setTenGoi(String tenGoi) {
-        this.tenGoi = tenGoi;
-    }
-
-    public String getTiengAnh() {
-        return tiengAnh;
-    }
-
-    public void setTiengAnh(String tiengAnh) {
-        this.tiengAnh = tiengAnh;
-    }
-
-    public String getDiaChiHoatDong() {
-        return diaChiHoatDong;
-    }
-
-    public void setDiaChiHoatDong(String diaChiHoatDong) {
-        this.diaChiHoatDong = diaChiHoatDong;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getToChucId() {
-        return toChucId;
-    }
-
-    public void setToChucId(String toChucId) {
-        this.toChucId = toChucId;
-    }
-
-    public String getCuocThiId() {
-        return cuocThiId;
-    }
-
-    public void setCuocThiId(String cuocThiId) {
-        this.cuocThiId = cuocThiId;
-    }
-
-    public Integer getThuTuXepHang() {
-        return thuTuXepHang;
-    }
-
-    public void setThuTuXepHang(Integer thuTuXepHang) {
-        this.thuTuXepHang = thuTuXepHang;
-    }
-
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
-    }
-
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
@@ -124,8 +51,6 @@ public class DoanThi {
 
     @Column(name = "thoiGianCapNhat")
     private long thoiGianCapNhat;
-
-    public DoanThi() {}
 
     public DoanThi(
         String tenGoi,

@@ -3,13 +3,10 @@ package vn.iodev.iogateway.security;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Arrays;
 import java.util.List;
 
 @Component
-@Slf4j
 public class RouterValidator {
     public static final List<Route> openApiEndpoints = Arrays.asList(
         new Route("/api/taikhoans$", "GET"),
@@ -44,7 +41,6 @@ public class RouterValidator {
     public boolean isSecured(ServerHttpRequest request) {
         boolean securedFlag = true;
         for (Route r : openApiEndpoints) {
-            log.info("Route: method " + request.getMethodValue().equals(r.getHttpMethod()) + ", uri: " + request.getURI().getPath() + ", match: " + request.getURI().getPath().matches(r.getUrlPattern()));
             if (request.getMethodValue().equals(r.getHttpMethod()) && request.getURI().getPath().matches(r.getUrlPattern())) {
                 securedFlag = false;
                 break;

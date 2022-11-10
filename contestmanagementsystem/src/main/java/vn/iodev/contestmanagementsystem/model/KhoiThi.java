@@ -17,8 +17,17 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Table(name = "T_KhoiThi")
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 public class KhoiThi {
     @Id
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
@@ -58,30 +67,12 @@ public class KhoiThi {
     @JsonIgnore
     @Transient
     private String tenCuocThi;
-    
-    public String getTenCuocThi() {
-        return tenCuocThi;
-    }
-
-    public void setTenCuocThi(String tenCuocThi) {
-        this.tenCuocThi = tenCuocThi;
-    }
-
+ 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cuocThiId", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private CuocThi cuocThi;
-
-    public CuocThi getCuocThi() {
-        return cuocThi;
-    }
-
-    public void setCuocThi(CuocThi cuocThi) {
-        this.cuocThi = cuocThi;
-    }
-
-    public KhoiThi() {}
 
     public KhoiThi(
         String tenGoi,
@@ -103,93 +94,5 @@ public class KhoiThi {
         this.maxThiSinh = maxThiSinh;
         this.thoiGianTao = System.currentTimeMillis();
         this.thoiGianCapNhat = System.currentTimeMillis();
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTenGoi() {
-        return tenGoi;
-    }
-
-    public void setTenGoi(String tenGoi) {
-        this.tenGoi = tenGoi;
-    }
-
-    public String getNoiDungThi() {
-        return noiDungThi;
-    }
-
-    public void setNoiDungThi(String noiDungThi) {
-        this.noiDungThi = noiDungThi;
-    }
-
-    public Boolean getVongSoLoai() {
-        return vongSoLoai;
-    }
-
-    public void setVongSoLoai(Boolean vongSoLoai) {
-        this.vongSoLoai = vongSoLoai;
-    }
-
-    public Boolean getThiTapThe() {
-        return thiTapThe;
-    }
-
-    public void setThiTapThe(Boolean thiTapThe) {
-        this.thiTapThe = thiTapThe;
-    }
-
-    public Boolean getThiSangTao() {
-        return thiSangTao;
-    }
-
-    public void setThiSangTao(Boolean thiSangTao) {
-        this.thiSangTao = thiSangTao;
-    }
-
-    public Integer getMaxDangKi() {
-        return maxDangKi;
-    }
-
-    public void setMaxDangKi(Integer maxDangKi) {
-        this.maxDangKi = maxDangKi;
-    }
-
-    public Integer getMaxThiSinh() {
-        return maxThiSinh;
-    }
-
-    public void setMaxThiSinh(Integer maxThiSinh) {
-        this.maxThiSinh = maxThiSinh;
-    }
-
-    public Integer getTinhTrang() {
-        return tinhTrang;
-    }
-
-    public void setTinhTrang(Integer tinhTrang) {
-        this.tinhTrang = tinhTrang;
-    }
-
-    public long getThoiGianTao() {
-        return thoiGianTao;
-    }
-
-    public void setThoiGianTao(long thoiGianTao) {
-        this.thoiGianTao = thoiGianTao;
-    }
-
-    public long getThoiGianCapNhat() {
-        return thoiGianCapNhat;
-    }
-
-    public void setThoiGianCapNhat(long thoiGianCapNhat) {
-        this.thoiGianCapNhat = thoiGianCapNhat;
     }
 }
