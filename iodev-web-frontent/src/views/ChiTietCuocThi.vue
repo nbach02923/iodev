@@ -7,14 +7,14 @@
       <v-flex class="py-0">
         <div>
           <v-row class="mx-0 my-0 py-0" style="">
-            <v-col cols="12" md="6" class="py-2">
+            <v-col cols="12" class="py-2">
               <div style="text-align: center;">
                 <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
                   <img class="img-cuocthi" :src="chiTietCuocThi.hinhAnh" style="height: 300px">
                 </a>
               </div>
             </v-col>
-            <v-col cols="12" md="6" class="py-4">
+            <!-- <v-col cols="12" md="6" class="py-4">
               <v-layout wrap>
                 <v-card
                   color="#fff"
@@ -85,7 +85,7 @@
                   </v-card-title>
                 </v-card>
               </v-layout>
-            </v-col>
+            </v-col> -->
           </v-row>
 
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
@@ -114,42 +114,118 @@
           
           <div>
             <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px;">
-              <v-col cols="12" class="py-2">
-                <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
-                <div class="" style="text-align: justify;">{{chiTietCuocThi.thongTinMoTa}}</div>
+              <v-col cols="12" md="7">
+                <v-row>
+                  <v-col cols="12" class="py-2">
+                    <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
+                    <div class="" style="text-align: justify;">{{chiTietCuocThi.thongTinMoTa}}</div>
+                  </v-col>
+                  <v-col cols="12" md="6" class="pt-0">
+                    <span class="label-header">Đơn vị tổ chức: </span>
+                    <span class="blue-text font-weight-bold">{{chiTietCuocThi.donViToChuc}}</span>
+                  </v-col>
+                  <v-col cols="12" md="6" class="pt-0">
+                    <span class="label-header">Thời gian tổ chức: </span>
+                    <span class="blue-text font-weight-bold">{{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
+                    <span class="blue-text font-weight-bold"> - {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
+                  </v-col>
+                  <!-- <v-col cols="12" md="6" class="pt-0"></v-col> -->
+                  <v-col cols="12" md="6" class="pt-0">
+                    <span class="label-header">Trang web: </span>
+                    <a class="blue-text font-weight-bold">{{chiTietCuocThi.website}}</a>
+                  </v-col>
+                  <v-col v-if="chiTietCuocThi.tinhTrang == 1" cols="12" md="6" class="pt-0">
+                    <span class="label-header">Tình trạng: </span>
+                    <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
+                      {{statusContest(chiTietCuocThi.tinhTrang)}}
+                    </span>
+                    <v-btn small class="ml-5"
+                      color="primary"
+                      @click="dangKyThi(chiTietCuocThi)"
+                    >
+                      <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
+                      Đăng ký dự thi
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </v-col>
-              <v-col cols="12" md="3" class="pt-0">
-                <span class="label-header">Đơn vị tổ chức: </span>
-                <span class="blue-text font-weight-bold">{{chiTietCuocThi.donViToChuc}}</span>
-              </v-col>
-              <v-col cols="12" md="3" class="pt-0">
-                <span class="label-header">Thời gian tổ chức: </span>
-                <span class="blue-text font-weight-bold">{{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
-                <span class="blue-text font-weight-bold"> - {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
-              </v-col>
-              <v-col cols="12" md="6" class="pt-0"></v-col>
-              <v-col cols="12" md="3" class="pt-0">
-                <span class="label-header">Trang web: </span>
-                <a class="blue-text font-weight-bold">{{chiTietCuocThi.website}}</a>
-              </v-col>
-              <v-col v-if="chiTietCuocThi.tinhTrang == 1" cols="12" md="3" class="pt-0">
-                <span class="label-header">Tình trạng: </span>
-                <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
-                  {{statusContest(chiTietCuocThi.tinhTrang)}}
-                </span>
-                <v-btn small class="ml-5"
-                  color="primary"
-                  @click="dangKyThi(chiTietCuocThi)"
-                >
-                  <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
-                  Đăng ký dự thi
-                </v-btn>
+              <v-col cols="12" md="5" class="py-4">
+                <v-layout wrap>
+                  <v-card
+                    color="#fff"
+                    dark
+                    height="70"
+                    class="mt-5 flex"
+                    style="max-width: 250px; background: #397cbf;margin: 0 auto"
+                  >
+                    <v-card-title class="align-start py-1" >
+                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
+                      style="max-width: 100%;">
+                        <div class="pa-3">
+                          <v-icon size="24">mdi-bank</v-icon>
+                        </div>
+                      </div>
+                      <div class="v-card--material__title" style="width: 170px">
+                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đoàn thi tham dự</div>
+                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
+                          20
+                        </div>
+                      </div>
+                    </v-card-title>
+                  </v-card>
+
+                  <v-card
+                    color="#fff"
+                    dark
+                    height="70"
+                    class="mt-5 flex"
+                    style="max-width: 250px; background: #397cbf;margin: 0 auto"
+                  >
+                    <v-card-title class="align-start py-1" >
+                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
+                      style="max-width: 100%;">
+                        <div class="pa-3" style="background: #4caf50">
+                          <v-icon size="24">mdi-account-group-outline</v-icon>
+                        </div>
+                      </div>
+                      <div class="v-card--material__title" style="width: 170px">
+                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đội tham dự</div>
+                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
+                          2
+                        </div>
+                      </div>
+                    </v-card-title>
+                  </v-card> 
+
+                  <v-card
+                    color="#fff"
+                    dark
+                    height="70"
+                    class="flex"
+                    style="max-width: 250px; background: #397cbf;margin: 0 auto; margin-top: 50px"
+                  >
+                    <v-card-title class="align-start py-1" >
+                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded"
+                      style="max-width: 100%;">
+                        <div class="pa-3" style="background: #e91e63">
+                          <v-icon size="24">mdi-account-circle-outline</v-icon>
+                        </div>
+                      </div>
+                      <div class="v-card--material__title" style="width: 170px">
+                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số thí sinh tham dự</div>
+                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
+                          15
+                        </div>
+                      </div>
+                    </v-card-title>
+                  </v-card>
+                </v-layout>
               </v-col>
             </v-row>
           </div>
         </div>
 
-        <!-- <div>
+        <div>
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -214,7 +290,7 @@
               <pagination v-if="totalTongHopDangKy" :pageInput="pageTongHopDangKy-1" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
             </v-col>
           </v-row>
-        </div> -->
+        </div>
 
         <div>
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
