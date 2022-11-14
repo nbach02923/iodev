@@ -166,6 +166,26 @@ export default new Vuex.Store({
         })
       })
     },
+    collectionFilterDaGhiDanh ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let config = {
+          method: 'get',
+          url: '/api/thisinhs/' + filter.toChucId + '/daghidanh',
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data: {},
+          params: filter.data
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error)
+        })
+      })
+    },
     collectionFilterLevel2 ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let config = {

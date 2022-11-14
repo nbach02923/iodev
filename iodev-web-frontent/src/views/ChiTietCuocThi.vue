@@ -114,7 +114,7 @@
           
           <div>
             <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px;">
-              <v-col cols="12" md="7">
+              <v-col cols="12" md="7" style="border-right: 1px solid #dedede;">
                 <v-row>
                   <v-col cols="12" class="py-2">
                     <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
@@ -168,7 +168,7 @@
                       <div class="v-card--material__title" style="width: 170px">
                         <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đoàn thi tham dự</div>
                         <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          20
+                          {{soDoanThiThamDu}}
                         </div>
                       </div>
                     </v-card-title>
@@ -191,7 +191,7 @@
                       <div class="v-card--material__title" style="width: 170px">
                         <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đội tham dự</div>
                         <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          2
+                          {{soDoiThiThamDu}}
                         </div>
                       </div>
                     </v-card-title>
@@ -214,7 +214,7 @@
                       <div class="v-card--material__title" style="width: 170px">
                         <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số thí sinh tham dự</div>
                         <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          15
+                          {{soThiSinhThamDu}}
                         </div>
                       </div>
                     </v-card-title>
@@ -685,20 +685,20 @@ export default {
               value: 'nganhDaoTao',
               class: 'th-center py-2'
           },
-          {
-              sortable: false,
-              text: 'Số điện thoại',
-              align: 'left',
-              value: 'soDienThoai',
-              class: 'th-center py-2'
-          },
-          {
-              sortable: false,
-              text: 'Email',
-              align: 'left',
-              value: 'email',
-              class: 'th-center py-2'
-          },
+          // {
+          //     sortable: false,
+          //     text: 'Số điện thoại',
+          //     align: 'left',
+          //     value: 'soDienThoai',
+          //     class: 'th-center py-2'
+          // },
+          // {
+          //     sortable: false,
+          //     text: 'Email',
+          //     align: 'left',
+          //     value: 'email',
+          //     class: 'th-center py-2'
+          // },
           {
               sortable: false,
               text: 'Giải thưởng',
@@ -760,7 +760,10 @@ export default {
         pageDanhSachHlv: 1,
         totalDanhSachHlv: 0,
         pageCountDanhSachHlv: 0,
-        itemsPerPageDanhSachHlv: 15
+        itemsPerPageDanhSachHlv: 15,
+        soThiSinhThamDu: 0,
+        soDoanThiThamDu: 0,
+        soDoiThiThamDu: 0,
       }
     },
     created () {
@@ -820,6 +823,7 @@ export default {
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
           vm.danhSachTongHopDangKy = response
           vm.totalTongHopDangKy = vm.danhSachTongHopDangKy.length
+          vm.soDoanThiThamDu = vm.totalTongHopDangKy
           vm.pageCountTongHopDangKy = Math.ceil(vm.totalTongHopDangKy / vm.itemsPerPage)
           vm.pageTongHopDangKy = 1
           if (vm.danhSachTongHopDangKy.length) {
