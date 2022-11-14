@@ -29,6 +29,7 @@ import com.netflix.config.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
+import vn.iodev.contestmanagementsystem.localservice.impl.ThiSinhLocalServiceImpl;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.ImportResponse;
@@ -61,6 +62,9 @@ public class ThiSinhController {
 
     @Autowired
     VaiTroChecker vaiTroChecker;
+    
+    @Autowired
+    ThiSinhLocalServiceImpl thiSinhLocalServiceImpl;
 
     @GetMapping("/thisinhs")
     public List<ThiSinh> getAllThiSinhs(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(name = "tuKhoa", defaultValue = "") String tuKhoa, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String doanThiId) {
@@ -87,6 +91,21 @@ public class ThiSinhController {
         Pageable paging = PageRequest.of(page - 1, size);
 
         List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiId(cuocThiId, paging);
+        lstThiSinh.addAll(thiSinhs);
+
+        return new ResponseEntity<>(lstThiSinh, HttpStatus.OK);
+    }
+    
+    @GetMapping("/thisinhs/{toChucId}/daghidanh")
+    public ResponseEntity<List<ThiSinh>> getAllThiSinhsByToChucId(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @PathVariable(value = "toChucId") String toChucId) {
+        log.info("API GET /thisinhs/{toChucId}/daghidanh");
+        List<ThiSinh> lstThiSinh = new ArrayList<>();
+
+    
+        Pageable paging = PageRequest.of(page - 1, size);
+        
+        List<ThiSinh> thiSinhs = thiSinhLocalServiceImpl.findByToChucId(toChucId, paging);
+
         lstThiSinh.addAll(thiSinhs);
 
         return new ResponseEntity<>(lstThiSinh, HttpStatus.OK);

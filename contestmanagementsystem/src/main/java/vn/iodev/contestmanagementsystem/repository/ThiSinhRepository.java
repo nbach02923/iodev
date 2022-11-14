@@ -30,4 +30,7 @@ public interface ThiSinhRepository extends JpaRepository<ThiSinh, String> {
     List<ThiSinh> findByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
     Optional<ThiSinh> findByHoTenAndCuocThiIdAndDoanThiId(String hoTen, String cuocThiId, String doanThiId);
     Optional<ThiSinh> findByHoTenAndDoanThiId(String hoTen, String doanThiId);
+    //add by trungnt
+    @Query("SELECT ts FROM T_ThiSinh ts WHERE ts.doanThiId IN (:doanThiIds)")
+    List<ThiSinh> findByDoanThiIds(List<String> doanThiIds, Pageable pageable);
 }
