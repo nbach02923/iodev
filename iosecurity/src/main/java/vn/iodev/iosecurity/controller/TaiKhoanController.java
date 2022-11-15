@@ -70,14 +70,17 @@ public class TaiKhoanController {
     @Autowired
     EmailService emailService;
 
-    @Value("${io.app.activecode.length:8}")
+    @Value("${io.app.activecode.length}")
     private int activeCodeLength;
 
-    @Value("${io.app.active.expired:24}")
+    @Value("${io.app.active.expired}")
     private int activeExpired;
 
-    @Value("${io.app.active.url:}")
+    @Value("${io.app.active.url}")
     private String linkKichHoat;
+    
+    @Value("${io.app.forgot.url}")
+    private String linkResetPassword;
 
     @Autowired
     ThymeleafService thymeleafService;
@@ -281,19 +284,17 @@ public class TaiKhoanController {
 	}
     
 	// add by trungnt
-	@PostMapping("/taikhoans/{id}/quenmatkhau")
-	public ResponseEntity<TaiKhoan> forgotMatKhau(@PathVariable("id") String id) {
+	@PostMapping("/taikhoans/{email}/quenmatkhau")
+	public ResponseEntity<TaiKhoan> forgotMatKhau(@PathVariable("email") String email) {
 		try {
 			log.info("API POST /taikhoans/{id}/quenmatkhau");
 			// IOUserDetails userDetails = (IOUserDetails)authentication.getPrincipal();
 
-			Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(id);
+			TaiKhoan _taiKhoan = taiKhoanRepository.findByEmail(email);
 
-			if (!taiKhoanData.isPresent()) {
+			if (_taiKhoan == null) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-
-			TaiKhoan _taiKhoan = taiKhoanData.get();
 
 			_taiKhoan.setMaKichHoat(RandomUtil.generateRandomAlphanumeric(activeCodeLength));
 
@@ -308,7 +309,7 @@ public class TaiKhoanController {
 			HashMap<String, Object> variables = new HashMap<>();
 			variables.put("MaBiMat", _taiKhoan.getMaKichHoat());
 			variables.put("LinkResetMatKhau",
-					linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&reset=" + _taiKhoan.getMaKichHoat());
+					linkResetPassword + "?email=" + _taiKhoan.getEmail() + "&reset=" + _taiKhoan.getMaKichHoat());
 
 			String msgBody = thymeleafService.getContent(IOConstants.FORGOT_PASSWORD_MAIL_TEMPLATE, variables);
 			MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.FORGOT_PASSWORD_MAIL_SUBJECT,
@@ -432,14 +433,13 @@ public class TaiKhoanController {
     }
     
     //add by trungnt
-	@PutMapping("/forgot-password/{id}/verify-email")
-	public ResponseEntity<TaiKhoan> verifyEmailByMaBiMat(@PathVariable("id") String email,
+	@PutMapping("/forgot-password/{email}/verify-email")
+	public ResponseEntity<TaiKhoan> verifyEmailByMaBiMat(@PathVariable("email") String email,
 			@RequestParam("maBiMat") String maBiMat) {
-		log.info("API PUT /forgot-password/{id}/verify-email");
-		Optional<TaiKhoan> taiKhoanData = taiKhoanRepository.findById(email);
+		log.info("API PUT /forgot-password/{email}/verify-email");
+		TaiKhoan _taiKhoan = taiKhoanRepository.findByEmail(email);
 
-		if (taiKhoanData.isPresent()) {
-			TaiKhoan _taiKhoan = taiKhoanData.get();
+		if (_taiKhoan != null) {
 			long now = System.currentTimeMillis();
 			if (_taiKhoan.getMaKichHoat().equals(maBiMat) && now < _taiKhoan.getThoiHanKichHoat()) {
 
