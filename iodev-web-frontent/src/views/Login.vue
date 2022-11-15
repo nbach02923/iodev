@@ -138,7 +138,7 @@
         <v-card-text class="mt-5 px-2">
           <v-form
             ref="formActive"
-            v-model="validFormActive"
+            v-model="validFormConfirm"
             lazy-validation
           >
             <v-layout wrap>
@@ -197,6 +197,7 @@
       client_secret: '',
       code: '',
       signed: false,
+      validFormConfirm: false,
       dialogConfirm: false,
       maBiMat: ''
     }),
@@ -368,6 +369,9 @@
       },
       confirmForgotPassWord () {
         let vm = this
+        if (!String(vm.maBiMat).trim()) {
+          return
+        }
         let filter = {
           maBiMat: String(vm.maBiMat).trim()
         }

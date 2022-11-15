@@ -102,7 +102,7 @@
                 class="mx-0"
                 small
                 color="primary"
-                @click="goBack()"
+                @click="goHome()"
                 style="float: right"
                 >
                 <v-icon size="18">mdi-reply-all</v-icon>
@@ -771,8 +771,8 @@ export default {
       vm.getChiTietCuocThi()
       vm.getdanhSachDoanThi('reset')
       vm.getDanhSachKhoiThi()
-      vm.getDanhSachDoiThi()
-      vm.getDanhSachThiSinh()
+      // vm.getDanhSachDoiThi()
+      // vm.getDanhSachThiSinh()
     },
     computed: {
       breakpointName () {
@@ -788,8 +788,8 @@ export default {
         vm.getChiTietCuocThi()
         vm.getdanhSachDoanThi('reset')
         vm.getDanhSachKhoiThi()
-        vm.getDanhSachDoiThi()
-        vm.getDanhSachThiSinh()
+        // vm.getDanhSachDoiThi()
+        // vm.getDanhSachThiSinh()
       }
     },
     methods: {
@@ -849,6 +849,19 @@ export default {
             }
           }
           vm.loadingDataTongHopDangKy = false
+
+          let soThiSinh = 0
+          let soDoiThi = 0
+          vm.danhSachTongHopDangKy.forEach(function (item) {
+            soThiSinh += item.soThiSinh
+            item.noiDungThi.forEach(function (el) {
+              if (el.soDoi && el.soThiSinh) {
+                soDoiThi += el.soDoi
+              }
+            })
+          })
+          vm.soDoiThiThamDu = soDoiThi
+          vm.soThiSinhThamDu = soThiSinh
         }).catch(function () {
           vm.loadingDataTongHopDangKy = false
         })
@@ -1163,6 +1176,10 @@ export default {
       },
       goBack () {
         window.history.back()
+      },
+      goHome () {
+        let vm = this
+        vm.$router.push({ path: '/'})
       }
     }
   }

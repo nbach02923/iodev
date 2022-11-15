@@ -6,7 +6,7 @@
     <v-layout wrap>
       <v-flex class="py-0">
         <div>
-          <v-row class="mx-0 my-0 py-0" style="">
+          <!-- <v-row class="mx-0 my-0 py-0" style="">
             <v-col cols="12" class="py-2">
               <div style="text-align: center;">
                 <a v-if="chiTietCuocThi.hinhAnh" :href="chiTietCuocThi.website" target="_blank" class="py-0 px-0"> 
@@ -14,7 +14,7 @@
                 </a>
               </div>
             </v-col>
-          </v-row>
+          </v-row> -->
           <v-row justify="end" class="my-0 mx-0" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
@@ -29,7 +29,7 @@
                 class="mx-0"
                 small
                 color="primary"
-                @click="goBack()"
+                @click="goToCuocThi()"
                 style="float: right"
                 >
                 <v-icon size="18">mdi-reply-all</v-icon>
@@ -40,9 +40,9 @@
           </v-row>
           <div>
             <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px;">
-              <v-col cols="12" md="7" class="py-4" style="border-right: 1px solid #dedede;">
+              <v-col cols="12" md="8" class="py-4">
                 <v-row>
-                  <v-col cols="12" class="py-2">
+                  <!-- <v-col cols="12" class="py-2">
                     <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
                     <div class="" style="text-align: justify;">{{chiTietCuocThi.thongTinMoTa}}</div>
                   </v-col>
@@ -55,7 +55,6 @@
                     <span class="blue-text font-weight-bold">{{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
                     <span class="blue-text font-weight-bold"> - {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
                   </v-col>
-                  <!-- <v-col cols="12" md="6" class="pt-0"></v-col> -->
                   <v-col cols="12" md="6" class="pt-0">
                     <span class="label-header">Trang web: </span>
                     <a class="blue-text font-weight-bold">{{chiTietCuocThi.website}}</a>
@@ -65,19 +64,39 @@
                     <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(chiTietCuocThi.tinhTrang)}}
                     </span>
+                  </v-col> -->
+                  <v-col cols="12" class="py-2">
+                    <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
                   </v-col>
-                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="12" class="pt-0">
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="7" class="pt-0">
                     <span class="label-header">Đoàn đăng ký dự thi: </span>
-                    <span class="blue-text font-weight-bold">{{thongTinDoanThi ? thongTinDoanThi.tenGoi : ''}}</span>
+                    <span class="blue-text font-weight-bold">{{thongTinDoanThi ? thongTinDoanThi.tenGoi : ''}}</span>&nbsp;
+                    <span v-if="thongTinToChuc && thongTinToChuc.tenVietTat" class="blue-text font-weight-bold">({{thongTinToChuc.tenVietTat}})</span>
                   </v-col>
-                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="12" class="pt-0">
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="5" class="pt-0">
+                    <span class="label-header">Số thí sinh tham dự: </span>&nbsp;
+                    <span class="blue-text font-weight-bold">{{soThiSinhThamDu}}</span>
+                  </v-col>
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="7" class="pt-0">
+                    <span class="label-header">Email: </span>
+                    <span class="blue-text font-weight-bold">{{thongTinToChuc && thongTinToChuc.email ? thongTinToChuc.email : ''}}</span>
+                  </v-col>
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="5" class="pt-0">
+                    <span class="label-header">Số khối thi tham dự: </span>&nbsp;
+                    <span class="blue-text font-weight-bold">{{soKhoiThiThamDu}}</span>
+                  </v-col>
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="7" class="pt-0">
                     <span class="label-header">Địa chỉ: </span>
                     <span class="blue-text font-weight-bold">{{thongTinToChuc && thongTinToChuc.diaChiHoatDong ? thongTinToChuc.diaChiHoatDong : ''}}</span>
                   </v-col>
+                  <v-col v-if="userLogin.loaiTaiKhoan == 0" cols="5" class="pt-0">
+                    <span class="label-header">Số đội thi tham dự: </span>&nbsp;
+                    <span class="blue-text font-weight-bold">{{soDoiThiThamDu}}</span>
+                  </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="5" class="py-4">
-                <v-layout wrap>
+              <v-col cols="12" md="4" class="py-4">
+                <!-- <v-layout wrap>
                   <v-card
                     color="#fff"
                     dark
@@ -146,7 +165,7 @@
                       </div>
                     </v-card-title>
                   </v-card>
-                </v-layout>
+                </v-layout> -->
               </v-col>
             </v-row>
           </div>
@@ -201,8 +220,9 @@
                 :key="i"
                 readonly
               >
-                <div v-if="(thongTinToChuc && userLogin.loaiTaiKhoan == 0 && chiTietCuocThi.tinhTrang == 1) && (item2.thiTapThe || !item2.countThiSinh || !item2.maxDangKi || (item2.countThiSinh && item2.countThiSinh < item2.maxDangKi ))" class="ml-5 layout wrap" style="position: absolute; right: 0; top: 10px; width: 550px; z-index: 1000">
-                  <v-autocomplete
+                <div v-if="(thongTinToChuc && userLogin.loaiTaiKhoan == 0 && chiTietCuocThi.tinhTrang == 1) && (item2.thiTapThe || !item2.countThiSinh || !item2.maxDangKi || (item2.countThiSinh && item2.countThiSinh < item2.maxDangKi ))"
+                 class="ml-5 layout wrap" style="position: absolute; right: 0; top: 10px; width: 150px; z-index: 1000">
+                  <!-- <v-autocomplete
                     style="width: 280px; max-width: 400px"
                     class="flex input-form mr-0"
                     hide-no-data
@@ -230,14 +250,14 @@
                       mdi-pencil-plus-outline
                     </v-icon>&nbsp;
                     Đăng ký
-                  </v-btn>
-                  <v-btn small color="primary" class="btn-form mx-0 text-white ml-2" @click.stop="showCreateThiSinh(item2)" style="height: 32px;max-width: 150px">
+                  </v-btn> -->
+                  <v-btn small color="primary" class="btn-form mx-0 text-white ml-2" @click.stop="showCreateThiSinh(item2, item2.danhSachThiSinhSuggest)" style="height: 32px;max-width: 150px">
                     <v-icon size="18">mdi-plus</v-icon>&nbsp;
-                    Thêm thí sinh mới
+                    Thêm thí sinh
                   </v-btn>
                 </div>
                 <v-expansion-panel-header>
-                  <div class="text-header" style="width: calc(100% - 550px); text-align: justify">
+                  <div class="text-header" style="width: calc(100% - 150px); text-align: justify">
                     {{ item2.tenGoi }} - {{ item2.noiDungThi }}
                     <span v-if="item2.maxDangKi">&nbsp; (Tối đa {{item2.maxDangKi}} thí sinh)</span>
                     <span v-if="item2.maxThiSinh">&nbsp; (Tối đa {{item2.maxThiSinh}} thí sinh / đội thi)</span>
@@ -313,7 +333,7 @@
           dark
           color="primary" class="px-3"
         >
-          <v-toolbar-title v-if="typeAction === 'create'">Đăng ký thí sinh mới</v-toolbar-title>
+          <v-toolbar-title v-if="typeAction === 'create'">Đăng ký thí sinh</v-toolbar-title>
           <v-toolbar-title v-else>Cập nhật thông tin thí sinh</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
@@ -334,9 +354,33 @@
             lazy-validation
           >
             <v-layout wrap>
+              <!-- <v-col cols="12" class="py-0 mb-2">
+                <label>Chọn thí sinh </label>
+                <v-combobox
+                  class="flex input-form mr-0"
+                  hide-no-data
+                  :items="danhSachThiSinhSuggest"
+                  v-model="thiSinhSuggested"
+                  item-text="hoTen"
+                  item-value="id"
+                  dense
+                  solo
+                  placeholder="Chọn thí sinh"
+                  clearable
+                  return-object
+                  @change="changeSuggest"
+                >
+                  <template v-slot:item="data">
+                    <span>{{data.item.hoTen}}</span>
+                    <span>&nbsp;</span>
+                    <span v-if="data.item.email">({{data.item.email}})</span>
+                  </template>
+
+                </v-combobox>
+              </v-col> -->
               <v-col cols="12" md="6" class="py-0 mb-2">
                   <label>Họ và tên <span class="red--text">(*)</span></label>
-                  <v-text-field
+                  <!-- <v-text-field
                     class="flex input-form"
                     v-model="thongTinThiSinh['hoTen']"
                     solo
@@ -345,7 +389,28 @@
                     required
                     hide-details="auto"
                     clearable
-                  ></v-text-field>
+                  ></v-text-field> -->
+
+                  <v-combobox
+                    class="flex input-form mr-0 select-thisinh"
+                    hide-no-data
+                    :items="danhSachThiSinhSuggest"
+                    v-model="thiSinhSuggested"
+                    item-text="hoTen"
+                    item-value="id"
+                    dense
+                    solo
+                    clearable
+                    return-object
+                    @change="changeSuggest"
+                  >
+                    <template v-slot:item="data">
+                      <span>{{data.item.hoTen}}</span>
+                      <span>&nbsp;</span>
+                      <span v-if="data.item.email">({{data.item.email}})</span>
+                    </template>
+
+                  </v-combobox>
               </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
                 <label>Ngày sinh</label>
@@ -441,6 +506,39 @@
                   hide-details="auto"
                 ></v-textarea>
               </v-col>
+
+              <v-col cols="12" class="py-0 mb-2" v-if="khoiThiSelected.thiTapThe">
+                <label>Chọn đội thi <span class="red--text">(*)</span></label>
+                <v-layout wrap>
+                  <v-autocomplete
+                    class="flex input-form"
+                    placeholder="Yêu cầu chọn đội thi"
+                    hide-no-data
+                    :items="filterDoiThiTheoKhoi(danhSachDoiThi, khoiThiSelected)"
+                    v-model="doiThiSelected"
+                    item-text="tenGoi"
+                    item-value="doiThiId"
+                    dense
+                    solo
+                    hide-details
+                    :rules="required"
+                    required
+                  >
+                  </v-autocomplete>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn small class="mr-0 ml-3" color="primary" @click="createDoiThi(khoiThiSelected)" v-bind="attrs" v-on="on">
+                        <v-icon>
+                          mdi-plus
+                        </v-icon>
+                        <span>Tạo đội thi</span>
+                      </v-btn>
+                    </template>
+                    <span>Tạo đội thi</span>
+                  </v-tooltip>
+                </v-layout>
+              </v-col>
+
               <!-- <v-col cols="12" class="py-0 mb-2">
                 <label>Nội dung dự thi</label>
                 <v-layout>
@@ -549,7 +647,7 @@
             <v-icon left>
               mdi-content-save
             </v-icon>
-            <span>Đăng ký mới</span>
+            <span>Đăng ký</span>
           </v-btn>
           <v-btn small v-else class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="submitUpdateThiSinh">
             <v-icon left>
@@ -758,7 +856,7 @@
             <v-icon left>
               mdi-content-save
             </v-icon>
-            <span>Thêm</span>
+            <span>Tạo mới</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -892,11 +990,12 @@
             </v-icon>
             Hủy
           </v-btn>
-          <v-btn small class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="addThiSinhSuggestThiTapThe()">
+          <v-btn small class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="khoiThiSelected.thiTapThe && thiSinhSuggested ? addThiSinhSuggestThiTapThe() : showCreateThiSinhTapThe()">
             <v-icon left>
               mdi-content-save
             </v-icon>
-            <span>Đăng ký</span>
+            <span v-if="!khoiThiSelected.thiTapThe">Đăng ký</span>
+            <span v-else>Thêm thí sinh</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -1134,10 +1233,12 @@ export default {
         validFormAddThiSinhDoiThi: false,
         dialogChonDoiThi: false,
         doiThiSelected: '',
+        danhSachThiSinhSuggest: [],
         thiSinhSuggested: '',
         soThiSinhThamDu: 0,
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
+        soKhoiThiThamDu: 0
       }
     },
     created () {
@@ -1147,7 +1248,6 @@ export default {
       if (vm.userLogin.loaiTaiKhoan == 0) {
         vm.getThongTinToChuc()
       }
-      vm.tongHopThamDu()
     },
     computed: {
       breakpointName () {
@@ -1165,7 +1265,6 @@ export default {
         if (vm.userLogin.loaiTaiKhoan == 0) {
           vm.getThongTinToChuc()
         }
-        vm.tongHopThamDu()
       }
     },
     methods: {
@@ -1226,7 +1325,11 @@ export default {
         let vm = this
         let filter = {
           collectionName: 'thisinhs',
-          toChucId: vm.userLogin.id
+          toChucId: vm.userLogin.id,
+          data: {
+            page: 1,
+            size: 10000
+          }
         }
         vm.$store.dispatch('collectionFilterDaGhiDanh', filter).then(function (response) {
           let contentUpdate = ''
@@ -1239,6 +1342,20 @@ export default {
           })
         }).catch(function () {
         })
+      },
+      changeSuggest () {
+        let vm = this
+        if (vm.thiSinhSuggested && vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
+          vm.thongTinThiSinh = vm.thiSinhSuggested
+          vm.ngaySinhCreate = vm.thiSinhSuggested.ngaySinh ? vm.convertDate(vm.thiSinhSuggested.ngaySinh) : ''
+        }
+      },
+      inputSuggest () {
+        let vm = this
+        setTimeout(() => {
+          console.log('aaaaaa1114441', vm.thiSinhSuggested)
+        }, 100);
+        
       },
       addThiSinhSuggest (item, index) {
         let vm = this
@@ -1291,7 +1408,7 @@ export default {
           "datGiaiThuong": vm.thiSinhSuggested.datGiaiThuong
         }
         console.log('vm.thongTinThiSinh', thongTinThiSinh)
-        if (vm.loading) {
+        if (vm.loading || !vm.doiThiSelected) {
           return
         }
         vm.loading = true
@@ -1334,6 +1451,7 @@ export default {
         vm.$store.dispatch('collectionCreateChild', filter).then(function () {
           vm.dialogChonDoiThi = false
           vm.getDanhSachThiSinh()
+          vm.tongHopThamDu()
         }).catch(function () {
         })
       },
@@ -1358,6 +1476,7 @@ export default {
           if (vm.thongTinDoanThi) {
             vm.getDanhSachThiSinh()
             vm.getDanhSachHlv()
+            vm.tongHopThamDu()
           } else {
             vm.tenDoanThi = vm.thongTinToChuc.tenGoi
             vm.dialogTaoDoanThi = true
@@ -1601,12 +1720,13 @@ export default {
           vm.$refs.formAddThiSinh.resetValidation()
         }, 100)
       },
-      showCreateThiSinh (khoiThi) {
+      showCreateThiSinh (khoiThi, suggest) {
         let vm = this
         vm.khoiThiSelected = khoiThi
-        if (!vm.khoiThiSelected.thiTapThe) {
+        vm.danhSachThiSinhSuggest = suggest
+        // if (!vm.khoiThiSelected.thiTapThe) {
           vm.typeAction = 'create'
-          // vm.getDanhSachDoiThi()
+          vm.getDanhSachDoiThi()
           vm.danhSachNoiDungThiThiSinh = []
           vm.dialogAddThiSinh = true
           setTimeout(function () {
@@ -1623,14 +1743,38 @@ export default {
             vm.$refs.formAddThiSinh.reset()
             vm.$refs.formAddThiSinh.resetValidation()
           }, 100)
-        } else {
-          vm.dialogChonDoiThi = true
-        }
+        // } else {
+        //   vm.getDanhSachDoiThi()
+        //   vm.dialogChonDoiThi = true
+        //   vm.thiSinhSuggested = ''
+        // }
+      },
+      showCreateThiSinhTapThe () {
+        let vm = this
+        vm.typeAction = 'create'
+        // vm.getDanhSachDoiThi()
+        vm.danhSachNoiDungThiThiSinh = []
+        vm.dialogAddThiSinh = true
+        setTimeout(function () {
+          vm.thongTinThiSinh = {
+            "hoTen": "",
+            "gioiTinh": "",
+            "ngaySinh": "",
+            "email": "",
+            "soDienThoai": "",
+            "doiTuongThi": "",
+            "nganhDaoTao": "",
+            "datGiaiThuong": ""
+          }
+          vm.$refs.formAddThiSinh.reset()
+          vm.$refs.formAddThiSinh.resetValidation()
+        }, 100)
       },
       submitCreateThiSinh () {
         let vm = this
-        console.log('vm.thongTinThiSinh', vm.thongTinThiSinh)
-        // console.log('vm.thongTinThiSinh', vm.danhSachNoiDungThiThiSinh)
+        if (!Object.is(vm.thiSinhSuggested)) {
+          vm.thongTinThiSinh['hoTen'] = vm.thiSinhSuggested
+        }
         if (vm.loading) {
           return
         }
@@ -1655,6 +1799,7 @@ export default {
             vm.dialogAddThiSinh = false
             // vm.taoDanhSachThi(result.id)
             vm.addDanhSachThi(result.id, vm.khoiThiSelected)
+            vm.getDanhSachThiSinhSuggest()
           }).catch(function (response) {
             vm.loading = false
             toastr.remove()
@@ -1747,14 +1892,10 @@ export default {
             }
           }
           vm.$store.dispatch('collectionCreateChild', filter).then(function (result) {
+            vm.doiThiSelected = result.id
             vm.loading = false
             toastr.remove()
             toastr.success('Thêm mới thành công')
-            // let item = Object.assign(vm.noiDungThiUpDate, {
-            //   doiThiId: result.id,
-            //   tenDoiThi: result.tenGoi
-            // })
-            // vm.$set(vm.danhSachNoiDungThiThiSinh, vm.indexNoiDungThiUpDate, item)
             vm.dialogAddDoiThi = false
             vm.getDanhSachDoiThi()
           }).catch(function (response) {
@@ -1978,7 +2119,7 @@ export default {
             return item.khoiThiId == noidungthi.id
           })
           if (noidungthi.thiTapThe && noidungthi.maxThiSinh) {
-            console.log('23123123123AA', doithis, noidungthi)
+            // console.log('23123123123AA', doithis, noidungthi)
             doiThiKhoi = doithis.filter(function (item) {
               return item.khoiThiId == noidungthi.id && item.countThiSinh < noidungthi.maxThiSinh
             })
@@ -1989,8 +2130,8 @@ export default {
       tongHopThamDu () {
         let vm = this
         vm.getDanhSachDoanThi()
-        vm.getDanhSachDoiThiTongHop()
-        vm.getDanhSachThiSinhTongHop()
+        // vm.getDanhSachDoiThiTongHop()
+        // vm.getDanhSachThiSinhTongHop()
       },
       getDanhSachDoanThi (type) {
         let vm = this
@@ -2008,21 +2149,40 @@ export default {
           let data = response.filter(function (item) {
             return item.soThiSinh
           })
-          vm.soDoanThiThamDu = data.length
+          let current = data.find(function (item) {
+            return item.doanThi.id == vm.thongTinDoanThi.id
+          })
+          if (current) {
+            vm.soThiSinhThamDu = current.soThiSinh
+            vm.soKhoiThiThamDu = current.noiDungThi.filter(function (item) {
+              return item.soThiSinh
+            }).length
+            let soDoi = 0
+            current.noiDungThi.forEach(function (item) {
+              if (item.soDoi && item.soThiSinh) {
+                soDoi += item.soDoi
+              }
+            })
+            vm.soDoiThiThamDu = soDoi
+          }
+          
         }).catch(function () {
         })
       },
       getDanhSachThiSinhTongHop () {
         let vm = this
         let filter = {
-          collectionName: 'thisinhs',
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'doanthis',
+          collectionChildId: vm.thongTinDoanThi.id,
+          collectionNameChild2: 'thisinhs',
           data: {
-            cuocThiId: vm.id,
             page: 1,
             size: 10000
           }
         }
-        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
           vm.soThiSinhThamDu = response.length
         }).catch(function () {})
       },
@@ -2170,11 +2330,18 @@ export default {
       },
       goBack () {
         window.history.back()
+      },
+      goToCuocThi () {
+        let vm = this
+        vm.$router.push({ path: '/cuoc-thi/' + vm.id})
       }
     }
   }
 </script>
 <style lang="scss">
+  .select-thisinh .v-input__append-inner{
+    display: none !important;
+  }
   .nav-content {
     border-right: 1px solid #DDDDDD;
     box-sizing: border-box;

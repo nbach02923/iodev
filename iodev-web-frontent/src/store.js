@@ -348,7 +348,7 @@ export default new Vuex.Store({
     forgotPassWord ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let settings = {
-          "url": state.apiSso + '/taikhoans/' + filter.email +'/quenmatkhau',
+          "url": state.apiSso + '/api/taikhoans/' + filter.email +'/quenmatkhau',
           "method": "POST",
           "headers": {
             'Accept': 'application/json',
@@ -368,7 +368,7 @@ export default new Vuex.Store({
     verifyForgotPassWord ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let settings = {
-          "url": state.apiSso + '/forgot-password/' + filter.email +'/verify-email?maBiMat=' + filter.maBiMat,
+          "url": state.apiSso + '/api/forgot-password/' + filter.email +'/verify-email?maBiMat=' + filter.maBiMat,
           "method": "PUT",
           "headers": {
             'Accept': 'application/json',
