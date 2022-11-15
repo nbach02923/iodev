@@ -344,6 +344,46 @@ export default new Vuex.Store({
           reject(response)
         })
       })
-    }
+    },
+    forgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/taikhoans/' + filter.email +'/quenmatkhau',
+          "method": "POST",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
+    verifyForgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/forgot-password/' + filter.email +'/verify-email?maBiMat=' + filter.maBiMat,
+          "method": "PUT",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
   }
 })

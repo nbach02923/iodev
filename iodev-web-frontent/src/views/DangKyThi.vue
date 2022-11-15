@@ -201,7 +201,7 @@
                 :key="i"
                 readonly
               >
-                <div class="ml-5 layout wrap" style="position: absolute; right: 0; top: 10px; width: 570px; z-index: 1000">
+                <div v-if="(thongTinToChuc && userLogin.loaiTaiKhoan == 0 && chiTietCuocThi.tinhTrang == 1) && (item2.thiTapThe || !item2.countThiSinh || !item2.maxDangKi || (item2.countThiSinh && item2.countThiSinh < item2.maxDangKi ))" class="ml-5 layout wrap" style="position: absolute; right: 0; top: 10px; width: 550px; z-index: 1000">
                   <v-autocomplete
                     style="width: 280px; max-width: 400px"
                     class="flex input-form mr-0"
@@ -223,7 +223,9 @@
                     </template>
 
                   </v-autocomplete>
-                  <v-btn small class="mr-3" color="primary"  @click.stop="item2.thiTapThe ? showChonDoiThi(item2, item2.thiSinhSuggest) : addThiSinhSuggest(item2, i)" style="height: 32px;margin-left: -15px;z-index: 10011">
+                  <v-btn small class="mr-3" color="primary"  @click.stop="item2.thiTapThe ? showChonDoiThi(item2, item2.thiSinhSuggest) : addThiSinhSuggest(item2, i)"
+                    style="height: 32px;margin-left: -15px;z-index: 10011;border-top-left-radius: 0;border-bottom-left-radius: 0;"
+                  >
                     <v-icon size="18">
                       mdi-pencil-plus-outline
                     </v-icon>&nbsp;
@@ -235,7 +237,7 @@
                   </v-btn>
                 </div>
                 <v-expansion-panel-header>
-                  <div class="text-header" style="width: calc(100% - 570px); text-align: justify">
+                  <div class="text-header" style="width: calc(100% - 550px); text-align: justify">
                     {{ item2.tenGoi }} - {{ item2.noiDungThi }}
                     <span v-if="item2.maxDangKi">&nbsp; (Tối đa {{item2.maxDangKi}} thí sinh)</span>
                     <span v-if="item2.maxThiSinh">&nbsp; (Tối đa {{item2.maxThiSinh}} thí sinh / đội thi)</span>
@@ -870,7 +872,7 @@
                 </v-autocomplete>
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn small class="mr-0 ml-3" color="primary" @click="createDoiThi" v-bind="attrs" v-on="on">
+                    <v-btn small class="mr-0 ml-3" color="primary" @click="createDoiThi(khoiThiSelected)" v-bind="attrs" v-on="on">
                       <v-icon>
                         mdi-plus
                       </v-icon>
@@ -1145,6 +1147,7 @@ export default {
       if (vm.userLogin.loaiTaiKhoan == 0) {
         vm.getThongTinToChuc()
       }
+      vm.tongHopThamDu()
     },
     computed: {
       breakpointName () {
@@ -1161,7 +1164,8 @@ export default {
         vm.getDanhSachKhoiThi()
         if (vm.userLogin.loaiTaiKhoan == 0) {
           vm.getThongTinToChuc()
-        }        
+        }
+        vm.tongHopThamDu()
       }
     },
     methods: {
@@ -1308,6 +1312,7 @@ export default {
       showChonDoiThi (khoiThi, thiSinh) {
         let vm = this
         if (!thiSinh) return
+        vm.getDanhSachDoiThi()
         vm.khoiThiSelected = khoiThi
         vm.dialogChonDoiThi = true
         vm.thiSinhSuggested = thiSinh
@@ -1330,7 +1335,6 @@ export default {
           vm.dialogChonDoiThi = false
           vm.getDanhSachThiSinh()
         }).catch(function () {
-
         })
       },
       getThongTinDoanThi () {
@@ -1342,6 +1346,7 @@ export default {
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.soDoanThiThamDu = response.length
           vm.thongTinDoanThi = ''
           try {
             let doanthi = response && response.length ? response.filter(function (item) {
@@ -1353,7 +1358,6 @@ export default {
           if (vm.thongTinDoanThi) {
             vm.getDanhSachThiSinh()
             vm.getDanhSachHlv()
-            vm.getDanhSachDoiThi()
           } else {
             vm.tenDoanThi = vm.thongTinToChuc.tenGoi
             vm.dialogTaoDoanThi = true
@@ -1475,12 +1479,33 @@ export default {
           collectionName: 'danhsachthis',
           data: {
             cuocThiId: vm.id,
+            doanThiId: vm.thongTinDoanThi.id,
             page: 1,
             size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
-          vm.danhSachDangKyThi = response
+          vm.danhSachDangKyThi = response.filter(function (item) {
+            return item.khoiThiId
+          })
+          // let filter = {
+          //   collectionName: 'doithis',
+          //   data: {
+          //     doanThiId: vm.thongTinDoanThi.id,
+          //     cuocThiId: vm.id
+          //   }
+          // }
+          // vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          //   let doiThis = response.filter(function (item) {
+          //     return item.khoiThiId
+          //   })
+          //   vm.danhSachDangKyThi.forEach(function (item) {
+          //     let doiThi = doiThis.find(function (i) {
+          //       i.id == item.doiThiId
+          //     })
+          //     item['tenDoiThi'] = doiThi ? doiThi.tenGoi : ''
+          //   })
+          // })
         }).catch(function () {
         })
       },
@@ -1497,7 +1522,9 @@ export default {
           response.forEach(element => {
             element['doiThiId'] = element.id
           });
-          vm.danhSachDoiThi = response
+          vm.danhSachDoiThi = response.filter(function (item) {
+            return item.khoiThiId
+          })
           // 
           if (vm.danhSachDoiThi.length) {
             vm.danhSachKhoiThi.forEach(element => {
@@ -1535,8 +1562,10 @@ export default {
           return 'Mở đăng kí'
         } else if (status == 2) {
           return 'Đóng đăng kí'
-        } else {
-          return 'Đã kết thúc'
+        } else if (status == 3) {
+          return 'Đóng đăng kí'
+        }else {
+          return '0'
         }
       },
       showEditThiSinh (item) {
@@ -1714,18 +1743,18 @@ export default {
               "ketQuaSoLoai": '',
               "thuTuXepHang": '',
               "doanThiId": vm.thongTinDoanThi.id,
-              "khoiThiId": vm.noiDungThiUpDate.khoiThiId
+              "khoiThiId": vm.khoiThiSelected.id
             }
           }
           vm.$store.dispatch('collectionCreateChild', filter).then(function (result) {
             vm.loading = false
             toastr.remove()
             toastr.success('Thêm mới thành công')
-            let item = Object.assign(vm.noiDungThiUpDate, {
-              doiThiId: result.id,
-              tenDoiThi: result.tenGoi
-            })
-            vm.$set(vm.danhSachNoiDungThiThiSinh, vm.indexNoiDungThiUpDate, item)
+            // let item = Object.assign(vm.noiDungThiUpDate, {
+            //   doiThiId: result.id,
+            //   tenDoiThi: result.tenGoi
+            // })
+            // vm.$set(vm.danhSachNoiDungThiThiSinh, vm.indexNoiDungThiUpDate, item)
             vm.dialogAddDoiThi = false
             vm.getDanhSachDoiThi()
           }).catch(function (response) {
@@ -1946,16 +1975,73 @@ export default {
           return []
         } else {
           let doiThiKhoi = doithis.filter(function (item) {
-            return item.khoiThiId == noidungthi.khoiThiId
+            return item.khoiThiId == noidungthi.id
           })
-          // console.log('23123123123', doithis, noidungthi)
           if (noidungthi.thiTapThe && noidungthi.maxThiSinh) {
+            console.log('23123123123AA', doithis, noidungthi)
             doiThiKhoi = doithis.filter(function (item) {
-              return item.khoiThiId == noidungthi.khoiThiId && item.countThiSinh < noidungthi.maxThiSinh
+              return item.khoiThiId == noidungthi.id && item.countThiSinh < noidungthi.maxThiSinh
             })
           }
           return doiThiKhoi
         }
+      },
+      tongHopThamDu () {
+        let vm = this
+        vm.getDanhSachDoanThi()
+        vm.getDanhSachDoiThiTongHop()
+        vm.getDanhSachThiSinhTongHop()
+      },
+      getDanhSachDoanThi (type) {
+        let vm = this
+        if (vm.loadingDataTongHopDangKy) {
+          return
+        }
+        vm.loadingDataTongHopDangKy = true
+        let filter = {
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'thongke',
+          data: {}
+        }
+        vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+          let data = response.filter(function (item) {
+            return item.soThiSinh
+          })
+          vm.soDoanThiThamDu = data.length
+        }).catch(function () {
+        })
+      },
+      getDanhSachThiSinhTongHop () {
+        let vm = this
+        let filter = {
+          collectionName: 'thisinhs',
+          data: {
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.soThiSinhThamDu = response.length
+        }).catch(function () {})
+      },
+      getDanhSachDoiThiTongHop () {
+        let vm = this
+        let filter = {
+          collectionName: 'doithis',
+          data: {
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          let data = response.filter(function (item) {
+            return item.khoiThiId
+          })
+          vm.soDoiThiThamDu = data.length
+        }).catch(function () {})
       },
       checkRoleAction (role) {
         let vm = this
@@ -2123,6 +2209,9 @@ export default {
   }
   .wrap-noidung-thi .v-expansion-panel--active {
     margin-top: 0px !important;
+  }
+  .table-group-thisinh td {
+    font-weight: bold;
   }
   .table-group-thisinh tbody  tr  td:nth-child(1){
     width: 5% !important;

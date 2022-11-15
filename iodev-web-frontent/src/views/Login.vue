@@ -9,7 +9,8 @@
       <div class="container-wrap">
         <div class="wrap-title">
           <v-flex style="text-align: center;" class="mb-5">
-            <img class="img-login-logo" :src="`${publicPath}/images/logo-vaip.jpg?t=93111413`">
+            <!-- <img class="img-login-logo" :src="`${publicPath}/images/logo-vaip.jpg?t=93111413`"> -->
+            <img class="img-login-logo" :src="`${publicPath}/images/logo-olp.jpg?t=93111413`">
           </v-flex>
           <v-flex class="wrap-title pt-1 mb-2 mt-3">
             <div class="text-1">Hệ thống thông tin quản lý các cuộc thi tin học</div>
@@ -62,8 +63,11 @@
                   <v-icon size="20">mdi-login</v-icon>&nbsp;
                   Đăng nhập
                 </v-btn>
-                <a @click="goToSignUp()"  href="javascript:;" class="" style="position: absolute; right: 0; bottom: 0; color: #fff;">
+                <!-- <a @click="goToSignUp()"  href="javascript:;" class="" style="position: absolute; right: 0; bottom: 0; color: #fff;">
                   <span> Đăng ký</span>
+                </a> -->
+                <a @click="forgotPassWord()"  href="javascript:;" class="" style="position: absolute; right: 0; bottom: 0; color: #fff;">
+                  <span> Quên mật khẩu ?</span>
                 </a>
               </v-flex>
             </v-form>
@@ -118,6 +122,54 @@
         ></v-progress-circular>
       </v-overlay>
     </div>
+    <v-dialog
+      max-width="450"
+      v-model="dialogConfirm"
+      persistent
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="primary" class="px-3" style=""
+        >
+          <v-toolbar-title>Xác nhận cấp lại mật khẩu</v-toolbar-title>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-card-text class="mt-5 px-2">
+          <v-form
+            ref="formActive"
+            v-model="validFormActive"
+            lazy-validation
+          >
+            <v-layout wrap>
+              <v-col cols="12" class="py-0 mb-2">
+                  <label>Mã bí mật <span class="red--text">(*)</span> </label>
+                  <i>Vui lòng kiểm tra email để lấy mã bí mật.</i>
+                  <v-text-field
+                    class="flex input-form"
+                    v-model="maBiMat"
+                    solo
+                    dense
+                    :rules="[v => !!v || 'Mã bí mật là bắt buộc']"
+                    required
+                    hide-details="auto"
+                    placeholder="Nhập mã bí mật"
+                    clearable
+                  ></v-text-field>
+              </v-col>
+            </v-layout>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="justify-end pb-3">
+          <v-btn small class="mr-2" color="primary" :loading="loading" :disabled="loading" @click="confirmForgotPassWord">
+            <v-icon left>
+              mdi-content-save
+            </v-icon>
+            <span>Xác nhận</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
   
 </template>
@@ -144,7 +196,9 @@
       password: '',
       client_secret: '',
       code: '',
-      signed: false
+      signed: false,
+      dialogConfirm: false,
+      maBiMat: ''
     }),
     created () {
       let vm = this
@@ -289,6 +343,48 @@
         //   window.location.href = window.location.origin + window.location.pathname + "#/dang-nhap"
         // })
       },
+      forgotPassWord () {
+        let vm = this
+        if (vm.loading) {
+          return;
+        }
+        if (String(vm.userName).trim() == '') {
+          toastr.remove()
+          toastr.error('Vui lòng nhập email đăng nhập')
+          return;
+        }
+        let filter = {
+          email: String(vm.userName).trim()
+        }
+        vm.loading = true
+        vm.$store.dispatch('forgotPassWord', filter).then(function () {
+          vm.loading = false
+          setTimeout(function () {
+            vm.dialogConfirm = true
+          }, 300)
+        }).catch(function () {
+          vm.loading = false
+        })  
+      },
+      confirmForgotPassWord () {
+        let vm = this
+        let filter = {
+          maBiMat: String(vm.maBiMat).trim()
+        }
+        vm.loading = true
+        vm.$store.dispatch('verifyForgotPassWord', filter).then(function () {
+          vm.loading = false
+          toastr.remove()
+          toastr.success('Xác minh thành công. Đăng nhập để sử dụng hệ thống.')
+          setTimeout(function () {
+            vm.$router.push({ path: '/dang-nhap' })
+          }, 300)
+        }).catch(function () {
+          vm.loading = false
+          toastr.remove()
+          toastr.error('Xác minh không thành công. Mã bí mật không chính xác.')
+        })
+      },
       goToPage () {
         let vm = this
         let currentQuery = vm.$router.history.current.query
@@ -428,9 +524,11 @@
     color: #ffffff !important;
   }
   .img-login-logo {
+    // width: 120px;
+    // border-radius: 30px;
     width: 120px;
-    border-radius: 30px;
-
+    height: 140px;
+    border-radius: 15px;
   }
   .wrap-title {
     text-align: center;

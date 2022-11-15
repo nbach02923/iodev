@@ -771,6 +771,8 @@ export default {
       vm.getChiTietCuocThi()
       vm.getdanhSachDoanThi('reset')
       vm.getDanhSachKhoiThi()
+      vm.getDanhSachDoiThi()
+      vm.getDanhSachThiSinh()
     },
     computed: {
       breakpointName () {
@@ -786,6 +788,8 @@ export default {
         vm.getChiTietCuocThi()
         vm.getdanhSachDoanThi('reset')
         vm.getDanhSachKhoiThi()
+        vm.getDanhSachDoiThi()
+        vm.getDanhSachThiSinh()
       }
     },
     methods: {
@@ -821,7 +825,9 @@ export default {
           data: {}
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachTongHopDangKy = response
+          vm.danhSachTongHopDangKy = response.filter(function (item) {
+            return item.soThiSinh
+          })
           vm.totalTongHopDangKy = vm.danhSachTongHopDangKy.length
           vm.soDoanThiThamDu = vm.totalTongHopDangKy
           vm.pageCountTongHopDangKy = Math.ceil(vm.totalTongHopDangKy / vm.itemsPerPage)
@@ -922,6 +928,34 @@ export default {
             vm.pageCountKetQuaDongDoi = Math.ceil(vm.totalKetQuaDongDoi / vm.itemsPerPage)
             // vm.danhSachKetQuaDongDoi = vm.dataLocal.danhSachGiaiTapThe
           })
+        }).catch(function () {})
+      },
+      getDanhSachThiSinh () {
+        let vm = this
+        let filter = {
+          collectionName: 'thisinhs',
+          data: {
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.soThiSinhThamDu = response.length
+        }).catch(function () {})
+      },
+      getDanhSachDoiThi () {
+        let vm = this
+        let filter = {
+          collectionName: 'doithis',
+          data: {
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          vm.soDoiThiThamDu = response.length
         }).catch(function () {})
       },
       showDsThiSinh (item, noidung) {

@@ -64,7 +64,7 @@
                     <div class="status-contest mx-4" :style="item.tinhTrang == 1 ? 'color: green' : (item.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(item.tinhTrang)}}
                     </div>
-                    <v-card-title class="py-0" style="word-break: break-word;">{{item.tenGoi}}</v-card-title>
+                    <v-card-title class="py-0" style="word-break: break-word;min-height: 56px;">{{item.tenGoi}}</v-card-title>
                     <v-card-text style="min-height: 90px;">
                       <div v-snip="{ lines: 3 }" class="my-0 text-subtitle-1">
                         {{item.thongTinMoTa}}
