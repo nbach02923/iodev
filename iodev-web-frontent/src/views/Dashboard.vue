@@ -169,7 +169,7 @@
                         Mở đăng ký
                       </v-chip>
                       <v-btn class="mb-2"
-                        v-if="item.tinhTrang == 1"
+                        v-if="item.tinhTrang == 1 && !checkRoleAction('VAITRO_QUANTRIHETHONG')"
                         text
                         color="success"
                         @click.stop="dangKyThi(item)"
@@ -413,7 +413,23 @@
           return items.sort(compare)
         }
         return sortItems(data)
-      }
+      },
+      checkRoleAction (role) {
+        let vm = this
+        let roleUser = vm.$cookies.get('Roles', '')
+        if (!role || !roleUser) {
+          return false
+        }
+        let roles = roleUser.split(',')
+        let exits = roles.find(function (item) {
+          return item == role
+        })
+        if (exits) {
+          return true
+        } else {
+          return false
+        }
+      },
     }
   }
 </script>

@@ -134,7 +134,7 @@
                     <span class="label-header">Trang web: </span>
                     <a class="blue-text font-weight-bold">{{chiTietCuocThi.website}}</a>
                   </v-col>
-                  <v-col v-if="chiTietCuocThi.tinhTrang == 1" cols="12" md="6" class="pt-0">
+                  <v-col v-if="chiTietCuocThi.tinhTrang == 1 && !checkRoleAction('VAITRO_QUANTRIHETHONG')" cols="12" md="6" class="pt-0">
                     <span class="label-header">Tình trạng: </span>
                     <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(chiTietCuocThi.tinhTrang)}}
@@ -285,6 +285,18 @@
                 </template>
                 <template v-slot:item.doanThi="{ item, index }">
                   <div class="px-2">{{item.doanThi.tenGoi}}</div>
+                </template>
+                <template v-slot:item.action="{ item, index }">
+                  <div class="px-2">
+                    <v-btn class="mb-2"
+                      text
+                      color="#2161B1"
+                      @click.stop="capNhatDangKy(item)"
+                    >
+                      <v-icon size="18" >mdi-pencil</v-icon>&nbsp;
+                      Cập nhật đăng ký
+                    </v-btn>
+                  </div>
                 </template>
               </v-data-table>
               <pagination v-if="totalTongHopDangKy" :pageInput="pageTongHopDangKy-1" :total="totalTongHopDangKy" :pageCount="pageCountTongHopDangKy" @tiny:change-page="changePage"></pagination>
@@ -773,6 +785,18 @@ export default {
       vm.getDanhSachKhoiThi()
       // vm.getDanhSachDoiThi()
       // vm.getDanhSachThiSinh()
+      if (vm.checkRoleAction('VAITRO_QUANTRIHETHONG')) {
+        vm.headersTongHopDangKy.push(
+          {
+            sortable: false,
+            text: 'Thao tác',
+            align: 'center',
+            value: 'action',
+            class: 'th-center',
+            width: 100
+          }
+        )
+      }
     },
     computed: {
       breakpointName () {
@@ -1055,6 +1079,10 @@ export default {
           let ref = '/dang-ky-thi/' + item.id
           vm.$router.push({ path: '/dang-nhap?redirect=' + ref})
         }
+      },
+      capNhatDangKy (item) {
+        let vm = this
+        vm.$router.push({ path: '/dang-ky-thi/' + vm.id + '?doanthi=' + item.doanThi.id + '&tochuc=' + item.doanThi.toChucId + '&email=' + item.doanThi.email})
       },
       statusContest (status) {
         if (status == 1) {
