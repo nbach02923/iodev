@@ -126,7 +126,9 @@ public class DanhSachThiController {
 
         }
         else {
-            int maxThiSinh = khoiThi.getMaxThiSinh();
+            //int maxThiSinh = khoiThi.getMaxThiSinh();
+        	//update by trungnt
+        	int maxThiSinh = khoiThi.getMaxDangKi();
             List<DanhSachThi> lstDst = danhSachThiRepository.findByCuocThiIdAndKhoiThiId(danhSachThi.getCuocThi().getId(), danhSachThi.getKhoiThiId());
             if (maxThiSinh <= lstDst.size()) {
                 throw new ValidationException("Number of ThiSinh limited!");
