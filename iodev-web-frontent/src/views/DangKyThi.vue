@@ -172,10 +172,78 @@
         </div>
 
         <div>
+          <!--  -->
+
+          <v-row class="my-0 py-0 pt-3 mx-0">
+             <v-flex>
+              <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
+                <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
+                  <div class="header-content">
+                    Danh sách huấn luyện viên
+                  </div>
+                  <div class="triangle-header"></div>
+                </v-col>
+                <v-spacer></v-spacer>
+            
+                <v-col v-if="((thongTinToChuc && userLogin.loaiTaiKhoan == 0 && chiTietCuocThi.tinhTrang == 1) || checkRoleAction('VAITRO_QUANTRIHETHONG'))" class="d-flex align-center justify-end py-0 px-0" style="max-width: 150px;">
+                  <v-btn small color="primary" class="btn-form mx-0 text-white" @click="showCreateHlv">
+                    <v-icon size="18">mdi-plus</v-icon>&nbsp;
+                    Thêm huấn luyện viên
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-flex>
+            <v-col cols="12"  class="pt-0 px-0">
+              <v-data-table
+                :headers="headersDanhSachHlv"
+                :items="danhSachHlv"
+                :items-per-page="itemsPerPage"
+                item-key="id"
+                hide-default-footer
+                class="table-base mt-2"
+                no-data-text="Không có"
+                :loading="loadingDataDanhSachHlv"
+                loading-text="Đang tải... "
+              >
+                <template v-slot:item.index="{ item, index }">
+                  <div>{{ (pageDanhSachHlv+1) * itemsPerPage - itemsPerPage + index + 1 }}</div>
+                </template>
+                <template v-slot:item.truongPhoDoan="{ item, index }">
+                  <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : ( item.truongPhoDoan == 2 ? 'Phó đoàn' : 'Huấn luyện viên')}}</div>
+                </template>
+                <template v-slot:item.noiDungThi="{ item, index }">
+                  <p class="mb-1" v-for="(item2, index2) in item.noiDungThi" :key="index2">{{index2 + 1}}. {{ item2.noiDungThi }}</p>
+                </template>
+                <template v-slot:item.action="{ item }" >
+                  <div v-if="chiTietCuocThi.tinhTrang == 1 || checkRoleAction('VAITRO_QUANTRIHETHONG')">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn small @click.stop="showEditHlv(item)" color="#2161B1" text icon class=" mr-3" v-bind="attrs" v-on="on">
+                          <v-icon size="22">mdi-pencil</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Sửa</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn small @click.stop="deleteHlv(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
+                          <v-icon size="22">mdi-delete</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Xóa</span>
+                    </v-tooltip>
+                  </div>
+                </template>
+              </v-data-table>
+              <pagination v-if="pageCountDanhSachHlv" :pageInput="pageDanhSachHlv" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePage"></pagination>
+            </v-col>
+          </v-row>
+
+          <!--  -->
           <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
             <v-col class="d-flex align-center justify-start py-0 px-0" style="color: #2161B1;font-weight: 500;">
               <div class="header-content">
-                Danh sách đăng ký dự thi
+                Danh sách thí sinh đăng ký dự thi
               </div>
               <div class="triangle-header"></div>
             </v-col>
@@ -422,7 +490,6 @@
                       <span>&nbsp;</span>
                       <span v-if="data.item.email">,&nbsp;{{data.item.email}}</span>
                     </template>
-
                   </v-combobox>
               </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
@@ -484,6 +551,7 @@
               <v-col cols="12" md="6" class="py-0 mb-2">
                 <label>Đối tượng</label>
                 <v-text-field
+                v-if="typeAction == 'update'"
                   class="input-form"
                   v-model="thongTinThiSinh['doiTuongThi']"
                   solo
@@ -491,12 +559,28 @@
                   clearable
                   max
                   hide-details="auto"
-                  placeholder="Sinh viên, học sinh năm mấy..."
+                  placeholder="Sinh viên năm mấy..."
                 ></v-text-field>
+                <v-combobox
+                  v-if="typeAction == 'create'"
+                  class="flex input-form mr-0 select-thisinh"
+                  hide-no-data
+                  :items="danhSachDoiTuongSuggest"
+                  v-model="doiTuongSuggested"
+                  item-text="giaTri"
+                  item-value="maDanhMuc"
+                  dense
+                  solo
+                  clearable
+                  return-object
+                  @change="changeSuggestDoiTuong"
+                >
+                </v-combobox>
               </v-col>
               <v-col cols="12" class="py-0">
-                <label>Nghành đào tạo</label>
+                <label>Ngành đào tạo</label>
                 <v-text-field
+                  v-if="typeAction == 'update'"
                   class="input-form"
                   v-model="thongTinThiSinh['nganhDaoTao']"
                   solo
@@ -505,10 +589,26 @@
                   max
                   hide-details="auto"
                 ></v-text-field>
+                <v-combobox
+                  v-if="typeAction == 'create'"
+                  class="flex input-form mr-0 select-thisinh"
+                  hide-no-data
+                  :items="danhSachNganhDaoTaoSuggest"
+                  v-model="nganhDaoTaoSuggested"
+                  item-text="giaTri"
+                  item-value="maDanhMuc"
+                  dense
+                  solo
+                  clearable
+                  return-object
+                  @change="changeSuggestNganhDaoTao"
+                >
+                </v-combobox>
               </v-col>
               <v-col cols="12" class="py-0">
                 <label>Giải thưởng đã đạt được</label>
                 <v-textarea
+                  v-if="typeAction == 'update'"
                   class="input-form"
                   v-model="thongTinThiSinh['datGiaiThuong']"
                   solo
@@ -518,6 +618,50 @@
                   rows="2"
                   hide-details="auto"
                 ></v-textarea>
+                <v-layout wrap v-if="typeAction == 'create'">
+                  <v-combobox
+                    class="flex input-form mr-0 select-thisinh"
+                    hide-no-data
+                    :items="danhSachCuocThiSuggest"
+                    v-model="cuocThiSuggested"
+                    item-text="giaTri"
+                    item-value="maDanhMuc"
+                    dense
+                    solo
+                    clearable
+                    return-object
+                    placeholder="Cuộc thi"
+                  >
+                  </v-combobox>
+                  <v-combobox
+                    class="flex input-form mr-0 select-thisinh px-2"
+                    hide-no-data
+                    :items="danhSachNamThiSuggest"
+                    v-model="namThiSuggested"
+                    item-text="giaTri"
+                    item-value="maDanhMuc"
+                    dense
+                    solo
+                    clearable
+                    return-object
+                    placeholder="Năm thi"
+                  >
+                  </v-combobox>
+                  <v-combobox
+                    class="flex input-form mr-0 select-thisinh"
+                    hide-no-data
+                    :items="danhSachGiaiThuongSuggest"
+                    v-model="giaiThuongSuggested"
+                    item-text="giaTri"
+                    item-value="maDanhMuc"
+                    dense
+                    solo
+                    clearable
+                    return-object
+                    placeholder="Giải thưởng"
+                  >
+                  </v-combobox>
+                </v-layout>
               </v-col>
 
               <v-col cols="12" class="py-0 mb-2" v-if="typeAction == 'create' && khoiThiSelected.thiTapThe">
@@ -707,6 +851,7 @@
                   <label>Họ và tên <span class="red--text">(*)</span></label>
                   <v-text-field
                     class="flex input-form"
+                    v-if="typeAction == 'update'"
                     v-model="thongTinHlv['hoTen']"
                     solo
                     dense
@@ -715,6 +860,28 @@
                     hide-details="auto"
                     clearable
                   ></v-text-field>
+
+                  <v-combobox
+                    v-if="typeAction == 'create'"
+                    class="flex input-form mr-0 select-thisinh"
+                    hide-no-data
+                    :items="danhSachHlvSuggest"
+                    v-model="hlvSuggested"
+                    item-text="hoTen"
+                    item-value="id"
+                    dense
+                    solo
+                    clearable
+                    return-object
+                    @change="changeSuggestHlv"
+                  >
+                    <template v-slot:item="data">
+                      <span>{{data.item.hoTen}}</span>
+                      <span>&nbsp;</span>
+                      <span v-if="data.item.email">,&nbsp;{{data.item.email}}</span>
+                    </template>
+
+                  </v-combobox>
               </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
                 <label>Email <span class="red--text">(*)</span></label>
@@ -1090,7 +1257,7 @@ export default {
           },
           {
               sortable: false,
-              text: 'Nghành đào tạo',
+              text: 'Ngành đào tạo',
               align: 'left',
               value: 'nganhDaoTao',
               class: 'th-center py-2'
@@ -1232,7 +1399,8 @@ export default {
         ],
         itemsChucVu: [
           {tenMuc: 'Trưởng đoàn', maMuc: 1},
-          {tenMuc: 'Phó đoàn', maMuc: 2}
+          {tenMuc: 'Phó đoàn', maMuc: 2},
+          {tenMuc: 'Huấn luyện viên', maMuc: 3}
         ],
         ngaySinhCreate: '',
         thongTinHlv: '',
@@ -1249,8 +1417,36 @@ export default {
         validFormAddThiSinhDoiThi: false,
         dialogChonDoiThi: false,
         doiThiSelected: '',
+        danhSachHlvSuggest: [],
+        hlvSuggested: '',
         danhSachThiSinhSuggest: [],
         thiSinhSuggested: '',
+        danhSachDoiTuongSuggest: [],
+        doiTuongSuggested: '',
+        danhSachNganhDaoTaoSuggest: [],
+        nganhDaoTaoSuggested: '',
+        danhSachNamThiSuggest: [
+          {giaTri: 2022, maDanhMuc: '2022'},
+          {giaTri: 2021, maDanhMuc: '2021'},
+          {giaTri: 2020, maDanhMuc: '2020'},
+          {giaTri: 2019, maDanhMuc: '2019'}
+        ],
+        namThiSuggested: '',
+        danhSachCuocThiSuggest: [
+          {giaTri: 'Olympic Tin học Sinh Viên Việt Nam', maDanhMuc: 'OLP'},
+          {giaTri: 'Kỳ thi lập trình sinh viên Quốc tế ICPC', maDanhMuc: 'ICPC'}
+        ],
+        cuocThiSuggested: '',
+        danhSachGiaiThuongSuggest: [
+          {giaTri: 'Giải nhất', maDanhMuc: 'NHAT'},
+          {giaTri: 'Giải nhì', maDanhMuc: 'NHI'},
+          {giaTri: 'Giải ba', maDanhMuc: 'BA'},
+          {giaTri: 'Giải khuyến khích', maDanhMuc: 'KK'},
+          {giaTri: 'Huy chương vàng', maDanhMuc: 'VANG'},
+          {giaTri: 'Huy chương bạc', maDanhMuc: 'BAC'},
+          {giaTri: 'Huy chương đồng', maDanhMuc: 'DONG'}
+        ],
+        giaiThuongSuggested: '',
         soThiSinhThamDu: 0,
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
@@ -1275,6 +1471,10 @@ export default {
       if (vm.userLogin.loaiTaiKhoan == 0 || vm.toChucUpdate) {
         vm.getThongTinToChuc()
       }
+      vm.getDanhMuc('C_DOITUONGTHI')
+      vm.getDanhMuc('C_NGANHDAOTAO')
+      vm.getDanhMuc('C_CUOCTHIDATGIAI')
+      vm.getDanhMuc('C_GIAITHUONGCUOCTHI')
     },
     computed: {
       breakpointName () {
@@ -1302,9 +1502,37 @@ export default {
         if (vm.userLogin.loaiTaiKhoan == 0 || vm.toChucUpdate) {
           vm.getThongTinToChuc()
         }
+        vm.getDanhMuc('C_DOITUONGTHI')
+        vm.getDanhMuc('C_NGANHDAOTAO')
+        vm.getDanhMuc('C_CUOCTHIDATGIAI')
+        vm.getDanhMuc('C_GIAITHUONGCUOCTHI')
       }
     },
     methods: {
+      getDanhMuc (danhmuc) {
+        let vm = this
+        let filter = {
+          collectionName: 'danhmucs',
+          data: {
+            loaiDanhMuc: danhmuc
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          if (danhmuc == 'C_DOITUONGTHI') {
+            vm.danhSachDoiTuongSuggest = response
+          }
+          if (danhmuc == 'C_NGANHDAOTAO') {
+            vm.danhSachNganhDaoTaoSuggest = response
+          }
+          if (danhmuc == 'C_CUOCTHIDATGIAI' && response && response.length) {
+            vm.danhSachCuocThiSuggest = response
+          }
+          if (danhmuc == 'C_GIAITHUONGCUOCTHI' && response && response.length) {
+            vm.danhSachGiaiThuongSuggest = response
+          }
+        }).catch(function () {
+        })
+      },
       getChiTietCuocThi () {
         let vm = this
         let filter = {
@@ -1404,16 +1632,20 @@ export default {
           vm.ngaySinhCreate = vm.thiSinhSuggested.ngaySinh ? vm.convertDate(vm.thiSinhSuggested.ngaySinh) : ''
         }
       },
-      inputSuggest () {
+      changeSuggestNganhDaoTao () {
         let vm = this
-        setTimeout(() => {
-          console.log('aaaaaa1114441', vm.thiSinhSuggested)
-        }, 100);
-        
+        if (vm.nganhDaoTaoSuggested && vm.nganhDaoTaoSuggested.hasOwnProperty('giaTri')) {
+          vm.thongTinThiSinh.nganhDaoTao = vm.nganhDaoTaoSuggested.giaTri
+        }
+      },
+      changeSuggestDoiTuong () {
+        let vm = this
+        if (vm.doiTuongSuggested && vm.doiTuongSuggested.hasOwnProperty('giaTri')) {
+          vm.thongTinThiSinh.doiTuongThi = vm.doiTuongSuggested.giaTri
+        }
       },
       addThiSinhSuggest (item, index) {
         let vm = this
-        console.log('addThiSinhSuggest', item, index)
         if (!item.thiSinhSuggest) {
           return
         }
@@ -1838,47 +2070,99 @@ export default {
       },
       submitCreateThiSinh () {
         let vm = this
-        try {
-          if (!vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
-            vm.thongTinThiSinh['hoTen'] = vm.thiSinhSuggested
+        setTimeout(() => {
+          try {
+            if (!vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
+              vm.thongTinThiSinh['hoTen'] = vm.thiSinhSuggested
+            }
+          } catch (error) {
           }
-        } catch (error) {
-        }
-        if (vm.loading) {
-          return
-        }
-        
-        if (vm.$refs.formAddThiSinh.validate()) {
-          // if (!vm.danhSachNoiDungThiThiSinh.length) {
-          //   toastr.error('Vui lòng chọn nội dung đăng ký dự thi')
-          //   return
-          // }
-          vm.thongTinThiSinh.ngaySinh = vm.formatDateInput(vm.ngaySinhCreate)
-          vm.thongTinThiSinh.doanThiId = vm.thongTinDoanThi.id
-          console.log('thongTinThiSinh', vm.thongTinThiSinh)
-          let filter = {
-            collectionName: 'cuocthis',
-            collectionId: vm.id,
-            collectionChildName: 'thisinhs',
-            data: vm.thongTinThiSinh
+          try {
+            if (!vm.doiTuongSuggested.hasOwnProperty('giaTri')) {
+              vm.thongTinThiSinh['doiTuongThi'] = vm.doiTuongSuggested
+            }
+          } catch (error) {
           }
-          vm.loading = true
-          vm.$store.dispatch('collectionCreateChild', filter).then(function (result) {
+          try {
+            if (!vm.nganhDaoTaoSuggested.hasOwnProperty('giaTri')) {
+              vm.thongTinThiSinh['nganhDaoTao'] = vm.nganhDaoTaoSuggested
+            }
+          } catch (error) {
+          }
+          try {
+            if (!vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
+              vm.thongTinThiSinh['hoTen'] = vm.thiSinhSuggested
+            }
+          } catch (error) {
+          }
+          let giaiThuongCuocThi = ''
+          let giaiThuongNamThi = ''
+          let giaiThuong = ''
+          try {
+            if (!vm.cuocThiSuggested.hasOwnProperty('giaTri')) {
+              giaiThuongCuocThi = vm.cuocThiSuggested
+            } else {
+              giaiThuongCuocThi = vm.cuocThiSuggested.giaTri
+            }
+          } catch (error) {
+          }
+          try {
+            if (!vm.namThiSuggested.hasOwnProperty('giaTri')) {
+              giaiThuongNamThi = vm.namThiSuggested
+            } else {
+              giaiThuongNamThi = vm.namThiSuggested.giaTri
+            }
+          } catch (error) {
+          }
+          try {
+            if (!vm.giaiThuongSuggested.hasOwnProperty('giaTri')) {
+              giaiThuong = vm.giaiThuongSuggested
+            } else {
+              giaiThuong = vm.giaiThuongSuggested.giaTri
+            }
+          } catch (error) {
+          }
+          vm.thongTinThiSinh['datGiaiThuong'] = giaiThuong + ' ' + giaiThuongCuocThi
+          if (vm.namThiSuggested) {
+            vm.thongTinThiSinh['datGiaiThuong'] = vm.thongTinThiSinh['datGiaiThuong'] + ' năm ' + giaiThuongNamThi
+          }
+
+          if (vm.loading) {
+            return
+          }
+          
+          if (vm.$refs.formAddThiSinh.validate()) {
+            // if (!vm.danhSachNoiDungThiThiSinh.length) {
+            //   toastr.error('Vui lòng chọn nội dung đăng ký dự thi')
+            //   return
+            // }
+            vm.thongTinThiSinh.ngaySinh = vm.formatDateInput(vm.ngaySinhCreate)
+            vm.thongTinThiSinh.doanThiId = vm.thongTinDoanThi.id
+            console.log('thongTinThiSinh', vm.thongTinThiSinh)
+            let filter = {
+              collectionName: 'cuocthis',
+              collectionId: vm.id,
+              collectionChildName: 'thisinhs',
+              data: vm.thongTinThiSinh
+            }
+            vm.loading = true
+            vm.$store.dispatch('collectionCreateChild', filter).then(function (result) {
+              vm.loading = false
+              toastr.remove()
+              toastr.success('Thêm mới thành công')
+              vm.dialogAddThiSinh = false
+              // vm.taoDanhSachThi(result.id)
+              vm.addDanhSachThi(result.id, vm.khoiThiSelected)
+              vm.getDanhSachThiSinhSuggest()
+            }).catch(function (response) {
+              vm.loading = false
+              toastr.remove()
+              toastr.error('Thêm mới thất bại')
+            })
+          } else {
             vm.loading = false
-            toastr.remove()
-            toastr.success('Thêm mới thành công')
-            vm.dialogAddThiSinh = false
-            // vm.taoDanhSachThi(result.id)
-            vm.addDanhSachThi(result.id, vm.khoiThiSelected)
-            vm.getDanhSachThiSinhSuggest()
-          }).catch(function (response) {
-            vm.loading = false
-            toastr.remove()
-            toastr.error('Thêm mới thất bại')
-          })
-        } else {
-          vm.loading = false
-        }
+          }
+        }, 100);
       },
       taoDanhSachThi (thiDinhId) {
         let vm = this
@@ -2003,8 +2287,30 @@ export default {
           vm.loading = false
         }
       },
+      getDanhSachHlvSuggest () {
+        let vm = this
+        let filter = {
+          collectionName: 'huanluyenviens',
+          toChucId: vm.toChucUpdate ? vm.toChucUpdate : vm.userLogin.id,
+          data: {
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilterDaGhiDanh', filter).then(function (response) {
+          vm.danhSachHlvSuggest = response
+        }).catch(function () {
+        })
+      },
+      changeSuggestHlv () {
+        let vm = this
+        if (vm.hlvSuggested && vm.hlvSuggested.hasOwnProperty('hoTen')) {
+          vm.thongTinHlv = vm.hlvSuggested
+        }
+      },
       showCreateHlv () {
         let vm = this
+        vm.getDanhSachHlvSuggest()
         vm.typeAction = 'create'
         vm.noiDungDuThiHlv = []
         vm.dialogAddHlv = true
@@ -2033,6 +2339,12 @@ export default {
       },
       submitCreateHlv () {
         let vm = this
+        try {
+          if (!vm.hlvSuggested.hasOwnProperty('hoTen')) {
+            vm.thongTinHlv['hoTen'] = vm.hlvSuggested
+          }
+        } catch (error) {
+        }
         console.log('vm.thongTinHlv', vm.thongTinHlv)
         console.log('noiDungThi', vm.noiDungDuThiHlv)
         if (vm.loading) {

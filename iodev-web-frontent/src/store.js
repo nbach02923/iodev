@@ -170,7 +170,7 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         let config = {
           method: 'get',
-          url: '/api/thisinhs/' + filter.toChucId + '/daghidanh',
+          url: '/api/' + filter.collectionName + '/' + filter.toChucId + '/daghidanh',
           headers: { 
             'Accept': 'application/json', 
             'Content-Type': 'application/json'

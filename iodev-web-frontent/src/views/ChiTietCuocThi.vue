@@ -469,7 +469,7 @@
               <div>{{ (pageDanhSachHlv) * itemsPerPageDanhSachHlv - itemsPerPageDanhSachHlv + index + 1 }}</div>
             </template>
             <template v-slot:item.truongPhoDoan="{ item, index }">
-              <div>{{ item.truongPhoDoan == 0 ? 'Phó đoàn' : 'Trưởng đoàn'}}</div>
+              <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : ( item.truongPhoDoan == 2 ? 'Phó đoàn' : 'Huấn luyện viên')}}</div>
             </template>
           </v-data-table>
           <pagination :getAll="true" :pageInput="pageDanhSachHlv -1" :total="totalDanhSachHlv" :pageCount="pageCountDanhSachHlv" @tiny:change-page="changePageDanhSachHlv"></pagination>
@@ -692,7 +692,7 @@ export default {
           },
           {
               sortable: false,
-              text: 'Nghành đào tạo',
+              text: 'Ngành đào tạo',
               align: 'left',
               value: 'nganhDaoTao',
               class: 'th-center py-2'
