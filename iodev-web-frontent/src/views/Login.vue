@@ -333,6 +333,7 @@
         vm.$cookies.set('Token', '')
         vm.$cookies.set('UserInfo', '')
         vm.$cookies.set('RefreshToken', '')
+        vm.$cookies.set('Roles', '')
         try {
           localStorage.setItem('thongTinTaiKhoan', '')
         } catch (error) {

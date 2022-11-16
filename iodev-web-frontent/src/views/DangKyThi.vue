@@ -344,6 +344,7 @@
                     no-data-text="Không có"
                     :loading="loadingDataDanhSachThiSinh"
                     loading-text="Đang tải... "
+                    :group-by="item2.thiTapThe ? 'Đội thi' : null"
                   >
                     <template v-slot:item.index="{ item, index }">
                       <div>{{ index + 1 }}</div>
@@ -399,7 +400,7 @@
         </div>
       </v-flex>
     </v-layout>
-    <!-- Thêm thí sinh -->
+    
     <v-dialog
       max-width="1200"
       v-model="dialogAddThiSinh"
@@ -1456,7 +1457,15 @@ export default {
     created () {
       let vm = this
       let currentQuery = vm.$router.history.current.query
-      console.log('currentQuery', currentQuery)
+      //
+      if (!vm.isSigned) {
+        let ref = '/dang-ky-thi/' + vm.id
+        vm.$router.push({ path: '/dang-nhap?redirect=' + ref})
+      }
+      if (vm.isSigned && vm.checkRoleAction('VAITRO_QUANTRIHETHONG') && !currentQuery.hasOwnProperty('doanthi')) {
+        vm.$router.push({ path: '/cuoc-thi/' + vm.id})
+      }
+      //
       if (currentQuery.hasOwnProperty('doanthi') && vm.checkRoleAction('VAITRO_QUANTRIHETHONG')) {
         vm.doanThiUpdate = currentQuery.doanthi
       }
@@ -1466,6 +1475,7 @@ export default {
       if (currentQuery.hasOwnProperty('email') && vm.checkRoleAction('VAITRO_QUANTRIHETHONG')) {
         vm.emailToChucUpdate = currentQuery.email
       }
+      vm.getDanhSachDoiThi()
       vm.getChiTietCuocThi()
       vm.getDanhSachKhoiThi()
       if (vm.userLogin.loaiTaiKhoan == 0 || vm.toChucUpdate) {
@@ -1564,7 +1574,6 @@ export default {
             return index
           })
           vm.getDanhSachThiSinhSuggest()
-          console.log('dsKhoithi', vm.danhSachKhoiThi)
         }).catch(function () {
         })
       },
@@ -1630,6 +1639,12 @@ export default {
         if (vm.thiSinhSuggested && vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
           vm.thongTinThiSinh = vm.thiSinhSuggested
           vm.ngaySinhCreate = vm.thiSinhSuggested.ngaySinh ? vm.convertDate(vm.thiSinhSuggested.ngaySinh) : ''
+          if (vm.thiSinhSuggested.doiTuongThi) {
+            vm.doiTuongSuggested = vm.thiSinhSuggested.doiTuongThi
+          }
+          if (vm.thiSinhSuggested.nganhDaoTao) {
+            vm.nganhDaoTaoSuggested = vm.thiSinhSuggested.nganhDaoTao
+          }
         }
       },
       changeSuggestNganhDaoTao () {
@@ -1839,20 +1854,54 @@ export default {
             })
           }
           // 
-          vm.danhSachKhoiThi.forEach((khoiThi, index) => {
-            let thisinhArr = []
-            vm.danhSachThiSinh.forEach(thisinh => {
-              if (thisinh.noiDungThi && thisinh.noiDungThi.length) {
-                let exits = thisinh.noiDungThi.find(function (item) {
-                  return item.id == khoiThi.id
-                })
-                if (exits) {
-                  thisinhArr.push(thisinh)
+          let filter = {
+            collectionName: 'danhsachthis',
+            data: {
+              cuocThiId: vm.id,
+              doanThiId: vm.thongTinDoanThi.id,
+              page: 1,
+              size: 10000
+            }
+          }
+          vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+            vm.danhSachDangKyThi = response.filter(function (item) {
+              return item.khoiThiId
+            })
+
+            vm.danhSachKhoiThi.forEach((khoiThi, index) => {
+              let thisinhArr = []
+              vm.danhSachThiSinh.forEach(thisinh => {
+                if (thisinh.noiDungThi && thisinh.noiDungThi.length) {
+                  let exits = thisinh.noiDungThi.find(function (item) {
+                    return item.id == khoiThi.id
+                  })
+                  if (exits) {
+                    if (exits.thiTapThe) {
+                      // console.log('khoiThiId', exits.id)
+                      // console.log('thiSinhId', thisinh.id)
+                      // console.log('dsthi', vm.danhSachDangKyThi)
+                      let dsthi = vm.danhSachDangKyThi.find(function (item) {
+                        return item.khoiThiId == exits.id && item.thiSinhId == thisinh.id
+                      })
+                      if (dsthi) {
+                        // console.log('dsthi111111', dsthi)
+                        let doiThi = vm.danhSachDoiThi.find(function (item) {
+                          return item.id == dsthi.doiThiId
+                        })
+                        // console.log('doiThi', doiThi)
+                        if (doiThi) {
+                          thisinh['Đội thi'] = doiThi.tenGoi
+                        }
+                      }
+                    }
+                    thisinhArr.push(thisinh)
+                  }
                 }
-              }
-            });
-            khoiThi.thiSinhs = thisinhArr
+              });
+              khoiThi.thiSinhs = thisinhArr
+            })
           })
+          
           // 
           console.log('danhSachThiSinh5555', vm.danhSachThiSinh)
           console.log('danhSachKhoiThi5555', vm.danhSachKhoiThi)
@@ -2022,35 +2071,28 @@ export default {
         let vm = this
         vm.khoiThiSelected = khoiThi
         vm.danhSachThiSinhSuggest = suggest
-        // if (!vm.khoiThiSelected.thiTapThe) {
-          vm.typeAction = 'create'
-          vm.getDanhSachDoiThi()
-          vm.danhSachNoiDungThiThiSinh = []
-          vm.dialogAddThiSinh = true
-          setTimeout(function () {
-            vm.thongTinThiSinh = {
-              "hoTen": "",
-              "gioiTinh": "",
-              "ngaySinh": "",
-              "email": "",
-              "soDienThoai": "",
-              "doiTuongThi": "",
-              "nganhDaoTao": "",
-              "datGiaiThuong": ""
-            }
-            vm.$refs.formAddThiSinh.reset()
-            vm.$refs.formAddThiSinh.resetValidation()
-          }, 100)
-        // } else {
-        //   vm.getDanhSachDoiThi()
-        //   vm.dialogChonDoiThi = true
-        //   vm.thiSinhSuggested = ''
-        // }
+        vm.typeAction = 'create'
+        vm.getDanhSachDoiThi()
+        vm.danhSachNoiDungThiThiSinh = []
+        vm.dialogAddThiSinh = true
+        setTimeout(function () {
+          vm.thongTinThiSinh = {
+            "hoTen": "",
+            "gioiTinh": "",
+            "ngaySinh": "",
+            "email": "",
+            "soDienThoai": "",
+            "doiTuongThi": "",
+            "nganhDaoTao": "",
+            "datGiaiThuong": ""
+          }
+          vm.$refs.formAddThiSinh.reset()
+          vm.$refs.formAddThiSinh.resetValidation()
+        }, 100)
       },
       showCreateThiSinhTapThe () {
         let vm = this
         vm.typeAction = 'create'
-        // vm.getDanhSachDoiThi()
         vm.danhSachNoiDungThiThiSinh = []
         vm.dialogAddThiSinh = true
         setTimeout(function () {
@@ -2074,6 +2116,7 @@ export default {
           try {
             if (!vm.thiSinhSuggested.hasOwnProperty('hoTen')) {
               vm.thongTinThiSinh['hoTen'] = vm.thiSinhSuggested
+              vm.thongTinThiSinh['id'] = null
             }
           } catch (error) {
           }
@@ -2151,8 +2194,11 @@ export default {
               toastr.remove()
               toastr.success('Thêm mới thành công')
               vm.dialogAddThiSinh = false
-              // vm.taoDanhSachThi(result.id)
-              vm.addDanhSachThi(result.id, vm.khoiThiSelected)
+              if (vm.khoiThiSelected.thiTapThe) {
+                vm.addDanhSachThi(result.id, vm.khoiThiSelected, vm.doiThiSelected)
+              } else {
+                vm.addDanhSachThi(result.id, vm.khoiThiSelected)
+              }
               vm.getDanhSachThiSinhSuggest()
             }).catch(function (response) {
               vm.loading = false
@@ -2342,6 +2388,7 @@ export default {
         try {
           if (!vm.hlvSuggested.hasOwnProperty('hoTen')) {
             vm.thongTinHlv['hoTen'] = vm.hlvSuggested
+            vm.thongTinHlv['id'] = null
           }
         } catch (error) {
         }
@@ -2787,5 +2834,11 @@ export default {
   }
   .table-group-thisinh tbody > tr > td:nth-child(9){
     width: 7%;
+  }
+  .table-group-thisinh .v-row-group__header button {
+    display: none
+  }
+  .table-group-thisinh .v-row-group__header .text-start {
+    padding-left: 15px !important
   }
 </style>

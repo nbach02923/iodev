@@ -175,6 +175,7 @@
         vm.$cookies.set('Token', '')
         vm.$cookies.set('RefreshToken', '')
         vm.$cookies.set('UserInfo', '')
+        vm.$cookies.set('Roles', '')
         vm.$cookies.set('admin', '')
         try {
           localStorage.setItem('thongTinTaiKhoan', '')

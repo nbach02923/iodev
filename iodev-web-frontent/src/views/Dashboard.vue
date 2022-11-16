@@ -204,7 +204,7 @@
 
 <script>
   import toastr from 'toastr'
-
+  import axios from 'axios'
   toastr.options = {
     'closeButton': true,
     'timeOut': '5000',
@@ -212,6 +212,7 @@
   }
   export default {
     name: 'Dashboard',
+    props: ['macuocthi'],
     components: {
     },
     data: () => ({
@@ -275,6 +276,9 @@
     }),
     created () {
       let vm = this
+      // if (vm.macuocthi) {
+      //   vm.goToDangKy()
+      // }
       vm.getDanhSachCuocThi('reset')
       vm.getDanhSachCuocThiStatus('1,2')
       vm.getDanhMuc('C_SERIECUOCTHI')
@@ -290,12 +294,34 @@
     watch: {
       '$route': function (newRoute, oldRoute) {
         let vm = this
+        // if (vm.macuocthi) {
+        //   vm.goToDangKy()
+        // }
         vm.getDanhSachCuocThi('reset')
         vm.getDanhSachCuocThiStatus('1,2')
         vm.getDanhMuc('C_SERIECUOCTHI')
       }
     },
     methods: {
+      goToDangKy () {
+        let vm = this
+        let config = {
+          method: 'get',
+          url: '/api/cuocthis/thongtinchitiet/' + vm.macuocthi,
+          data: {},
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          }
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          if (serializable) {
+            vm.$router.push({ path: '/dang-ky-thi/' + serializable.id})
+          }
+        }).catch(function (error) {
+        })
+      },
       getDanhMuc (danhmuc) {
         let vm = this
         let filter = {
