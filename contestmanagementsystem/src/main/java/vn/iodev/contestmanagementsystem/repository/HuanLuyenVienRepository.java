@@ -27,4 +27,8 @@ public interface HuanLuyenVienRepository extends JpaRepository<HuanLuyenVien, St
     void deleteByCuocThiId(String cuocThiId);
 
     long countByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
+    
+    //add by trungnt
+    @Query("SELECT hlv FROM T_HuanLuyenVien hlv WHERE hlv.doanThiId IN (:doanThiIds)")
+    List<HuanLuyenVien> findByDoanThiIds(List<String> doanThiIds, Pageable pageable);
 }
