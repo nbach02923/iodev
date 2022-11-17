@@ -67,6 +67,9 @@ public class CuocThi {
 
     @Column(name = "website", nullable = true)
     private String website;
+    
+    @Column(name = "maCuocThi")
+    private String maCuocThi;
 
     @Transient
     private String hinhAnh;
