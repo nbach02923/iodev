@@ -61,14 +61,19 @@ public class ExcelService {
         try {
             List<DoanThi> doanthis = ExcelHelper.excelXlsxToDoanThis(file.getInputStream());
             for (DoanThi dt : doanthis) {
-                Optional<DoanThi> doanThiData = doanThiRepository.findByTenGoiOrTiengAnh(dt.getTenGoi(), dt.getTiengAnh());
-                if (doanThiData.isPresent()) {
-                    dt.setId(doanThiData.get().getId());
-                }
-                else {
-                    dt.setThoiGianTao(System.currentTimeMillis());
-                }
-                dt.setThoiGianCapNhat(System.currentTimeMillis());
+                try {
+                	Optional<DoanThi> doanThiData = doanThiRepository.findByTenGoiOrTiengAnh(dt.getTenGoi(), dt.getTiengAnh());
+                    if (doanThiData.isPresent()) {
+                        dt.setId(doanThiData.get().getId());
+                    }
+                    else {
+                        dt.setThoiGianTao(System.currentTimeMillis());
+                    }
+                    dt.setThoiGianCapNhat(System.currentTimeMillis());
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+				}
             }
             doanThiRepository.saveAll(doanthis);
         }
@@ -79,51 +84,63 @@ public class ExcelService {
         }
     }  
     
-    public void importThiSinh(MultipartFile file, CuocThi cuocThi) {
-        try {
-            List<ThiSinh> thisinhs = ExcelHelper.excelXlsxToThiSinhs(file.getInputStream());
-            for (ThiSinh ts : thisinhs) {
-                ts.setCuocThi(cuocThi);
-                Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), cuocThi.getId());
-                if (thiSinhData.isPresent()) {
-                    ts.setId(thiSinhData.get().getId());
-                }
-                else {
-                    ts.setThoiGianTao(System.currentTimeMillis());
-                }
-                ts.setThoiGianCapNhat(System.currentTimeMillis());
-            }
-            thiSinhRepository.saveAll(thisinhs);
-        }
-        catch (IOException e) {
-            log.debug("importThiSinh", e);
-            
-            throw new RuntimeException("fail to store excel data: " + e.getMessage());
-        }
-    }  
+	public void importThiSinh(MultipartFile file, CuocThi cuocThi) {
+		try {
+			List<ThiSinh> thisinhs = ExcelHelper.excelXlsxToThiSinhs(file.getInputStream());
+			for (ThiSinh ts : thisinhs) {
 
-    public void importHuanLuyenVien(MultipartFile file, CuocThi cuocThi) {
-        try {
-            List<HuanLuyenVien> huanluyenviens = ExcelHelper.excelXlsxToHuanLuyenViens(file.getInputStream());
-            for (HuanLuyenVien hlv : huanluyenviens) {
-                hlv.setCuocThi(cuocThi);
-                Optional<HuanLuyenVien> huanLuyenVienData = huanLuyenVienRepository.findByHoTenAndEmailAndSoDienThoai(hlv.getHoTen(), hlv.getEmail(), hlv.getSoDienThoai());
-                if (huanLuyenVienData.isPresent()) {
-                    hlv.setId(huanLuyenVienData.get().getId());
-                }
-                else {
-                    hlv.setThoiGianTao(System.currentTimeMillis());
-                }
-                hlv.setThoiGianCapNhat(System.currentTimeMillis());
-            }
-            huanLuyenVienRepository.saveAll(huanluyenviens);
-        }
-        catch (IOException e) {
-            log.debug("importHuanLuyenVien", e);
-            
-            throw new RuntimeException("fail to store excel data: " + e.getMessage());
-        }
-    } 
+				try {
+					ts.setCuocThi(cuocThi);
+					Optional<ThiSinh> thiSinhData = thiSinhRepository
+							.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(),
+									ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), cuocThi.getId());
+					if (thiSinhData.isPresent()) {
+						ts.setId(thiSinhData.get().getId());
+					} else {
+						ts.setThoiGianTao(System.currentTimeMillis());
+					}
+					ts.setThoiGianCapNhat(System.currentTimeMillis());
+
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+				}
+			}
+			thiSinhRepository.saveAll(thisinhs);
+		} catch (IOException e) {
+			log.debug("importThiSinh", e);
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
+
+	public void importHuanLuyenVien(MultipartFile file, CuocThi cuocThi) {
+		try {
+			List<HuanLuyenVien> huanluyenviens = ExcelHelper.excelXlsxToHuanLuyenViens(file.getInputStream());
+			for (HuanLuyenVien hlv : huanluyenviens) {
+
+				try {
+					hlv.setCuocThi(cuocThi);
+					Optional<HuanLuyenVien> huanLuyenVienData = huanLuyenVienRepository
+							.findByHoTenAndEmailAndSoDienThoai(hlv.getHoTen(), hlv.getEmail(), hlv.getSoDienThoai());
+					if (huanLuyenVienData.isPresent()) {
+						hlv.setId(huanLuyenVienData.get().getId());
+					} else {
+						hlv.setThoiGianTao(System.currentTimeMillis());
+					}
+					hlv.setThoiGianCapNhat(System.currentTimeMillis());
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+				}
+			}
+			huanLuyenVienRepository.saveAll(huanluyenviens);
+		} catch (IOException e) {
+			log.debug("importHuanLuyenVien", e);
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
     
     public List<ToChucResponse> importToChuc(MultipartFile file) {
         List<ToChucResponse> lstToChucs = new ArrayList<>();
@@ -131,15 +148,20 @@ public class ExcelService {
         try {
             List<ToChucResponse> tochucs = ExcelHelper.excelXlsxToToChucs(file.getInputStream());
             for (ToChucResponse tcr : tochucs) {
-                tcr.setTinhTrang(LoaiTinhTrangToChuc.DA_CHINH_THUC);
-                ToChucResponse[] findTC = toChucService.getToChucByTenGoi(tcr.getTenGoi());
-                if (findTC.length > 0) {
-                    lstToChucs.add(findTC[0]);
-                }
-                else {
-                    ToChucResponse result = toChucService.createToChuc(tcr);
-                    lstToChucs.add(result);
-                }
+                try {
+                	tcr.setTinhTrang(LoaiTinhTrangToChuc.DA_CHINH_THUC);
+                    ToChucResponse[] findTC = toChucService.getToChucByTenGoi(tcr.getTenGoi());
+                    if (findTC.length > 0) {
+                        lstToChucs.add(findTC[0]);
+                    }
+                    else {
+                        ToChucResponse result = toChucService.createToChuc(tcr);
+                        lstToChucs.add(result);
+                    }
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+				}
             }
         }
         catch (IOException e) {
@@ -151,31 +173,37 @@ public class ExcelService {
         return lstToChucs;
     }
 
-    public List<CuocThi> importCuocThi(MultipartFile file) {
-        try {
-            List<CuocThi> cuocthis = ExcelHelper.excelXlsxToCuocThis(file.getInputStream());
+	public List<CuocThi> importCuocThi(MultipartFile file) {
+		try {
+			List<CuocThi> cuocthis = ExcelHelper.excelXlsxToCuocThis(file.getInputStream());
 
-            for (CuocThi cuocThi : cuocthis) {
-                CuocThi oldCuocThi = cuocThiRepository.findByTenGoiAndSerieCuocThiAndLanToChucAndDonViToChuc(cuocThi.getTenGoi(), cuocThi.getSerieCuocThi(), cuocThi.getLanToChuc(), cuocThi.getDonViToChuc());
-                if (oldCuocThi != null) {
-                    cuocThi.setId(oldCuocThi.getId());
-                }
-                if (cuocThi.getDonViToChuc() != null && !cuocThi.getDonViToChuc().isEmpty()) {
-                    ToChucResponse[] toChucs = toChucService.getToChucByTenGoi(cuocThi.getDonViToChuc());
-                    if (toChucs.length > 0) {
-                        cuocThi.setToChucId(toChucs[0].getId());
-                    }
-                }
-            }
+			for (CuocThi cuocThi : cuocthis) {
+				try {
+					CuocThi oldCuocThi = cuocThiRepository.findByTenGoiAndSerieCuocThiAndLanToChucAndDonViToChuc(
+							cuocThi.getTenGoi(), cuocThi.getSerieCuocThi(), cuocThi.getLanToChuc(),
+							cuocThi.getDonViToChuc());
+					if (oldCuocThi != null) {
+						cuocThi.setId(oldCuocThi.getId());
+					}
+					if (cuocThi.getDonViToChuc() != null && !cuocThi.getDonViToChuc().isEmpty()) {
+						ToChucResponse[] toChucs = toChucService.getToChucByTenGoi(cuocThi.getDonViToChuc());
+						if (toChucs.length > 0) {
+							cuocThi.setToChucId(toChucs[0].getId());
+						}
+					}
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+				}
+			}
 
-            return cuocThiRepository.saveAll(cuocthis);
-        }
-        catch (IOException e) {
-            log.debug("importCuocThi", e);
-            
-            throw new RuntimeException("fail to store excel data: " + e.getMessage());
-        }
-    }
+			return cuocThiRepository.saveAll(cuocthis);
+		} catch (IOException e) {
+			log.debug("importCuocThi", e);
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
 
     public List<KhoiThi> importKhoiThi(MultipartFile file, List<CuocThi> cuocthis) {
         try {
@@ -183,13 +211,19 @@ public class ExcelService {
             for (KhoiThi khoiThi : khoithis) {
                 if (khoiThi.getTenCuocThi() != null && !khoiThi.getTenCuocThi().isEmpty()) {
                     for (CuocThi ct : cuocthis) {
-                        if (ct.getTenGoi().equals(khoiThi.getTenCuocThi())) {
-                            khoiThi.setCuocThi(ct);
-                            Optional<KhoiThi> oldKhoiThi = khoiThiRepository.findByTenGoiAndCuocThiId(khoiThi.getTenGoi(), khoiThi.getCuocThi().getId());
-                            if (oldKhoiThi.isPresent()) {
-                                khoiThi.setId(oldKhoiThi.get().getId());
+                    	try {
+                    		if (ct.getTenGoi().equals(khoiThi.getTenCuocThi())) {
+                                khoiThi.setCuocThi(ct);
+                                Optional<KhoiThi> oldKhoiThi = khoiThiRepository.findByTenGoiAndCuocThiId(khoiThi.getTenGoi(), khoiThi.getCuocThi().getId());
+                                if (oldKhoiThi.isPresent()) {
+                                    khoiThi.setId(oldKhoiThi.get().getId());
+                                }
                             }
-                        }
+						} catch (Exception e) {
+							log.warn(e.getMessage());
+							continue;
+						}
+                        
                     }
                 }
             }
@@ -249,115 +283,148 @@ public class ExcelService {
         }
     }
 
-    public void importDanhSachThi(MultipartFile file, List<CuocThi> cuocthis, List<KhoiThi> khoithis, List<DoanThi> doanthis) {
-        try {
-            List<ThiSinh> thisinhs = ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPCHUYENTIN);
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPKHONGCHUYENTIN));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_ICPCCHUYENTIN));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_ICPCKHONGCHUYENTIN));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPCAODANG));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPPROCON));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPPMNM));
-            thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPSIEUCUP));
+	public void importDanhSachThi(MultipartFile file, List<CuocThi> cuocthis, List<KhoiThi> khoithis,
+			List<DoanThi> doanthis) {
+		try {
+			List<ThiSinh> thisinhs = ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_OLPCHUYENTIN);
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_OLPKHONGCHUYENTIN));
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_ICPCCHUYENTIN));
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_ICPCKHONGCHUYENTIN));
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_OLPCAODANG));
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_OLPPROCON));
+			thisinhs.addAll(
+					ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(), ExcelHelper.SHEET_DANHSACHTHI_OLPPMNM));
+			thisinhs.addAll(ExcelHelper.excelXlsxToDanhSachThis(file.getInputStream(),
+					ExcelHelper.SHEET_DANHSACHTHI_OLPSIEUCUP));
 
-            for (ThiSinh ts : thisinhs) {
-                for (CuocThi cuocThi : cuocthis) {
-                    if (cuocThi.getTenGoi().equals(ts.getTenCuocThi())) {
-                        ts.setCuocThi(cuocThi);
-                        for (DoanThi doanThi : doanthis) {
-                            if (doanThi.getTenGoi().equals(ts.getTenDoanThi()) && doanThi.getCuocThiId().equals(cuocThi.getId())) {
-                                ts.setDoanThiId(doanThi.getId());
-                            }
-                        }        
-                        break;
-                    }
-                }
-                KhoiThi khoiThi = null;
-                for (KhoiThi kt : khoithis) {
-                    if (kt.getTenGoi().equals(ts.getTenKhoiThi())) {
-                        khoiThi = kt;
-                        break;
-                    }
-                }
-                if (khoiThi != null && !khoiThi.getThiTapThe()) {
-                    // DoanThi doanThi = null;
-                    // for (DoanThi dt : doanthis) {
-                    //     if (dt.getTenGoi().equals(ts.getTenDoanThi())) {
-                    //         doanThi = dt;
-                    //         break;
-                    //     }
-                    // }                    
-                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), ts.getCuocThi().getId());
-                    if (thiSinhData.isPresent()) {
-                        ThiSinh tempTs = thiSinhData.get();
-                        if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId()) && tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
-                            ts.setId(thiSinhData.get().getId());
-                    }
-                    else {
-                        ts.setThoiGianTao(System.currentTimeMillis());
-                    }
-                    ts.setThoiGianCapNhat(System.currentTimeMillis());
+			for (ThiSinh ts : thisinhs) {
+				for (CuocThi cuocThi : cuocthis) {
+					if (cuocThi.getTenGoi().equals(ts.getTenCuocThi())) {
+						ts.setCuocThi(cuocThi);
+						for (DoanThi doanThi : doanthis) {
+							if (doanThi.getTenGoi().equals(ts.getTenDoanThi())
+									&& doanThi.getCuocThiId().equals(cuocThi.getId())) {
+								ts.setDoanThiId(doanThi.getId());
+							}
+						}
+						break;
+					}
+				}
+				KhoiThi khoiThi = null;
+				for (KhoiThi kt : khoithis) {
+					if (kt.getTenGoi().equals(ts.getTenKhoiThi())) {
+						khoiThi = kt;
+						break;
+					}
+				}
+				try {
+					if (khoiThi != null && !khoiThi.getThiTapThe()) {
+						// DoanThi doanThi = null;
+						// for (DoanThi dt : doanthis) {
+						// if (dt.getTenGoi().equals(ts.getTenDoanThi())) {
+						// doanThi = dt;
+						// break;
+						// }
+						// }
+						Optional<ThiSinh> thiSinhData = thiSinhRepository
+								.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(),
+										ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(),
+										ts.getCuocThi().getId());
+						if (thiSinhData.isPresent()) {
+							ThiSinh tempTs = thiSinhData.get();
+							if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId())
+									&& tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
+								ts.setId(thiSinhData.get().getId());
+						} else {
+							ts.setThoiGianTao(System.currentTimeMillis());
+						}
+						ts.setThoiGianCapNhat(System.currentTimeMillis());
 
-                    ThiSinh thiSinhMoi = thiSinhRepository.save(ts);
-                    if (ts.isThamGia()) {
-                        DanhSachThi danhSachThi = new DanhSachThi(thiSinhMoi.getId(), ts.getCuocThi(), khoiThi != null ? khoiThi.getId() : null, null, null, null, null, null, null, null);
-                        Optional<DanhSachThi> oldDstData = danhSachThiRepository.findByThiSinhIdAndCuocThiIdAndKhoiThiIdAndDoiThiId(thiSinhMoi.getId(), thiSinhMoi.getCuocThi().getId(), khoiThi != null ? khoiThi.getId() : null, null);
-                        if (oldDstData.isPresent()) {
-                            danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
-                        }
+						ThiSinh thiSinhMoi = thiSinhRepository.save(ts);
+						if (ts.isThamGia()) {
+							DanhSachThi danhSachThi = new DanhSachThi(thiSinhMoi.getId(), ts.getCuocThi(),
+									khoiThi != null ? khoiThi.getId() : null, null, null, null, null, null, null, null);
+							Optional<DanhSachThi> oldDstData = danhSachThiRepository
+									.findByThiSinhIdAndCuocThiIdAndKhoiThiIdAndDoiThiId(thiSinhMoi.getId(),
+											thiSinhMoi.getCuocThi().getId(), khoiThi != null ? khoiThi.getId() : null,
+											null);
+							if (oldDstData.isPresent()) {
+								danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
+							}
 
-                        danhSachThiRepository.save(danhSachThi);
-                    }
-                }
-                else if (khoiThi != null && khoiThi.getThiTapThe()) {
-                    DoanThi doanThi = null;
-                    for (DoanThi dt : doanthis) {
-                        if (dt.getTenGoi().equals(ts.getTenDoanThi())) {
-                            doanThi = dt;
-                            break;
-                        }
-                    }
-                    Optional<DoiThi> doiThiData = doiThiRepository.findByTenGoiAndCuocThiIdAndDoanThiIdAndKhoiThiId(ts.getTenDoiThi(), ts.getCuocThi() != null ? ts.getCuocThi().getId() : null, doanThi != null ? doanThi.getId() : null, khoiThi != null ? khoiThi.getId() : null);
-                    Optional<ThiSinh> thiSinhData = thiSinhRepository.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(), ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(), ts.getCuocThi().getId());
-                    if (thiSinhData.isPresent()) {
-                        ThiSinh tempTs = thiSinhData.get();
-                        if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId()) && tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
-                            ts.setId(thiSinhData.get().getId());
-                    }
-                    else {
-                        ts.setThoiGianTao(System.currentTimeMillis());
-                    }
-                    ts.setThoiGianCapNhat(System.currentTimeMillis());
+							danhSachThiRepository.save(danhSachThi);
+						}
+					} else if (khoiThi != null && khoiThi.getThiTapThe()) {
+						DoanThi doanThi = null;
+						for (DoanThi dt : doanthis) {
+							if (dt.getTenGoi().equals(ts.getTenDoanThi())) {
+								doanThi = dt;
+								break;
+							}
+						}
+						Optional<DoiThi> doiThiData = doiThiRepository.findByTenGoiAndCuocThiIdAndDoanThiIdAndKhoiThiId(
+								ts.getTenDoiThi(), ts.getCuocThi() != null ? ts.getCuocThi().getId() : null,
+								doanThi != null ? doanThi.getId() : null, khoiThi != null ? khoiThi.getId() : null);
+						Optional<ThiSinh> thiSinhData = thiSinhRepository
+								.findByHoTenAndGioiTinhAndNgaySinhAndNganhDaoTaoAndCuocThiId(ts.getHoTen(),
+										ts.getGioiTinh(), ts.getNgaySinh(), ts.getNganhDaoTao(),
+										ts.getCuocThi().getId());
+						if (thiSinhData.isPresent()) {
+							ThiSinh tempTs = thiSinhData.get();
+							if (tempTs.getDoanThiId() != null && tempTs.getDoanThiId().equals(ts.getDoanThiId())
+									&& tempTs.getCuocThi().getId().equals(ts.getCuocThi().getId()))
+								ts.setId(thiSinhData.get().getId());
+						} else {
+							ts.setThoiGianTao(System.currentTimeMillis());
+						}
+						ts.setThoiGianCapNhat(System.currentTimeMillis());
 
-                    ThiSinh thiSinhMoi = thiSinhRepository.save(ts);
-                    if (ts.isThamGia()) {
-                        DoiThi doiThi = new DoiThi(ts.getTenDoiThi(), ts.getCuocThi(), doanThi != null ? doanThi.getId() : null, khoiThi != null ? khoiThi.getId() : null, null, null, null, null, null, null);
-                        if (doiThiData.isPresent()) {
-                            doiThi.setId(doiThiData.get().getId());
-                        }
-                        if (doiThi.getTenGoi() == null || doiThi.getTenGoi().isEmpty()) {
-                            doiThi.setTenGoi(RandomUtil.generateRandomAlphanumeric(16));
-                        }
-                        DoiThi doiThiMoi = doiThiRepository.save(doiThi);
+						ThiSinh thiSinhMoi = thiSinhRepository.save(ts);
+						if (ts.isThamGia()) {
+							DoiThi doiThi = new DoiThi(ts.getTenDoiThi(), ts.getCuocThi(),
+									doanThi != null ? doanThi.getId() : null, khoiThi != null ? khoiThi.getId() : null,
+									null, null, null, null, null, null);
+							if (doiThiData.isPresent()) {
+								doiThi.setId(doiThiData.get().getId());
+							}
+							if (doiThi.getTenGoi() == null || doiThi.getTenGoi().isEmpty()) {
+								doiThi.setTenGoi(RandomUtil.generateRandomAlphanumeric(16));
+							}
+							DoiThi doiThiMoi = doiThiRepository.save(doiThi);
 
-                        DanhSachThi danhSachThi = new DanhSachThi(thiSinhMoi.getId(), ts.getCuocThi(), khoiThi != null ? khoiThi.getId() : null, doiThiMoi.getId(), null, null, null, null, null, null);
-                        Optional<DanhSachThi> oldDstData = danhSachThiRepository.findByThiSinhIdAndCuocThiIdAndKhoiThiIdAndDoiThiId(thiSinhMoi.getId(), thiSinhMoi.getCuocThi().getId(), khoiThi != null ? khoiThi.getId() : null, doiThiData.isPresent() ? doiThiData.get().getId() : null);
-                        if (oldDstData.isPresent()) {
-                            danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
-                        }
+							DanhSachThi danhSachThi = new DanhSachThi(thiSinhMoi.getId(), ts.getCuocThi(),
+									khoiThi != null ? khoiThi.getId() : null, doiThiMoi.getId(), null, null, null, null,
+									null, null);
+							Optional<DanhSachThi> oldDstData = danhSachThiRepository
+									.findByThiSinhIdAndCuocThiIdAndKhoiThiIdAndDoiThiId(thiSinhMoi.getId(),
+											thiSinhMoi.getCuocThi().getId(), khoiThi != null ? khoiThi.getId() : null,
+											doiThiData.isPresent() ? doiThiData.get().getId() : null);
+							if (oldDstData.isPresent()) {
+								danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
+							}
 
-                        danhSachThiRepository.save(danhSachThi);
-                    }
-                }
-            }
-            
-        }
-        catch (IOException e) {
-            log.debug("importDanhSachThi", e);
-            
-            throw new RuntimeException("fail to store excel data: " + e.getMessage());
-        }
-    } 
+							danhSachThiRepository.save(danhSachThi);
+						}
+					}
+				} catch (Exception e) {
+					log.warn(e.getMessage());
+					continue;
+
+				}
+			}
+
+		} catch (IOException e) {
+			log.debug("importDanhSachThi", e);
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
 
     public void importDanhSachThi(MultipartFile file, List<CuocThi> cuocthis, List<KhoiThi> khoithis) {
         try {
