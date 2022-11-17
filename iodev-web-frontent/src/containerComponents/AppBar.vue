@@ -5,7 +5,7 @@
       <header id="banner" class="px-5">
         <div class="container layout wrap" style=""> 
           <a href="javascript:;" class="py-0 px-0"> 
-            <img class="logo-banner" :src="`${publicPath}/images/logo-vaip.jpg`">
+            <img class="logo-banner" :src="`${publicPath}/images/logo-olp.jpg`">
           </a>
           <div class="title-banner">
             <div class="mb-0" style="width: 100%">Hệ thống thông tin quản lý các cuộc thi tin học</div>
@@ -175,6 +175,7 @@
         vm.$cookies.set('Token', '')
         vm.$cookies.set('RefreshToken', '')
         vm.$cookies.set('UserInfo', '')
+        vm.$cookies.set('Roles', '')
         vm.$cookies.set('admin', '')
         try {
           localStorage.setItem('thongTinTaiKhoan', '')

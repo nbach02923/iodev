@@ -166,6 +166,26 @@ export default new Vuex.Store({
         })
       })
     },
+    collectionFilterDaGhiDanh ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let config = {
+          method: 'get',
+          url: '/api/' + filter.collectionName + '/' + filter.toChucId + '/daghidanh',
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data: {},
+          params: filter.data
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error)
+        })
+      })
+    },
     collectionFilterLevel2 ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let config = {
@@ -324,6 +344,46 @@ export default new Vuex.Store({
           reject(response)
         })
       })
-    }
+    },
+    forgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/api/auth/' + filter.email +'/quenmatkhau',
+          "method": "POST",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
+    verifyForgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/api/auth/forgot-password/' + filter.email +'/verify-email?maBiMat=' + filter.maBiMat,
+          "method": "PUT",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
   }
 })
