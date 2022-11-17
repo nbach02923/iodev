@@ -26,6 +26,7 @@ import com.netflix.config.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exception.ResourceNotFoundException;
+import vn.iodev.contestmanagementsystem.localservice.impl.HuanLuyenVienLocalServiceImpl;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
@@ -62,6 +63,9 @@ public class HuanLuyenVienController {
 
     @Autowired
     VaiTroChecker vaiTroChecker;
+    
+    @Autowired
+    HuanLuyenVienLocalServiceImpl huanLuyenVienLocalServiceImpl;
 
     @GetMapping("/cuocthis/{cuocThiId}/huanluyenviens")
     public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByCuocThiId(@PathVariable(value = "cuocThiId") String cuocThiId) {
@@ -102,6 +106,20 @@ public class HuanLuyenVienController {
         HuanLuyenVien huanLuyenVien = huanLuyenVienRespository.findById(huanLuyenVienId)
           .orElseThrow(() -> new ResourceNotFoundException("HuanLuyenVien not found for this id :: " + huanLuyenVienId));
         return ResponseEntity.ok().body(huanLuyenVien);
+    }
+    
+    @GetMapping("/huanluyenviens/{toChucId}/daghidanh")
+    public ResponseEntity<List<HuanLuyenVien>> getAllHuanLuyenViensByToChucId(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @PathVariable(value = "toChucId") String toChucId) {
+        log.info("API GET /huanluyenviens/{toChucId}/daghidanh");
+        List<HuanLuyenVien> lstHuanLuyenVien = new ArrayList<>();
+
+        Pageable paging = PageRequest.of(page - 1, size);
+        
+        List<HuanLuyenVien> huanLuyenViens = huanLuyenVienLocalServiceImpl.findByToChucId(toChucId, paging);
+
+        lstHuanLuyenVien.addAll(huanLuyenViens);
+
+        return new ResponseEntity<>(lstHuanLuyenVien, HttpStatus.OK);
     }
 
     private void validateRelationConstraint(HuanLuyenVien huanLuyenVien) throws Exception {
