@@ -188,6 +188,20 @@ public class CuocThiController {
         }
         return ResponseEntity.ok().body(cuocThi);
     }
+    
+    @GetMapping("/cuocthis/thongtincuocthi/{maCuocThi}")
+    public ResponseEntity<CuocThi> getCuocThiByMaCuocThi(@PathVariable(value = "maCuocThi") String maCuocThi)
+        throws ResourceNotFoundException {
+    	log.info("API GET /cuocthis/thongtincuocthi/{maCuocThi}");
+        Optional<CuocThi> cuocThiOpt = cuocThiRepository.findByMaCuocThi(maCuocThi);
+        
+        if(cuocThiOpt.isPresent()) {
+        	 return ResponseEntity.ok().body(cuocThiOpt.get());
+        }else {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+       
+    }
 
     private void validateRelationConstraint(CuocThi cuocThi) throws Exception {
         if (cuocThi.getLanToChuc() != null && cuocThi.getLanToChuc() < 0) {

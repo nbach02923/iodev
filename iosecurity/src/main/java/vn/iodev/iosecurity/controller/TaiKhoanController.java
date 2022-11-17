@@ -284,7 +284,7 @@ public class TaiKhoanController {
 	}
     
 	// add by trungnt
-	@PostMapping("/taikhoans/{email}/quenmatkhau")
+	@PostMapping("/auth/{email}/quenmatkhau")
 	public ResponseEntity<TaiKhoan> forgotMatKhau(@PathVariable("email") String email) {
 		try {
 			log.info("API POST /taikhoans/{id}/quenmatkhau");
@@ -433,7 +433,7 @@ public class TaiKhoanController {
     }
     
     //add by trungnt
-	@PutMapping("/forgot-password/{email}/verify-email")
+	@PutMapping("/auth/forgot-password/{email}/verify-email")
 	public ResponseEntity<TaiKhoan> verifyEmailByMaBiMat(@PathVariable("email") String email,
 			@RequestParam("maBiMat") String maBiMat) {
 		log.info("API PUT /forgot-password/{email}/verify-email");

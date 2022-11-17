@@ -147,7 +147,8 @@ public class DanhSachThiController {
                 throw new ValidationException("KhoiThi is not exists!");
             }
             else {
-                validateLimited(danhSachThi, khoiThi.get());
+            	//block by trungnt. 
+                //validateLimited(danhSachThi, khoiThi.get());
             }
         }
         if (danhSachThi.getDoiThiId() != null) {

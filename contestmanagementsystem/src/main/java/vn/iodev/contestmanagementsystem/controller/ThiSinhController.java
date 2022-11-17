@@ -134,9 +134,9 @@ public class ThiSinhController {
         }
         try {
             validateRelationConstraint(thiSinh);
-
+            
             ThiSinh thiSinhMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
-                thiSinh.setCuocThi(cuocThi);
+            	thiSinh.setCuocThi(cuocThi);
                 return thiSinhRepository.save(thiSinh);
             }).orElseThrow(() -> new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId));
 
