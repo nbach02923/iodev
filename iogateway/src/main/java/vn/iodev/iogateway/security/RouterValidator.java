@@ -36,7 +36,9 @@ public class RouterValidator {
         new Route("/api/danhsachthis/.+$", "GET"),
         new Route("/api/danhmucs$", "GET"),
         new Route("/api/auth/.+/verify-email*$", "PUT"),
-        new Route("/api/auth/register$", "POST")
+        new Route("/api/auth/register$", "POST"),
+        new Route("/api/auth/.+/quenmatkhau", "POST"),
+        new Route("/api/auth/forgot-password/.+/verify-email*$", "PUT")
     );
     public boolean isSecured(ServerHttpRequest request) {
         boolean securedFlag = true;
