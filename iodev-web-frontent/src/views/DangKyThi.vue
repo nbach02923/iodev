@@ -248,6 +248,20 @@
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
+            <!-- <v-col class="d-flex align-center py-0 px-0" style="max-width: 135px;height: 30px;">
+              <v-btn :loading="loadingExport" :disabled="loadingExport"
+                depressed
+                class="mx-0"
+                small
+                color="green"
+                @click="exportDangKy"
+                style="float: right"
+                >
+                <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
+                &nbsp;
+                <span class="white--text">Xuất danh sách</span>
+              </v-btn>
+            </v-col> -->
           </v-row>
           <v-row class="my-0 py-0 pt-3 mx-0">
             <!-- <v-flex>
@@ -1451,7 +1465,8 @@ export default {
         soThiSinhThamDu: 0,
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
-        soKhoiThiThamDu: 0
+        soKhoiThiThamDu: 0,
+        loadingExport: false
       }
     },
     created () {
@@ -2070,7 +2085,46 @@ export default {
       showCreateThiSinh (khoiThi, suggest) {
         let vm = this
         vm.khoiThiSelected = khoiThi
-        vm.danhSachThiSinhSuggest = suggest
+        if (vm.khoiThiSelected.cuocThiTruocId) {
+          let vm = this
+          let filter = {
+            collectionName: 'cuocthis',
+            collectionId: vm.khoiThiSelected.cuocThiTruocId,
+            collectionNameChild: 'thisinhs',
+            data: {
+              page: 1,
+              size: 10000
+            }
+          }
+          vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+            let dsThiSinh = response.filter(function (item) {
+              return item.doanThiId
+            })
+            let filter = {
+              collectionName: 'doanthis',
+              data: {
+                page: 1,
+                size: 10000,
+                cuocThiId: vm.khoiThiSelected.cuocThiTruocId
+              }
+            }
+            vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+              let emailDoanThi = vm.emailToChucUpdate ? vm.emailToChucUpdate : vm.userLogin.email
+              let doanThi = response.find(function (item) {
+                return String(item.email).trim() == String(emailDoanThi).trim()
+              })
+              if (doanThi) {
+                vm.danhSachThiSinhSuggest = dsThiSinh.filter(function(item) {
+                  return item.doanThiId == doanThi.id
+                })
+              } else {
+                vm.danhSachThiSinhSuggest = dsThiSinh
+              }
+            }).catch(function () {})
+          }).catch(function () {})
+        } else {
+          vm.danhSachThiSinhSuggest = suggest
+        }
         vm.typeAction = 'create'
         vm.getDanhSachDoiThi()
         vm.danhSachNoiDungThiThiSinh = []
@@ -2551,7 +2605,7 @@ export default {
           if (noidungthi.thiTapThe && noidungthi.maxThiSinh) {
             // console.log('23123123123AA', doithis, noidungthi)
             doiThiKhoi = doithis.filter(function (item) {
-              return item.khoiThiId == noidungthi.id && item.countThiSinh < noidungthi.maxThiSinh
+              return item.khoiThiId == noidungthi.id && (!item.countThiSinh || item.countThiSinh < noidungthi.maxThiSinh)
             })
           }
           return doiThiKhoi
@@ -2632,6 +2686,32 @@ export default {
           })
           vm.soDoiThiThamDu = data.length
         }).catch(function () {})
+      },
+      exportDangKy () {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let dataSearch = {
+          "baoCao_maBaoCao": vm.chiTietBaoCao.maBaoCao,
+          "pageable":{
+            "orderFields":"baoCao_maBaoCao",
+            "orderTypes":"asc",
+            "page": 0,
+            "size": 10000
+          }
+        }
+        let filter = {
+          maBaoCao: vm.chiTietBaoCao.maBaoCao,
+          url: '/v1/datasharing/thanhphanbaocao/detail/export',
+          data: dataSearch
+        }
+        vm.$store.dispatch('exportDanhSachDangKy', filter).then(function (response) {
+          vm.loadingExport = false
+        }).catch(function () {
+          vm.loadingExport = false
+        })
       },
       checkRoleAction (role) {
         let vm = this

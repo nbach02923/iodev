@@ -234,6 +234,22 @@
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
+            <v-col cols="4" class="px-0 py-0">
+              <v-text-field
+                  class="input-form my-0"
+                  v-model="keywordSearchDoanThi"
+                  solo
+                  dense
+                  placeholder="Tên trường, đoàn thi"
+                  hide-details="auto"
+                  @keyup.enter="getdanhSachDoanThi()"
+                  clearable
+              >
+                <template v-slot:append>
+                  <v-icon @click="getdanhSachDoanThi()" size="18" color="#2161B1">mdi-magnify</v-icon>
+                </template>
+              </v-text-field>
+            </v-col>
           </v-row>
           <v-row class="my-0 py-0 pt-3">
             <v-col cols="12"  class="pt-0">
@@ -776,12 +792,13 @@ export default {
         soThiSinhThamDu: 0,
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
+        keywordSearchDoanThi: ''
       }
     },
     created () {
       let vm = this
       vm.getChiTietCuocThi()
-      vm.getdanhSachDoanThi('reset')
+      vm.getdanhSachDoanThi()
       vm.getDanhSachKhoiThi()
       // vm.getDanhSachDoiThi()
       // vm.getDanhSachThiSinh()
@@ -810,7 +827,7 @@ export default {
       '$route': function (newRoute, oldRoute) {
         let vm = this
         vm.getChiTietCuocThi()
-        vm.getdanhSachDoanThi('reset')
+        vm.getdanhSachDoanThi()
         vm.getDanhSachKhoiThi()
         // vm.getDanhSachDoiThi()
         // vm.getDanhSachThiSinh()
@@ -836,7 +853,7 @@ export default {
           vm.loadingData = false
         })
       },
-      getdanhSachDoanThi (type) {
+      getdanhSachDoanThi () {
         let vm = this
         if (vm.loadingDataTongHopDangKy) {
           return
@@ -849,9 +866,15 @@ export default {
           data: {}
         }
         vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-          vm.danhSachTongHopDangKy = response.filter(function (item) {
-            return item.soThiSinh
-          })
+          if (vm.keywordSearchDoanThi && String(vm.keywordSearchDoanThi).trim()) {
+            vm.danhSachTongHopDangKy = response.filter(function (item) {
+              return item.soThiSinh && String(item.doanThi.tenGoi).trim().toLowerCase().indexOf(String(vm.keywordSearchDoanThi).trim().toLowerCase()) >= 0
+            })
+          } else {
+            vm.danhSachTongHopDangKy = response.filter(function (item) {
+              return item.soThiSinh
+            })
+          }
           vm.totalTongHopDangKy = vm.danhSachTongHopDangKy.length
           vm.soDoanThiThamDu = vm.totalTongHopDangKy
           vm.pageCountTongHopDangKy = Math.ceil(vm.totalTongHopDangKy / vm.itemsPerPage)

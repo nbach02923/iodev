@@ -338,6 +338,8 @@
           localStorage.setItem('thongTinTaiKhoan', '')
         } catch (error) {
         }
+        window.location.href = window.location.origin + window.location.pathname + "#/"
+        window.location.reload()
         // vm.$store.dispatch('logoutKeyCloak').then(function (result) {
         //   let redirect_uri = process.env.VUE_APP_PATH_REDIRECT_SSO
         //   window.location.href = result.endpoint + '?redirect_uri='+ redirect_uri
