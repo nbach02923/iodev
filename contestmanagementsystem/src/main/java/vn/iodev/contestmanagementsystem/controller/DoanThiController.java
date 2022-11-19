@@ -1,13 +1,21 @@
 package vn.iodev.contestmanagementsystem.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -201,4 +209,27 @@ public class DoanThiController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+	@PostMapping("/doanthis/{doanThiId}/export")
+	public ResponseEntity<?> exportDoanThi(@PathVariable("doanThiId") String doanThiId) {
+		log.info("API POST /doanthis/{doanThiId}/export");
+
+		File file = fileService.exportDanhSachDangKyMau1(doanThiId);
+
+		if (file == null) {
+			return ResponseEntity.noContent().build();
+		}
+
+		Resource resource = null;
+		try {
+			resource = new UrlResource(file.toURI());
+			return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/octet-stream"))
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+					.body(resource);
+		} catch (MalformedURLException e) {
+			log.error(e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
 }

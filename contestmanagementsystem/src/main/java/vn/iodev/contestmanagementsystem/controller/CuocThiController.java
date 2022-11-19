@@ -729,10 +729,15 @@ public class CuocThiController {
                 row.setSoDienThoai(thiSinh.getSoDienThoai());
                 row.setEmail(thiSinh.getEmail());
                 row.setDatGiaiThuong(thiSinh.getDatGiaiThuong());
+                
                 List<String> khoiThiIds = new ArrayList<>();
                 for (DanhSachThi dst : danhSachThis) {
                     if (!khoiThiIds.contains(dst.getKhoiThiId())) {
                         khoiThiIds.add(dst.getKhoiThiId());
+                    }
+                    
+                    if(dst.getThiSinhId() == thiSinh.getId()) {
+                    	row.setSoBaoDanh(dst.getSoBaoDanh());
                     }
                 }
                 List<KhoiThi> noiDungThi = khoiThiRepository.findByIdIn(khoiThiIds);

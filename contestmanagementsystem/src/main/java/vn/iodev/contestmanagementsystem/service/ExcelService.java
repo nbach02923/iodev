@@ -1,17 +1,21 @@
 package vn.iodev.contestmanagementsystem.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.helper.ExcelHelper;
 import vn.iodev.contestmanagementsystem.helper.KetQuaThi;
+import vn.iodev.contestmanagementsystem.localservice.impl.BaoCaoLocalServiceImpl;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
@@ -56,6 +60,31 @@ public class ExcelService {
 
     @Autowired
     DoiThiRepository doiThiRepository;
+    
+    @Autowired
+    BaoCaoLocalServiceImpl baoCaoLocalServiceImpl;
+    
+    @Value("${io.report.template.folder}")
+	private String templateFolderName;
+    
+    @Value("${io.report.folder}")
+	private String exportFolderName;
+    
+    @Value("${io.report.danhsachdangkymau1.name}")
+	private String danhSachDangKyMau1Name;
+    
+    @Value("${io.report.danhsachdangkymau1.fc}")
+   	private Integer fc;
+    @Value("${io.report.danhsachdangkymau1.lc}")
+   	private Integer lc;
+    @Value("${io.report.danhsachdangkymau1.fr}")
+   	private Integer fr;
+    @Value("${io.report.danhsachdangkymau1.lr}")
+   	private Integer lr;
+ 
+    @Value("${io.report.danhsachdangkymau1.looprow}")
+   	private Integer looprow;
+
 
     public void importDoanThi(MultipartFile file) {
         try {
@@ -494,4 +523,29 @@ public class ExcelService {
             throw new RuntimeException("fail to store excel data: " + e.getMessage());
         }
     } 
+    
+    public File exportDanhSachDangKyMau1(String doanThiId) {
+    	
+    	String homeDir = System.getProperty("user.dir");
+    	
+    	String templateFilePath = homeDir + "/" + templateFolderName + "/" + danhSachDangKyMau1Name;
+    	
+    	String outputPath = homeDir + "/" + exportFolderName + "/" + System.currentTimeMillis() + "_danhsachdangky.xlsx";
+    	
+    	log.info("homeDir:{}", homeDir);
+    	
+    	log.info("templateFilePath:{}", templateFilePath);
+    	
+    	log.info("outputPath:{}", outputPath);
+    	
+    	HashMap<String, Object> data = baoCaoLocalServiceImpl.getDanhSachDangKyMau1(doanThiId);
+    	
+    	if(data == null) {
+    		return null;
+    	}
+    	
+    	log.info("data size:{}", data.size());
+    	
+    	return ExcelHelper.exportDanhSachDangKyMau1(templateFilePath, outputPath, fc, lc, fr, lr, looprow,  data);
+    }
 }

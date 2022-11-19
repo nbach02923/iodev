@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 public class ContestManagementSystemApplication {
 
 	public static void main(String[] args) {
+		String directory = System.getProperty("user.dir");
+		System.out.println(directory);
 		SpringApplication.run(ContestManagementSystemApplication.class, args);
 	}
 }

@@ -68,7 +68,14 @@ public class DanhSachThiSinhTrongDoanResponse {
     public void setNoiDungThi(List<KhoiThi> noiDungThi) {
         this.noiDungThi = noiDungThi;
     }
-    private String id;
+    public String getSoBaoDanh() {
+		return soBaoDanh;
+	}
+	public void setSoBaoDanh(String soBaoDanh) {
+		this.soBaoDanh = soBaoDanh;
+	}
+
+	private String id;
     private String hoTen;
     private Integer gioiTinh;
 
@@ -80,5 +87,6 @@ public class DanhSachThiSinhTrongDoanResponse {
     private String nganhDaoTao;
     private String datGiaiThuong;
     private List<KhoiThi> noiDungThi;
+    private String soBaoDanh;
     public DanhSachThiSinhTrongDoanResponse() {}
 }
