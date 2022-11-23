@@ -1570,7 +1570,7 @@ export default {
         const zip = new PizZip(content);
         const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
         doc.setData({
-          first_name: item.hoTen
+          ten_ts: item.hoTen
         });
         try {
           doc.render();
@@ -1618,7 +1618,7 @@ export default {
         const zip = new PizZip(content);
         const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
         doc.setData({
-          last_name: item.hoTen
+          ten_hlv: item.hoTen
         });
         try {
           doc.render();
