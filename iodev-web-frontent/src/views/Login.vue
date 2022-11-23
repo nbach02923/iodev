@@ -376,11 +376,13 @@
           return
         }
         let filter = {
+          email: String(vm.userName).trim(),
           maBiMat: String(vm.maBiMat).trim()
         }
         vm.loading = true
         vm.$store.dispatch('verifyForgotPassWord', filter).then(function () {
           vm.loading = false
+          vm.dialogConfirm = false
           toastr.remove()
           toastr.success('Xác minh thành công. Đăng nhập để sử dụng hệ thống.')
           setTimeout(function () {
