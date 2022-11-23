@@ -1402,14 +1402,14 @@ export default {
               value: 'email',
               class: 'th-center'
           },
-          {
-              sortable: false,
-              text: 'Nội dung phụ trách',
-              align: 'left',
-              value: 'noiDungThi',
-              class: 'th-center',
-              width: 400
-          },
+          // {
+          //     sortable: false,
+          //     text: 'Nội dung phụ trách',
+          //     align: 'left',
+          //     value: 'noiDungThi',
+          //     class: 'th-center',
+          //     width: 400
+          // },
           {
               sortable: false,
               text: 'Thao tác',
@@ -1560,7 +1560,7 @@ export default {
     },
     methods: {
       inTheThiSinh(item){
-        loadFile("", function(
+        loadFile("http://dangky.olp.vn/docs/The_thi_sinh_OLP-PROCON.docx", function(
         error,
         content
       ) {
@@ -1570,7 +1570,7 @@ export default {
         const zip = new PizZip(content);
         const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
         doc.setData({
-          ten_ts: item.hoTen
+          first_name: item.hoTen
         });
         try {
           doc.render();
@@ -1604,11 +1604,11 @@ export default {
           mimeType:
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         });
-        saveAs(out, "Thẻ thí sinh " + item.tengoi + ".docx");
+        saveAs(out, "Thẻ thí sinh " + item.hoTen + ".docx");
       });
       }, 
       inTheHuanLuyenVien(item){
-        loadFile("", function(
+        loadFile("http://dangky.olp.vn/docs/The_truong_pho_doan.docx", function(
         error,
         content
       ) {
@@ -1618,7 +1618,7 @@ export default {
         const zip = new PizZip(content);
         const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
         doc.setData({
-          ten_hlv: item.hoTen
+          last_name: item.hoTen
         });
         try {
           doc.render();
@@ -1652,7 +1652,7 @@ export default {
           mimeType:
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         });
-        saveAs(out, "Thẻ trưởng phó đoàn " + item.tengoi + ".docx");
+        saveAs(out, "Thẻ trưởng phó đoàn " + item.hoTen + ".docx");
       });
       }, 
       getDanhMuc (danhmuc) {
