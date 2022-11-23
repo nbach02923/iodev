@@ -373,15 +373,15 @@
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           let data = response
           vm.danhSachCuocThi_sub = vm.orderCuocThi(data)
-          vm.danhSachCuocThi_main = vm.orderCuocThi([
-            {
-              website: '',
-              hinhAnh: '/images/bg-def.jpeg',
-              tinhTrang: 0
-            }
-          ].concat(data).filter(function (item) {
-            return item.hinhAnh
-          }))
+          // vm.danhSachCuocThi_main = vm.orderCuocThi([
+          //   {
+          //     website: '',
+          //     hinhAnh: '/images/bg-def.jpeg',
+          //     tinhTrang: 0
+          //   }
+          // ].concat(data).filter(function (item) {
+          //   return item.hinhAnh
+          // }))
         }).catch(function () {
         })
       },
