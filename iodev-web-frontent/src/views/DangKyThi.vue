@@ -1559,6 +1559,9 @@ export default {
       }
     },
     methods: {
+      exportDaanhSachThi () {
+        
+      },
       inTheThiSinh(item){
         loadFile("http://dangky.olp.vn/docs/The_thi_sinh_OLP-PROCON.docx", function(
         error,
