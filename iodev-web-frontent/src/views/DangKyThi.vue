@@ -232,6 +232,14 @@
                       </template>
                       <span>Xóa</span>
                     </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{on, attrs}">
+                        <v-btn small @click.stop="inTheHuanLuyenVien(item)" text icon class="" v-bind="attrs" v-on="on">
+                          <v-icon>mdi-printer</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>In thẻ huấn luyện viên</span>
+                    </v-tooltip>
                   </div>
                 </template>
               </v-data-table>
@@ -402,6 +410,15 @@
                             </v-btn>
                           </template>
                           <span>Xóa đăng ký</span>
+                        </v-tooltip>
+
+                        <v-tooltip top>
+                          <template v-slot:activator="{on, attrs}">
+                          <v-btn small @click.stop="inTheThiSinh(item)" text icon class="" v-bind="attrs" v-on="on">
+                            <v-icon size="22">mdi-printer</v-icon>
+                          </v-btn>
+                        </template>
+                        <span>In thẻ thí sinh</span>
                         </v-tooltip>
                       </div>
                     </template>
@@ -1201,10 +1218,18 @@
 <script>
 import Pagination from './Pagination.vue'
 import toastr from 'toastr'
+import docxtemplater from 'docxtemplater'
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
+import { saveAs } from "file-saver";
+
 toastr.options = {
   'closeButton': true,
   'timeOut': '5000',
   "positionClass": "toast-top-center"
+}
+function loadFile(url, callback) {
+  PizZipUtils.getBinaryContent(url, callback);
 }
 export default {
     name: 'CuocThi',
@@ -1466,7 +1491,7 @@ export default {
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
         soKhoiThiThamDu: 0,
-        loadingExport: false
+        loadingExport: false,
       }
     },
     created () {
@@ -1534,6 +1559,102 @@ export default {
       }
     },
     methods: {
+      inTheThiSinh(item){
+        loadFile("", function(
+        error,
+        content
+      ) {
+        if (error) {
+          throw error;
+        }
+        const zip = new PizZip(content);
+        const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+        doc.setData({
+          ten_ts: item.hoTen
+        });
+        try {
+          doc.render();
+        } catch (error) {
+          function replaceErrors(key, value) {
+            if (value instanceof Error) {
+              return Object.getOwnPropertyNames(value).reduce(function(
+                error,
+                key
+              ) {
+                error[key] = value[key];
+                return error;
+              },
+              {});
+            }
+            return value;
+          }
+          console.log(JSON.stringify({ error: error }, replaceErrors));
+          if (error.properties && error.properties.errors instanceof Array) {
+            const errorMessages = error.properties.errors
+              .map(function(error) {
+                return error.properties.explanation;
+              })
+              .join("\n");
+            console.log("errorMessages", errorMessages);
+          }
+          throw error;
+        }
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        });
+        saveAs(out, "Thẻ thí sinh " + item.tengoi + ".docx");
+      });
+      }, 
+      inTheHuanLuyenVien(item){
+        loadFile("", function(
+        error,
+        content
+      ) {
+        if (error) {
+          throw error;
+        }
+        const zip = new PizZip(content);
+        const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+        doc.setData({
+          ten_hlv: item.hoTen
+        });
+        try {
+          doc.render();
+        } catch (error) {
+          function replaceErrors(key, value) {
+            if (value instanceof Error) {
+              return Object.getOwnPropertyNames(value).reduce(function(
+                error,
+                key
+              ) {
+                error[key] = value[key];
+                return error;
+              },
+              {});
+            }
+            return value;
+          }
+          console.log(JSON.stringify({ error: error }, replaceErrors));
+          if (error.properties && error.properties.errors instanceof Array) {
+            const errorMessages = error.properties.errors
+              .map(function(error) {
+                return error.properties.explanation;
+              })
+              .join("\n");
+            console.log("errorMessages", errorMessages);
+          }
+          throw error;
+        }
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        });
+        saveAs(out, "Thẻ trưởng phó đoàn " + item.tengoi + ".docx");
+      });
+      }, 
       getDanhMuc (danhmuc) {
         let vm = this
         let filter = {
