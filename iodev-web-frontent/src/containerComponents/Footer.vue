@@ -15,7 +15,7 @@
             </v-flex>
             <v-flex class="text-3">
               <v-icon size="18" color="#2161B1">mdi-email-outline</v-icon>&nbsp;
-              <span>Email: office@vaip.vn</span>
+              <span>Email: olpvietnam@vaip.vn</span>
             </v-flex>
           </v-layout>
         </v-flex>
