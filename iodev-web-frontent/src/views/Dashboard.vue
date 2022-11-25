@@ -64,7 +64,7 @@
                     <div class="status-contest mx-4" :style="item.tinhTrang == 1 ? 'color: green' : (item.tinhTrang == 2 ? 'color: blue' : 'color: red')">
                       {{statusContest(item.tinhTrang)}}
                     </div>
-                    <v-card-title class="py-0" style="word-break: break-word;">{{item.tenGoi}}</v-card-title>
+                    <v-card-title class="py-0" style="word-break: break-word;min-height: 56px;">{{item.tenGoi}}</v-card-title>
                     <v-card-text style="min-height: 90px;">
                       <div v-snip="{ lines: 3 }" class="my-0 text-subtitle-1">
                         {{item.thongTinMoTa}}
@@ -169,7 +169,7 @@
                         Mở đăng ký
                       </v-chip>
                       <v-btn class="mb-2"
-                        v-if="item.tinhTrang == 1"
+                        v-if="item.tinhTrang == 1 && !checkRoleAction('VAITRO_QUANTRIHETHONG')"
                         text
                         color="success"
                         @click.stop="dangKyThi(item)"
@@ -204,7 +204,7 @@
 
 <script>
   import toastr from 'toastr'
-
+  import axios from 'axios'
   toastr.options = {
     'closeButton': true,
     'timeOut': '5000',
@@ -212,6 +212,7 @@
   }
   export default {
     name: 'Dashboard',
+    props: ['macuocthi'],
     components: {
     },
     data: () => ({
@@ -275,6 +276,9 @@
     }),
     created () {
       let vm = this
+      // if (vm.macuocthi) {
+      //   vm.goToDangKy()
+      // }
       vm.getDanhSachCuocThi('reset')
       vm.getDanhSachCuocThiStatus('1,2')
       vm.getDanhMuc('C_SERIECUOCTHI')
@@ -290,12 +294,34 @@
     watch: {
       '$route': function (newRoute, oldRoute) {
         let vm = this
+        // if (vm.macuocthi) {
+        //   vm.goToDangKy()
+        // }
         vm.getDanhSachCuocThi('reset')
         vm.getDanhSachCuocThiStatus('1,2')
         vm.getDanhMuc('C_SERIECUOCTHI')
       }
     },
     methods: {
+      goToDangKy () {
+        let vm = this
+        let config = {
+          method: 'get',
+          url: '/api/cuocthis/thongtinchitiet/' + vm.macuocthi,
+          data: {},
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          }
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          if (serializable) {
+            vm.$router.push({ path: '/dang-ky-thi/' + serializable.id})
+          }
+        }).catch(function (error) {
+        })
+      },
       getDanhMuc (danhmuc) {
         let vm = this
         let filter = {
@@ -347,15 +373,15 @@
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           let data = response
           vm.danhSachCuocThi_sub = vm.orderCuocThi(data)
-          vm.danhSachCuocThi_main = vm.orderCuocThi([
-            {
-              website: '',
-              hinhAnh: '/images/bg-def.jpeg',
-              tinhTrang: 0
-            }
-          ].concat(data).filter(function (item) {
-            return item.hinhAnh
-          }))
+          // vm.danhSachCuocThi_main = vm.orderCuocThi([
+          //   {
+          //     website: '',
+          //     hinhAnh: '/images/bg-def.jpeg',
+          //     tinhTrang: 0
+          //   }
+          // ].concat(data).filter(function (item) {
+          //   return item.hinhAnh
+          // }))
         }).catch(function () {
         })
       },
@@ -413,7 +439,23 @@
           return items.sort(compare)
         }
         return sortItems(data)
-      }
+      },
+      checkRoleAction (role) {
+        let vm = this
+        let roleUser = vm.$cookies.get('Roles', '')
+        if (!role || !roleUser) {
+          return false
+        }
+        let roles = roleUser.split(',')
+        let exits = roles.find(function (item) {
+          return item == role
+        })
+        if (exits) {
+          return true
+        } else {
+          return false
+        }
+      },
     }
   }
 </script>

@@ -166,6 +166,26 @@ export default new Vuex.Store({
         })
       })
     },
+    collectionFilterDaGhiDanh ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let config = {
+          method: 'get',
+          url: '/api/' + filter.collectionName + '/' + filter.toChucId + '/daghidanh',
+          headers: { 
+            'Accept': 'application/json', 
+            'Content-Type': 'application/json'
+          },
+          data: {},
+          params: filter.data
+        }
+        axios(config).then(function (response) {
+          let serializable = response.data
+          resolve(serializable)
+        }).catch(function (error) {
+          reject(error)
+        })
+      })
+    },
     collectionFilterLevel2 ({commit, state}, filter) {
       return new Promise((resolve, reject) => {
         let config = {
@@ -324,6 +344,77 @@ export default new Vuex.Store({
           reject(response)
         })
       })
-    }
+    },
+    forgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/api/auth/' + filter.email +'/quenmatkhau',
+          "method": "POST",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
+    verifyForgotPassWord ({commit, state}, filter) {
+      return new Promise((resolve, reject) => {
+        let settings = {
+          "url": state.apiSso + '/api/auth/forgot-password/' + filter.email +'/verify-email?maBiMat=' + filter.maBiMat,
+          "method": "PUT",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          "data": JSON.stringify({})
+        };
+        
+        $.ajax(settings).done(function (response) {
+          let serializable = response
+          resolve(serializable)
+        }).fail(function (response) {
+          reject(response)
+        })
+      })
+    },
+    exportDanhSachDangKy ({ commit, state }, filter) {
+      return new Promise((resolve, reject) => {
+        let dataPost = JSON.stringify(filter.data)
+        let config = {
+          method: 'post',
+          url: filter.url,
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          responseType: 'blob',
+          data : dataPost
+        }
+        axios(config).then(function (response) {
+          if (response.data) {
+            var urlFile = window.URL.createObjectURL(response.data)
+            var a = document.createElement('a')
+            document.body.appendChild(a)
+            a.style = 'display: none'
+            a.href = urlFile
+            a.download = 'tonghopbaocao-' + filter.maBaoCao +'.xlsx'
+            a.click()
+            window.URL.revokeObjectURL(urlFile)
+            resolve('success')
+          } else {
+            resolve('pending')
+          }
+        }).catch(function (error) {
+          reject(error)
+        })
+      })
+    },
   }
 })

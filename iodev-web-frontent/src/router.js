@@ -30,6 +30,18 @@ export default new Router({
           props: true
         },
         {
+          path: '/dangky/:macuocthi',
+          name: 'DashBoardRedirectDangKy',
+          component: () => import('@/views/Dashboard'),
+          props: true
+        },
+        {
+          path: '/cuocthi/:macuocthi',
+          name: 'DashBoardRedirectCuocThi',
+          component: () => import('@/views/Dashboard'),
+          props: true
+        },
+        {
           path: '/to-chuc/:id',
           name: 'ThongTinToChuc',
           component: () => import('@/views/ThongTinToChuc'),
