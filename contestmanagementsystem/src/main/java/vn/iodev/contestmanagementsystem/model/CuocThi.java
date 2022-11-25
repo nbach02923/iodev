@@ -51,12 +51,12 @@ public class CuocThi {
 
     @Column(name = "ngayBatDau")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayBatDau;
 
     @Column(name = "ngayKetThuc")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayKetThuc;
 
     @Column(name = "diaDiemToChuc", length = 1024)

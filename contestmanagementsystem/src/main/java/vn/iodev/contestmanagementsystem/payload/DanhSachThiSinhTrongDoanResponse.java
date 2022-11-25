@@ -79,7 +79,7 @@ public class DanhSachThiSinhTrongDoanResponse {
     private String hoTen;
     private Integer gioiTinh;
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
     private String email;
     private String soDienThoai;

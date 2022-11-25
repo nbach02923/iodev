@@ -126,7 +126,7 @@ public class CaNhan {
 
     @Column(name = "ngaySinh", nullable = true)
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
 
     @Column(name = "email", nullable = false)

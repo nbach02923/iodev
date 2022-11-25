@@ -20,7 +20,7 @@ public class CaNhanResponse {
     private String hoTen;
     private int gioiTinh;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
     private String email;
     private String soDienThoai;

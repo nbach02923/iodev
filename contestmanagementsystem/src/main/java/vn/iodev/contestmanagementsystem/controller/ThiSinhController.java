@@ -122,6 +122,17 @@ public class ThiSinhController {
             }
         }
     }
+    
+    private void validateDuplicateContest(ThiSinh thiSinh, String cuocthiId, String doanThiId) throws Exception {
+    	List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocthiId, doanThiId);
+    	if(thiSinhs != null) {
+    		for(ThiSinh tmp : thiSinhs) {
+    			if(thiSinh.getHoTen().toLowerCase().equals(tmp.getHoTen().toLowerCase()) && thiSinh.getNgaySinh().equals(tmp.getNgaySinh()) && thiSinh.getGioiTinh() == tmp.getGioiTinh()) {
+    				 throw new ValidationException("ThiSinh is not exists!"); 
+    			}
+    		}
+    	}
+    }
 
     @PostMapping("/cuocthis/{cuocThiId}/thisinhs")
     public ResponseEntity<ThiSinh> createThiSinhOfCuocThi(@PathVariable(value = "cuocThiId") String cuocThiId, @Valid @RequestBody ThiSinh thiSinh, @RequestHeader("id") String toChucId, @RequestHeader("vaiTros") String vaiTros) {
@@ -134,6 +145,8 @@ public class ThiSinhController {
         }
         try {
             validateRelationConstraint(thiSinh);
+            
+            validateDuplicateContest(thiSinh, cuocThiId, thiSinh.getDoanThiId());
             
             ThiSinh thiSinhMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
             	thiSinh.setCuocThi(cuocThi);
