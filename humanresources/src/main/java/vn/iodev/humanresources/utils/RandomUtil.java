@@ -1,7 +1,8 @@
 package vn.iodev.humanresources.utils;
 
-import java.sql.Date;
+
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 public class RandomUtil {
