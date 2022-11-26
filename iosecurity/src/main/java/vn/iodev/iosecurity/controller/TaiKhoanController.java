@@ -186,10 +186,10 @@ public class TaiKhoanController {
                     return new ResponseEntity<>(null, HttpStatus.CONFLICT);
                 }
             }
-            TaiKhoan taiKhoanMoi = new TaiKhoan(taiKhoan.getEmail(), taiKhoan.getId(), taiKhoan.getLoaiTaiKhoan(), passwordEncoder.encode(taiKhoan.getMatKhau()));
-            taiKhoanMoi.setMaKichHoat(RandomUtil.generateRandomAlphanumeric(activeCodeLength));
-            long nowTime = System.currentTimeMillis();
-            taiKhoanMoi.setThoiHanKichHoat(nowTime + activeExpired * 60 * 60 * 1000);
+            TaiKhoan taiKhoanMoi = new TaiKhoan(taiKhoan.getEmail(), taiKhoan.getId(), taiKhoan.getLoaiTaiKhoan(), passwordEncoder.encode(taiKhoan.getMatKhau()), 1);
+            //taiKhoanMoi.setMaKichHoat(RandomUtil.generateRandomAlphanumeric(activeCodeLength));
+            //long nowTime = System.currentTimeMillis();
+            //taiKhoanMoi.setThoiHanKichHoat(nowTime + activeExpired * 60 * 60 * 1000);
 
             if (taiKhoan.getVaiTros() == null || taiKhoan.getVaiTros().size() == 0) {
                 Optional<VaiTro> vtNdData = vaiTroRepository.findByTen(EVaiTro.VAITRO_NGUOIDUNG);
@@ -212,12 +212,19 @@ public class TaiKhoanController {
 
             TaiKhoan _taiKhoan = taiKhoanRepository
                 .save(taiKhoanMoi);
-            HashMap<String, Object> activeVariables = new HashMap<>();
-            activeVariables.put("MaKichHoat", taiKhoan.getMaKichHoat());
-            activeVariables.put("LinkKichHoat", linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&active=" + _taiKhoan.getMaKichHoat());
+            //HashMap<String, Object> activeVariables = new HashMap<>();
+            //activeVariables.put("MaKichHoat", taiKhoan.getMaKichHoat());
+            //activeVariables.put("LinkKichHoat", linkKichHoat + "?email=" + _taiKhoan.getEmail() + "&active=" + _taiKhoan.getMaKichHoat());
                 
-            String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
-            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.ACTIVE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
+            //String msgBody = thymeleafService.getContent(IOConstants.ACTIVE_USER_MAIL_TEMPLATE, activeVariables);
+            
+            HashMap<String, Object> notiVariables = new HashMap<>();
+            notiVariables.put("TenTaiKhoan", _taiKhoan.getEmail());
+            notiVariables.put("MatKhau", taiKhoan.getMatKhau());
+                
+            String msgBody = thymeleafService.getContent(IOConstants.CREATE_USER_MAIL_TEMPLATE, notiVariables);
+            
+            MailQueue mailQueue = new MailQueue(_taiKhoan.getEmail(), msgBody, IOConstants.CREATE_USER_MAIL_SUBJECT, "", QueueStatus.WAITED, 0);
             mailQueueRepository.save(mailQueue);
             
             // emailService.sendActiveUserHtmlMail(_taiKhoan);
@@ -231,7 +238,7 @@ public class TaiKhoanController {
     
     //add by trungnt
 	@PostMapping("/taikhoans/{id}/resetmatkhau")
-	public ResponseEntity<TaiKhoan> resetMatKhau(@PathVariable("id") String id, @Valid @RequestBody TaiKhoan taiKhoan,
+	public ResponseEntity<TaiKhoan> resetMatKhau(@PathVariable("id") String id, @RequestBody TaiKhoan taiKhoan,
 			Authentication authentication) {
 		log.info("API POST /taikhoans/{id}/resetmatkhau");
 		// IOUserDetails userDetails = (IOUserDetails)authentication.getPrincipal();
@@ -282,6 +289,56 @@ public class TaiKhoanController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	 //add by trungnt
+		@PostMapping("/taikhoans/{email}/{matKhau}/resetmatkhau")
+		public ResponseEntity<TaiKhoan> resetMatKhau(@PathVariable("email") String email, @PathVariable("matKhau") String matKhau,
+				Authentication authentication) {
+			log.info("API POST /taikhoans/{id}/resetmatkhau");
+			// IOUserDetails userDetails = (IOUserDetails)authentication.getPrincipal();
+			try {
+				boolean isAdmin = false;
+				for (GrantedAuthority sga : authentication.getAuthorities()) {
+					if (sga.getAuthority().equals(EVaiTro.VAITRO_QUANTRIHETHONG.toString())) {
+						isAdmin = true;
+						break;
+					}
+				}
+				if (!isAdmin) {
+					return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+				}
+
+				TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email);
+
+				if (taiKhoan == null) {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+				
+				if (ObjectUtils.isEmpty(matKhau)) {
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				}
+
+				taiKhoan.setMatKhau(passwordEncoder.encode(matKhau));
+
+				taiKhoan = taiKhoanRepository.save(taiKhoan);
+
+				HashMap<String, Object> variables = new HashMap<>();
+
+				variables.put("MatKhauMoi", taiKhoan.getMatKhau());
+
+				String msgBody = thymeleafService.getContent(IOConstants.RESET_PASSWORD_MAIL_TEMPLATE, variables);
+
+				MailQueue mailQueue = new MailQueue(taiKhoan.getEmail(), msgBody, IOConstants.RESET_PASSWORD_MAIL_SUBJECT,
+						"", QueueStatus.WAITED, 0);
+
+				mailQueueRepository.save(mailQueue);
+
+				return new ResponseEntity<>(taiKhoan, HttpStatus.OK);
+			} catch (Exception e) {
+				log.info("API POST /taikhoans/{id}/resetmatkhau", e);
+				return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
     
 	// add by trungnt
 	@PostMapping("/auth/{email}/quenmatkhau")

@@ -123,8 +123,9 @@ public class ThiSinhController {
         }
     }
     
-    private void validateDuplicateContest(ThiSinh thiSinh, String cuocthiId, String doanThiId) throws Exception {
+    private ThiSinh validateDuplicateContest(ThiSinh thiSinh, String cuocthiId, String doanThiId){
     	List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocthiId, doanThiId);
+    	System.out.println("ID ThiSinh: ============= " + thiSinh.getId());
     	System.out.println("HoTen ThiSinh: ============= " + thiSinh.getHoTen());
     	System.out.println("NgaySinh ThiSinh: ============= " + thiSinh.getNgaySinh());
     	System.out.println("GioiTinh ThiSinh: ============= " + thiSinh.getGioiTinh());
@@ -134,10 +135,12 @@ public class ThiSinhController {
     		for(ThiSinh tmp : thiSinhs) {
     			System.out.println("tmp: ============= " + tmp.getHoTen() + "|" + tmp.getNgaySinh() + "|" + tmp.getGioiTinh() );
     			if(thiSinh.getHoTen().toLowerCase().equals(tmp.getHoTen().toLowerCase()) && thiSinh.getNgaySinh().equals(tmp.getNgaySinh()) && thiSinh.getGioiTinh() == tmp.getGioiTinh()) {
-    				 throw new ValidationException("ThiSinh is not exists!"); 
+    				 return tmp;
     			}
     		}
     	}
+    	
+    	return null;
     }
 
     @PostMapping("/cuocthis/{cuocThiId}/thisinhs")
@@ -152,7 +155,11 @@ public class ThiSinhController {
         try {
             validateRelationConstraint(thiSinh);
             
-            //validateDuplicateContest(thiSinh, cuocThiId, thiSinh.getDoanThiId());
+            ThiSinh tmp = validateDuplicateContest(thiSinh, cuocThiId, thiSinh.getDoanThiId());
+            
+            if(tmp != null) {
+            	return new ResponseEntity<>(tmp, HttpStatus.CREATED);
+            }
             
             ThiSinh thiSinhMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
             	thiSinh.setCuocThi(cuocThi);
@@ -160,6 +167,7 @@ public class ThiSinhController {
             }).orElseThrow(() -> new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId));
 
             return new ResponseEntity<>(thiSinhMoi, HttpStatus.CREATED);
+            
         } catch (Exception e) {
             log.debug("API POST /cuocthis/{cuocThiId}/thisinhs", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
