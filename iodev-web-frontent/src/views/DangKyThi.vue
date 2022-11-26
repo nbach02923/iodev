@@ -1900,7 +1900,9 @@ export default {
         let filter = {
           collectionName: 'doanthis',
           data: {
-            cuocThiId: vm.id
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
@@ -2067,8 +2069,8 @@ export default {
           collectionChildId: vm.thongTinDoanThi.id,
           collectionNameChild2: 'huanluyenviens',
           data: {
-            // page: vm.pageDanhSachHlv,
-            // size: vm.itemsPerPage
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
@@ -2120,7 +2122,9 @@ export default {
           collectionName: 'doithis',
           data: {
             doanThiId: vm.thongTinDoanThi.id,
-            cuocThiId: vm.id
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
