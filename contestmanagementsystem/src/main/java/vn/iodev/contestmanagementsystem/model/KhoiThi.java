@@ -63,6 +63,12 @@ public class KhoiThi {
 
     @Column(name = "thoiGianCapNhat")
     private long thoiGianCapNhat;
+    
+    @Column(name = "khoiThiTruocId")
+    private String khoiThiTruocId;
+    
+    @Column(name = "cuocThiTruocId")
+    private String cuocThiTruocId;
 
     @JsonIgnore
     @Transient

@@ -67,6 +67,10 @@ export default {
         { title: 'Đăng nhập', icon: 'mdi-login', to:'/dangnhap', requiredLoggedIn: false },
         { title: 'Đăng xuất', icon: 'mdi-logout', to:'/dangnhap', requiredLoggedIn: true, tag: 'logOut' },
         { title: 'Giới thiệu', icon: 'mdi-help-box', to:'/gioithieu', requiredLoggedIn: true },
+        { title: 'Thí sinh', icon: 'mdi-account-multiple', to:'/thisinh', requiredLoggedIn: true },
+        { title: 'Đội thi', icon: 'mdi-account-group', to: '/doithi', requiredLoggedIn: true },
+        { title: 'Tổ chức', icon: 'mdi-bank', to: '/tochuc', requiredLoggedIn: true },
+        { title: 'Profile', icon: 'mdi-clipboard-list', to: '/profile', requiredLoggedIn: true}
       ],
     }),
     computed: {

@@ -1,6 +1,6 @@
 package vn.iodev.contestmanagementsystem.payload;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -68,11 +68,18 @@ public class DanhSachThiSinhTrongDoanResponse {
     public void setNoiDungThi(List<KhoiThi> noiDungThi) {
         this.noiDungThi = noiDungThi;
     }
-    private String id;
+    public String getSoBaoDanh() {
+		return soBaoDanh;
+	}
+	public void setSoBaoDanh(String soBaoDanh) {
+		this.soBaoDanh = soBaoDanh;
+	}
+
+	private String id;
     private String hoTen;
     private Integer gioiTinh;
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
     private String email;
     private String soDienThoai;
@@ -80,5 +87,6 @@ public class DanhSachThiSinhTrongDoanResponse {
     private String nganhDaoTao;
     private String datGiaiThuong;
     private List<KhoiThi> noiDungThi;
+    private String soBaoDanh;
     public DanhSachThiSinhTrongDoanResponse() {}
 }

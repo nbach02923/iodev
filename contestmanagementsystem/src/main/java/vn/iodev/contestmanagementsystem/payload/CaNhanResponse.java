@@ -1,6 +1,7 @@
 package vn.iodev.contestmanagementsystem.payload;
 
-import java.sql.Date;
+
+import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -83,7 +84,7 @@ public class CaNhanResponse {
     private String hoTen;
     private Integer gioiTinh;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
     private String email;
     private String soDienThoai;

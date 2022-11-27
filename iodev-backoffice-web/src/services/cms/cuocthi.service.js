@@ -3,7 +3,8 @@ import authHeader from '../authenticate/auth-header';
 
 class CuocThiService {
   getDanhSachCuocThi() {
-    return axios.get("/cuocthis", { headers: authHeader() }).then(response => {
+    return axios.get("/cuocthis", {params: {size: '10000'}}, { headers: authHeader() })
+    .then(response => {
       return response.data;
     });
   }
@@ -23,7 +24,7 @@ class CuocThiService {
   }
   getDanhSachHinhAnhs(id) {
     return axios
-        .get('/cuocthis/' + id + "/hinhanhs", { headers: authHeader() })
+        .get('/cuocthis/' + id + "/hinhanhs", {params: {size: '10000'}}, { headers: authHeader() })
         .then(response => {
           return response.data;
         });

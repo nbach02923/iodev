@@ -93,6 +93,9 @@
                     <span class="label-header">Số đội thi tham dự: </span>&nbsp;
                     <span class="blue-text font-weight-bold">{{soDoiThiThamDu}}</span>
                   </v-col>
+                  <v-col class="pt-0" v-if="userLogin.loaiTaiKhoan == 1">
+                    <v-btn color="primary" @click="exportDoanThi()" :loading="loadingExport" :disabled="loadingExport">Export Danh Sách Thi</v-btn>
+                  </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="4" class="py-4">
@@ -1833,6 +1836,23 @@ export default {
           vm.loading = false
         })
         
+      },
+      exportDoanThi() {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let filter = {
+          collectionName: 'doanthis',
+          id: vm.thongTinDoanThi.id,
+          tenGoi: vm.thongTinDoanThi.tenGoi
+        }
+        vm.$store.dispatch('exportDoanThi', filter). then(function (response) {
+          vm.loadingExport = false
+        }).catch(function() {
+          vm.loadingExport = false
+        })
       },
       addThiSinhSuggestThiTapThe () {
         let vm = this

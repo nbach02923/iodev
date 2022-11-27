@@ -448,6 +448,11 @@ import ToChucService from '../../services/humanresources/tochuc.service';
                 await this.readHinhAnhCuocThis()
               }
             },
+            editItem (item) {
+              this.editedItem = this.cuocThis.indexOf(item)
+              this.editedItem = Object.assign({}, item)
+              this.dialog = true
+            },
             deleteItem (item) {
               this.editedIndex = this.cuocThis.indexOf(item)
               this.editedItem = Object.assign({}, item)

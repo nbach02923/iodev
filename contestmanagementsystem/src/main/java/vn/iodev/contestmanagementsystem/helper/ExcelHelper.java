@@ -1,19 +1,30 @@
 package vn.iodev.contestmanagementsystem.helper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyMau1;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
@@ -24,9 +35,12 @@ import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangCuocThi;
 import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangToChuc;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
+import vn.iodev.contestmanagementsystem.utils.StringPatternUtil;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -987,4 +1001,173 @@ public class ExcelHelper {
             throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
         }
     }
+    
+    
+	public static File exportDanhSachDangKyMau1(String templateFilePath, String outputPath, int fc, int lc, int fr,
+			int lr, int looprow, HashMap<String, Object> data) {
+
+		Workbook workbook = null;
+
+		FileInputStream fis = null;
+
+		FileOutputStream fos = null;
+
+		Path targetPath = null;
+
+		try {
+
+			Path sourcePath = Paths.get(templateFilePath);
+
+			// init target report
+			targetPath = Paths.get(outputPath);
+
+			// copy source to target
+			targetPath = Files.copy(sourcePath, targetPath);
+
+			fis = new FileInputStream(targetPath.toFile());
+
+			workbook = new XSSFWorkbook(fis);
+
+			// close fis after init workbook
+			fis.close();
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Row row = null;
+
+			// int dataSize = 0;
+
+			for (int r = fr; r < lr; r++) {
+
+				row = sheet.getRow(r);
+
+				if (row != null) {
+
+					for (int c = fc; c < lc; c++) {
+
+						Cell cell = row.getCell(c);
+
+						if (cell != null) {
+							if (cell.getCellComment() != null) {
+								cell.removeCellComment();
+							}
+
+							String cellValue = cell.getStringCellValue();
+
+							List<String> cellPatterns = new ArrayList<>();
+
+							if (!ObjectUtils.isEmpty(cellValue)) {
+								cellPatterns = StringPatternUtil.getMatcher(cellValue, DanhSachDangKyMau1.dataPattern);
+							}
+
+							for (String cellPattern : cellPatterns) {
+								if (data.containsKey(cellPattern)) {
+									cellValue = cellValue.replace(cellPattern, String.valueOf(data.get(cellPattern)));
+								} else {
+									cellValue = cellValue.replace(cellPattern, "");
+								}
+							}
+							
+							cell.setCellValue(cellValue);
+
+						}
+					}
+				}
+			}
+			
+			row = sheet.getRow(looprow);
+			
+			List<HashMap<String, Object>> dataRows = (List<HashMap<String, Object>>) data.get("$loop$");
+			
+			sheet.shiftRows(looprow, lr, dataRows.size() - 1);
+			
+			Cell tmpCell = row.getCell(fc);
+
+			CellStyle tmpCellStyle = tmpCell.getCellStyle();
+			
+			if (row != null && dataRows != null && !dataRows.isEmpty()) {
+			
+				Row newRow = null;
+
+				int dataRowCount = 0;
+
+				for (int i = looprow; i <= looprow + (dataRows.size() - 1); i++) {
+
+					HashMap<String, Object> dataRow = dataRows.get(dataRowCount);
+
+					// new row insert
+					
+					newRow = sheet.createRow(i);
+					
+					newRow.setHeight(row.getHeight()); // create cell end set style
+					
+					CellStyle cellStyle = workbook.createCellStyle();
+					
+					cellStyle.cloneStyleFrom(tmpCellStyle);
+					
+					Font font = workbook.createFont();
+					
+					Cell newCell = null;
+					
+					if(dataRow.size() == 1) {
+						font.setBold(true);
+						cellStyle.setFont(font);
+					}else {
+						font.setBold(false);
+						cellStyle.setFont(font);
+					}
+					
+					for (int column = fc; column <= lc; column++) {
+						
+						newCell = newRow.createCell(column);
+						
+						newCell.setCellStyle(cellStyle);
+
+						String cellPattern = DanhSachDangKyMau1.colMap.get(column);
+						
+						String value = "";
+
+						if (dataRow.containsKey(cellPattern)) {
+							value = String.valueOf(dataRow.get(cellPattern));
+						}
+
+						newCell.setCellValue(value);
+					}
+				
+					dataRowCount++;
+
+				}
+
+			}
+
+			fos = new FileOutputStream(targetPath.toFile());
+
+			workbook.write(fos);
+
+			fos.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+		} finally {
+			try {
+
+				if (workbook != null) {
+					workbook.close();
+				}
+				if (fis != null) {
+					fis.close();
+				}
+
+				if (fos != null) {
+					fos.close();
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+
+		return targetPath.toFile();
+
+	}
 }

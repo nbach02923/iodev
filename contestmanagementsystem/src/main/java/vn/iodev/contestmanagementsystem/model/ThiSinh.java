@@ -1,6 +1,6 @@
 package vn.iodev.contestmanagementsystem.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,7 +45,7 @@ public class ThiSinh {
 
     @Column(name = "ngaySinh", nullable = true)
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy", locale = "vi_VN", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
 
     @Column(name = "email", nullable = true)
