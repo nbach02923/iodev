@@ -840,27 +840,27 @@ export default {
               value: 'hoTen',
               class: 'th-center py-2'
           },
-          {
-              sortable: false,
-              text: 'Số điện thoại',
-              align: 'left',
-              value: 'soDienThoai',
-              class: 'th-center py-2'
-          },
-          {
-              sortable: false,
-              text: 'Email',
-              align: 'left',
-              value: 'email',
-              class: 'th-center py-2'
-          },
+          // {
+          //     sortable: false,
+          //     text: 'Số điện thoại',
+          //     align: 'left',
+          //     value: 'soDienThoai',
+          //     class: 'th-center py-2'
+          // },
+          // {
+          //     sortable: false,
+          //     text: 'Email',
+          //     align: 'left',
+          //     value: 'email',
+          //     class: 'th-center py-2'
+          // },
           {
               sortable: false,
               text: 'Chức danh',
               align: 'left',
               value: 'truongPhoDoan',
               class: 'th-center',
-              width: 150
+              // width: 150
           }
         ],
         dialogDsHlv: false,

@@ -2213,46 +2213,46 @@ export default {
       showCreateThiSinh (khoiThi, suggest) {
         let vm = this
         vm.khoiThiSelected = khoiThi
-        if (vm.khoiThiSelected.cuocThiTruocId) {
-          let vm = this
-          let filter = {
-            collectionName: 'cuocthis',
-            collectionId: vm.khoiThiSelected.cuocThiTruocId,
-            collectionNameChild: 'thisinhs',
-            data: {
-              page: 1,
-              size: 10000
-            }
-          }
-          vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
-            let dsThiSinh = response.filter(function (item) {
-              return item.doanThiId
-            })
-            let filter = {
-              collectionName: 'doanthis',
-              data: {
-                page: 1,
-                size: 10000,
-                cuocThiId: vm.khoiThiSelected.cuocThiTruocId
-              }
-            }
-            vm.$store.dispatch('collectionFilter', filter).then(function (response) {
-              let emailDoanThi = vm.emailToChucUpdate ? vm.emailToChucUpdate : vm.userLogin.email
-              let doanThi = response.find(function (item) {
-                return String(item.email).trim() == String(emailDoanThi).trim()
-              })
-              if (doanThi) {
-                vm.danhSachThiSinhSuggest = dsThiSinh.filter(function(item) {
-                  return item.doanThiId == doanThi.id
-                })
-              } else {
-                vm.danhSachThiSinhSuggest = dsThiSinh
-              }
-            }).catch(function () {})
-          }).catch(function () {})
-        } else {
+        // if (vm.khoiThiSelected.cuocThiTruocId) {
+        //   let vm = this
+        //   let filter = {
+        //     collectionName: 'cuocthis',
+        //     collectionId: vm.khoiThiSelected.cuocThiTruocId,
+        //     collectionNameChild: 'thisinhs',
+        //     data: {
+        //       page: 1,
+        //       size: 10000
+        //     }
+        //   }
+        //   vm.$store.dispatch('collectionFilterLevel2', filter).then(function (response) {
+        //     let dsThiSinh = response.filter(function (item) {
+        //       return item.doanThiId
+        //     })
+        //     let filter = {
+        //       collectionName: 'doanthis',
+        //       data: {
+        //         page: 1,
+        //         size: 10000,
+        //         cuocThiId: vm.khoiThiSelected.cuocThiTruocId
+        //       }
+        //     }
+        //     vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+        //       let emailDoanThi = vm.emailToChucUpdate ? vm.emailToChucUpdate : vm.userLogin.email
+        //       let doanThi = response.find(function (item) {
+        //         return String(item.email).trim() == String(emailDoanThi).trim()
+        //       })
+        //       if (doanThi) {
+        //         vm.danhSachThiSinhSuggest = dsThiSinh.filter(function(item) {
+        //           return item.doanThiId == doanThi.id
+        //         })
+        //       } else {
+        //         vm.danhSachThiSinhSuggest = dsThiSinh
+        //       }
+        //     }).catch(function () {})
+        //   }).catch(function () {})
+        // } else {
           vm.danhSachThiSinhSuggest = suggest
-        }
+        // }
         vm.typeAction = 'create'
         vm.getDanhSachDoiThi()
         vm.danhSachNoiDungThiThiSinh = []
