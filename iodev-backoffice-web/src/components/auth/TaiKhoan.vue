@@ -8,6 +8,7 @@
         :items="taiKhoans"
         sort-by="email"
         class="elevation-1"
+        :search="search"
         >
         <template v-slot:top>
         <v-toolbar
@@ -19,6 +20,7 @@
               inset
               vertical
               ></v-divider>
+              <v-text-field dense label="Search" v-model="search"></v-text-field>
               <v-spacer></v-spacer>
               <v-dialog
               v-model="dialog"
@@ -176,6 +178,27 @@
                 </v-card-actions>
             </v-card>
             </v-dialog>
+            <v-dialog v-model="dialogEdit" max-width="640px">
+              <v-card>
+                <v-card-title class="text-h5">Thay đổi mật khẩu của tài khoản</v-card-title>
+                <v-card-text>
+                  <v-row>
+                    <v-col>
+                      <label>Email:</label>
+                      <v-text-field dense outlined v-model="editedItem.email"></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <label>Mật Khẩu:</label>
+                      <v-text-field dense outlined v-model="editedItem.matKhau"></v-text-field>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn color="error" @click="closeEdit">Hủy</v-btn>
+                  <v-btn color="success" @click="editConfirm">Lưu lại</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
         </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
@@ -199,6 +222,13 @@
         >
             mdi-delete
         </v-icon>
+        <v-icon
+          small
+          class="mr-2"
+          @click="editTaiKhoan(item)"
+        >
+          mdi-pencil
+        </v-icon>
         </template>
         <template v-slot:no-data>
         <v-btn
@@ -221,10 +251,12 @@ import moment from 'moment';
         name: "TaiKhoan",
         data() {
             return {
+              search: '',
                 dialog: false,
                 dialogDelete: false,
                 dialogDeActive: false,
                 dialogActive: false,
+                dialogEdit: false,
                 headers: [
                   {
                     text: 'Email',
@@ -303,6 +335,20 @@ import moment from 'moment';
               this.closeActive()
             },
 
+            editTaiKhoan(item) {
+              this.editedIndex = this.taiKhoans.indexOf(item)
+              this.editedItem = Object.assign({}, item)
+              this.dialogEdit = true
+            },
+
+            closeEdit() {
+              this.dialogEdit = false
+              this.$nextTick(() => {
+                this.editedItem = Object.asign({}, this.defaultItem)
+                this.editedIndex = -1
+              })
+            },
+
             close () {
               this.dialog = false
               this.$nextTick(() => {
@@ -335,6 +381,16 @@ import moment from 'moment';
               })
             },
 
+            editConfirm: async function () {
+              this.taikhoans.splice(this.editedIndex, 1)
+              let reset = {
+                matKhau : this.editedItem.matKhau,
+                id : this.editedItem.id
+              }
+              await TaiKhoanService.suaTaiKhoan(reset)
+              this.closeEdit = true
+            }, 
+
             save: async function () {
               if (this.editedIndex > -1) {
                 Object.assign(this.taiKhoans[this.editedIndex], this.editedItem)
@@ -365,6 +421,9 @@ import moment from 'moment';
             kichHoatTaiKhoan: async function(tk) {
               await TaiKhoanService.kichHoatTaiKhoan(tk.email);
             },
+            suaTaiKhoan: async function(item) {
+              await TaiKhoanService.suaTaiKhoan(item.email);
+            }, 
             xoaTaiKhoan: async function(tk) {
               await TaiKhoanService.xoaTaiKhoan(tk.email);
             },
@@ -372,9 +431,9 @@ import moment from 'moment';
               const data = await CaNhanService.getDanhSachCaNhan();
               this.caNhans = data;
             },
-            readToChucs: async function() {
+            readDanhSachToChuc: async function() {
               const data = await ToChucService.getDanhSachToChuc();
-              this.toChucs = data;
+              this.toChucs = data
             },
             convertTaiKhoanTable (lstTaiKhoan) {
               var convertArr = [];
@@ -411,6 +470,7 @@ import moment from 'moment';
                 this.$router.push('/dangnhap');
             }    
             this.readTaiKhoans();
+            this.readDanhSachToChuc();
           },
           computed: {
             formTitle () {
@@ -427,6 +487,9 @@ import moment from 'moment';
             dialogDelete (val) {
               val || this.closeDelete()
             },
+            dialogEdit (val) {
+              val || this.closeEdit()
+            }
           },
       created () {
       
