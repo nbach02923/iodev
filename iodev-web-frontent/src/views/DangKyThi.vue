@@ -528,7 +528,7 @@
                   </v-combobox>
               </v-col>
               <v-col cols="12" md="6" class="py-0 mb-2">
-                <label>Ngày sinh</label>
+                <label>Ngày sinh  <span class="red--text">(*)</span></label>
                 <v-text-field
                   class="input-form"
                   v-model="ngaySinhCreate"
@@ -539,6 +539,8 @@
                   clearable
                   max
                   hide-details="auto"
+                  :rules="required"
+                  required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6" class="py-0">
@@ -2032,30 +2034,33 @@ export default {
             vm.danhSachKhoiThi.forEach((khoiThi, index) => {
               let thisinhArr = []
               vm.danhSachThiSinh.forEach(thisinh => {
-                if (thisinh.noiDungThi && thisinh.noiDungThi.length) {
-                  let exits = thisinh.noiDungThi.find(function (item) {
+                let thisinhdk = Object.assign({}, thisinh)
+                if (thisinhdk.noiDungThi && thisinhdk.noiDungThi.length) {
+                  let exits = thisinhdk.noiDungThi.find(function (item) {
                     return item.id == khoiThi.id
                   })
                   if (exits) {
                     if (exits.thiTapThe) {
                       // console.log('khoiThiId', exits.id)
-                      // console.log('thiSinhId', thisinh.id)
+                      // console.log('thiSinhId', thisinhdk.id)
                       // console.log('dsthi', vm.danhSachDangKyThi)
+                      
                       let dsthi = vm.danhSachDangKyThi.find(function (item) {
-                        return item.khoiThiId == exits.id && item.thiSinhId == thisinh.id
+                        return item.khoiThiId == exits.id && item.thiSinhId == thisinhdk.id
                       })
                       if (dsthi) {
+                        thisinhdk['danhSachThiId'] = dsthi.danhSachThiId
                         // console.log('dsthi111111', dsthi)
                         let doiThi = vm.danhSachDoiThi.find(function (item) {
                           return item.id == dsthi.doiThiId
                         })
                         // console.log('doiThi', doiThi)
                         if (doiThi) {
-                          thisinh['Đội thi'] = doiThi.tenGoi
+                          thisinhdk['Đội thi'] = doiThi.tenGoi
                         }
                       }
                     }
-                    thisinhArr.push(thisinh)
+                    thisinhArr.push(thisinhdk)
                   }
                 }
               });
@@ -2668,28 +2673,50 @@ export default {
         let confirm = {
           auth: false,
           title: 'Xóa thí sinh',
-          message: 'Bạn có chắc chắn muốn xóa thí sinh "' + item.hoTen + '"',
+          message: 'Bạn có chắc chắn muốn xóa đăng ký thí sinh "' + item.hoTen + '"',
           button: {
             yes: 'Có',
             no: 'Không'
           },
           callback: () => {
-            if (danhSachThi && danhSachThi.length) {
-              let arrDsThi = []
-              for (let index = 0; index < danhSachThi.length; index++) {
-                let filter = {
-                  collectionName: 'danhsachthis',
-                  id: danhSachThi[index]['danhSachThiId']
-                }
-                arrDsThi.push(vm.$store.dispatch('collectionDelete', filter).then(function (result) {}))
-              }
-              Promise.all(arrDsThi).then(values => {
-                vm.xoaThiSinh(item.id)
-              }).catch(function () {
-              })
-            } else {
-              vm.xoaThiSinh(item.id)
+            console.log('danhSachThi', danhSachThi)
+            console.log('danhSachThi2', item)
+            // -----------------
+            let filter = {
+              collectionName: 'danhsachthis',
+              id: item['danhSachThiId']
             }
+            vm.$store.dispatch('collectionDelete', filter).then(function (result) {
+              vm.loading = false
+              toastr.remove()
+              toastr.success('Xóa thí sinh thành công')
+              vm.getDanhSachThiSinh()
+            }).catch(function (err) {
+              vm.loading = false
+              toastr.remove()
+              toastr.error('Xóa thí sinh thất bại')
+            })
+            // -----------------
+            // if (danhSachThi && danhSachThi.length) {
+            //   let arrDsThi = []
+            //   for (let index = 0; index < danhSachThi.length; index++) {
+            //     let filter = {
+            //       collectionName: 'danhsachthis',
+            //       id: danhSachThi[index]['danhSachThiId']
+            //     }
+            //     arrDsThi.push(vm.$store.dispatch('collectionDelete', filter).then(function (result) {}))
+            //   }
+            //   Promise.all(arrDsThi).then(values => {
+            //     vm.xoaThiSinh(item.id)
+            //     vm.loading = false
+            //     toastr.remove()
+            //     toastr.success('Xóa thí sinh thành công')
+            //     vm.getDanhSachThiSinh()
+            //   }).catch(function () {
+            //   })
+            // } else {
+            //   vm.xoaThiSinh(item.id)
+            // }
           }
         }
         vm.$store.commit('SET_CONFIG_CONFIRM_DIALOG', confirm)
