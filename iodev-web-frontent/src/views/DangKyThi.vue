@@ -93,6 +93,9 @@
                     <span class="label-header">Số đội thi tham dự: </span>&nbsp;
                     <span class="blue-text font-weight-bold">{{soDoiThiThamDu}}</span>
                   </v-col>
+                  <v-col class="pt-0" v-if="userLogin.loaiTaiKhoan == 1">
+                    <v-btn color="primary" @click="exportDoanThi()" :loading="loadingExport" :disabled="loadingExport">Export Danh Sách Thi</v-btn>
+                  </v-col>
                 </v-row>
               </v-col>
               <v-col cols="12" md="4" class="py-4">
@@ -1834,6 +1837,23 @@ export default {
         })
         
       },
+      exportDoanThi() {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let filter = {
+          collectionName: 'doanthis',
+          id: vm.thongTinDoanThi.id,
+          tenGoi: vm.thongTinDoanThi.tenGoi
+        }
+        vm.$store.dispatch('exportDoanThi', filter). then(function (response) {
+          vm.loadingExport = false
+        }).catch(function() {
+          vm.loadingExport = false
+        })
+      },
       addThiSinhSuggestThiTapThe () {
         let vm = this
         let thongTinThiSinh = {
@@ -1900,7 +1920,9 @@ export default {
         let filter = {
           collectionName: 'doanthis',
           data: {
-            cuocThiId: vm.id
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
@@ -2067,8 +2089,8 @@ export default {
           collectionChildId: vm.thongTinDoanThi.id,
           collectionNameChild2: 'huanluyenviens',
           data: {
-            // page: vm.pageDanhSachHlv,
-            // size: vm.itemsPerPage
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
@@ -2120,7 +2142,9 @@ export default {
           collectionName: 'doithis',
           data: {
             doanThiId: vm.thongTinDoanThi.id,
-            cuocThiId: vm.id
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
           }
         }
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {

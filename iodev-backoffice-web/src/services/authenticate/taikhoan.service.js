@@ -35,6 +35,11 @@ class TaiKhoanService {
           return response.data;
         });
   }
+
+  suaTaiKhoan(reset) {
+    return axios
+      .post('taikhoans' + reset.id, )
+  }
 }
 
 export default new TaiKhoanService();
