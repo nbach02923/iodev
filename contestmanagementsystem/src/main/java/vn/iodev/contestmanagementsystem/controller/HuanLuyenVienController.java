@@ -132,6 +132,8 @@ public class HuanLuyenVienController {
                 throw new ValidationException("DoanThi is not exists!");
             }
         }
+        //comment by trungnt
+        /*
         if (huanLuyenVien.getKhoiThiId() != null) {
             String[] khoiThiIds = huanLuyenVien.getKhoiThiId().split(",");
             for (String khoiThiId : khoiThiIds) {
@@ -141,6 +143,7 @@ public class HuanLuyenVienController {
                 }
             }
         }
+        */
     }
 
     @PostMapping("/cuocthis/{cuocThiId}/huanluyenviens")

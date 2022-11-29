@@ -51,6 +51,9 @@ public class DoanThi {
 
     @Column(name = "thoiGianCapNhat")
     private long thoiGianCapNhat;
+    
+    @Column(name = "maDoanThi")
+    private String maDoanThi;
 
     public DoanThi(
         String tenGoi,

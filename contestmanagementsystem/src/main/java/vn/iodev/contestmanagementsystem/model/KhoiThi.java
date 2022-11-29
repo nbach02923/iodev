@@ -69,6 +69,9 @@ public class KhoiThi {
     
     @Column(name = "cuocThiTruocId")
     private String cuocThiTruocId;
+    
+    @Column(name = "maKhoi")
+    private String maKhoi;
 
     @JsonIgnore
     @Transient

@@ -30,6 +30,7 @@ public interface DanhSachThiRepository extends JpaRepository<DanhSachThi, Long> 
     List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndThiSinhId(String cuocThiId, String khoiThiId, String thiSinhId);
     List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndThiSinhIdIn(String cuocThiId, String khoiThiId, List<String> thiSinhIds);
     List<DanhSachThi> findByCuocThiIdAndKhoiThiIdAndDoiThiIdIn(String cuocThiId, String khoiThiId, List<String> doiThiIds);
+    List<DanhSachThi> findByCuocThiIdAndThiSinhId(String cuocThiId, String thiSinhId);
 
     @Query("SELECT dst FROM T_DanhSachThi dst WHERE (:cuocThi is null OR dst.cuocThi = :cuocThi) AND (:khoiThiId is null OR dst.khoiThiId = :khoiThiId) AND dst.doiThiId is null ORDER BY dst.thuTuXepHang")
     List<DanhSachThi> getDanhSachThiCaNhan(@Param("cuocThi") CuocThi cuocThi, @Param("khoiThiId") String khoiThiId);

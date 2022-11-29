@@ -84,6 +84,21 @@ public class ExcelService {
  
     @Value("${io.report.danhsachdangkymau1.looprow}")
    	private Integer looprow;
+    
+    
+	@Value("${io.report.danhsachdangkymau2.name}")
+	private String danhsachdangkymau2Name;
+	@Value("${io.report.danhsachdangkymau2.fc}")
+	private Integer danhsachdangkymau2_fc;
+	@Value("${io.report.danhsachdangkymau2.lc}")
+	private Integer danhsachdangkymau2_lc;
+	@Value("${io.report.danhsachdangkymau2.fr}")
+	private Integer danhsachdangkymau2_fr;
+	@Value("${io.report.danhsachdangkymau2.lr}")
+	private Integer danhsachdangkymau2_lr;
+	@Value("${io.report.danhsachdangkymau2.looprow}")
+	
+	private Integer danhsachdangkymau2_looprow;
 
 
     public void importDoanThi(MultipartFile file) {
@@ -547,5 +562,30 @@ public class ExcelService {
     	log.info("data size:{}", data.size());
     	
     	return ExcelHelper.exportDanhSachDangKyMau1(templateFilePath, outputPath, fc, lc, fr, lr, looprow,  data);
+    }
+    
+    public File exportDanhSachDangKyMau2(String cuocThiId) {
+    	
+    	String homeDir = System.getProperty("user.dir");
+    	
+    	String templateFilePath = homeDir + "/" + templateFolderName + "/" + danhsachdangkymau2Name;
+    	
+    	String outputPath = homeDir + "/" + exportFolderName + "/" + System.currentTimeMillis() + "_danhsachdangkymau2.xlsx";
+    	
+    	log.info("homeDir:{}", homeDir);
+    	
+    	log.info("templateFilePath:{}", templateFilePath);
+    	
+    	log.info("outputPath:{}", outputPath);
+    	
+    	HashMap<String, Object> data = baoCaoLocalServiceImpl.getDanhSachDangKyMau2(cuocThiId);
+    	
+    	if(data == null) {
+    		return null;
+    	}
+    	
+    	log.info("data size:{}", data.size());
+    	
+    	return ExcelHelper.exportDanhSachDangKyMau2(templateFilePath, outputPath, danhsachdangkymau2_fc, danhsachdangkymau2_lc, danhsachdangkymau2_fr, danhsachdangkymau2_lr, danhsachdangkymau2_looprow,  data);
     }
 }
