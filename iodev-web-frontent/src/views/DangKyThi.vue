@@ -38,33 +38,10 @@
               </v-btn>
             </v-col>
           </v-row>
-          <div>
-            <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px;">
+          <div style="position: relative;">
+            <v-row class="mx-0 my-0 py-0" style="border: 1px solid #D9D9D9; border-top: 0px">
               <v-col cols="12" md="8" class="py-4">
                 <v-row>
-                  <!-- <v-col cols="12" class="py-2">
-                    <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
-                    <div class="" style="text-align: justify;">{{chiTietCuocThi.thongTinMoTa}}</div>
-                  </v-col>
-                  <v-col cols="12" md="6" class="pt-0">
-                    <span class="label-header">Đơn vị tổ chức: </span>
-                    <span class="blue-text font-weight-bold">{{chiTietCuocThi.donViToChuc}}</span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="pt-0">
-                    <span class="label-header">Thời gian tổ chức: </span>
-                    <span class="blue-text font-weight-bold">{{convertDate(chiTietCuocThi.ngayBatDau)}}</span>
-                    <span class="blue-text font-weight-bold"> - {{convertDate(chiTietCuocThi.ngayKetThuc)}}</span>
-                  </v-col>
-                  <v-col cols="12" md="6" class="pt-0">
-                    <span class="label-header">Trang web: </span>
-                    <a class="blue-text font-weight-bold">{{chiTietCuocThi.website}}</a>
-                  </v-col>
-                  <v-col cols="12" md="6" class="pt-0">
-                    <span class="label-header">Tình trạng: </span>
-                    <span class="font-weight-bold" :style="chiTietCuocThi.tinhTrang == 1 ? 'color: green' : (chiTietCuocThi.tinhTrang == 2 ? 'color: blue' : 'color: red')">
-                      {{statusContest(chiTietCuocThi.tinhTrang)}}
-                    </span>
-                  </v-col> -->
                   <v-col cols="12" class="py-2">
                     <div class="font-weight-bold" style="color: #2161B1;font-size: 18px;">{{chiTietCuocThi.tenGoi}}</div>
                   </v-col>
@@ -93,90 +70,30 @@
                     <span class="label-header">Số đội thi tham dự: </span>&nbsp;
                     <span class="blue-text font-weight-bold">{{soDoiThiThamDu}}</span>
                   </v-col>
-                  <v-col class="pt-0" v-if="userLogin.loaiTaiKhoan == 1">
+                  <!-- <v-col class="pt-0" v-if="userLogin.loaiTaiKhoan == 1">
                     <v-btn color="primary" @click="exportDoanThi()" :loading="loadingExport" :disabled="loadingExport">Export Danh Sách Thi</v-btn>
-                  </v-col>
+                  </v-col> -->
                 </v-row>
               </v-col>
               <v-col cols="12" md="4" class="py-4">
-                <!-- <v-layout wrap>
-                  <v-card
-                    color="#fff"
-                    dark
-                    height="70"
-                    class="mt-5 flex"
-                    style="max-width: 250px; background: #397cbf;margin: 0 auto"
-                  >
-                    <v-card-title class="align-start py-1" >
-                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
-                      style="max-width: 100%;">
-                        <div class="pa-3">
-                          <v-icon size="24">mdi-bank</v-icon>
-                        </div>
-                      </div>
-                      <div class="v-card--material__title" style="width: 170px">
-                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đoàn thi tham dự</div>
-                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          {{soDoanThiThamDu}}
-                        </div>
-                      </div>
-                    </v-card-title>
-                  </v-card>
-
-                  <v-card
-                    color="#fff"
-                    dark
-                    height="70"
-                    class="mt-5 flex"
-                    style="max-width: 250px; background: #397cbf;margin: 0 auto"
-                  >
-                    <v-card-title class="align-start py-1" >
-                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded orange"
-                      style="max-width: 100%;">
-                        <div class="pa-3" style="background: #4caf50">
-                          <v-icon size="24">mdi-account-group-outline</v-icon>
-                        </div>
-                      </div>
-                      <div class="v-card--material__title" style="width: 170px">
-                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số đội tham dự</div>
-                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          {{soDoiThiThamDu}}
-                        </div>
-                      </div>
-                    </v-card-title>
-                  </v-card> 
-
-                  <v-card
-                    color="#fff"
-                    dark
-                    height="70"
-                    class="flex"
-                    style="max-width: 250px; background: #397cbf;margin: 0 auto; margin-top: 50px"
-                  >
-                    <v-card-title class="align-start py-1" >
-                      <div class="overflow-hidden mt-n7 v-card--material__sheet v-sheet theme--light elevation-6 rounded"
-                      style="max-width: 100%;">
-                        <div class="pa-3" style="background: #e91e63">
-                          <v-icon size="24">mdi-account-circle-outline</v-icon>
-                        </div>
-                      </div>
-                      <div class="v-card--material__title" style="width: 170px">
-                        <div style="color: #fff; font-size: 18px;" class="mb-1 text-right"> Số thí sinh tham dự</div>
-                        <div class="text-right" style="font-size: 28px;font-weight: 400; color: #fff">
-                          {{soThiSinhThamDu}}
-                        </div>
-                      </div>
-                    </v-card-title>
-                  </v-card>
-                </v-layout> -->
               </v-col>
             </v-row>
+            <div v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" style="position: absolute;right: 10px;bottom: 10px">
+              <v-btn small color="orange" class="btn-form mx-0 mr-2 text-white" @click="showThiSinhXoa">
+                <v-icon style="color: #fff !important" size="18">mdi-delete</v-icon>&nbsp;
+                <span style="color: #fff !important">Xóa thí sinh không tham dự thi</span>
+              </v-btn>
+
+              <v-btn small color="orange" class="btn-form mx-0 text-white" @click="showDoiThiXoa">
+                <v-icon style="color: #fff !important" size="18">mdi-delete</v-icon>&nbsp;
+                <span style="color: #fff !important">Xóa đội thi không có thí sinh</span>
+              </v-btn>
+            </div>
           </div>
         </div>
 
         <div>
           <!--  -->
-
           <v-row class="my-0 py-0 pt-3 mx-0">
              <v-flex>
               <v-row justify="end" class="my-0 mx-0 mt-3" style="border-bottom: 1px solid #2161B1">
@@ -235,7 +152,7 @@
                       </template>
                       <span>Xóa</span>
                     </v-tooltip>
-                    <v-tooltip top>
+                    <v-tooltip top v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
                       <template v-slot:activator="{on, attrs}">
                         <v-btn small @click.stop="inTheHuanLuyenVien(item)" text icon class="" v-bind="attrs" v-on="on">
                           <v-icon>mdi-printer</v-icon>
@@ -259,20 +176,20 @@
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
-            <!-- <v-col class="d-flex align-center py-0 px-0" style="max-width: 135px;height: 30px;">
+            <v-col v-if="isSigned" class="d-flex align-center py-0 px-0" style="max-width: 205px;height: 30px;">
               <v-btn :loading="loadingExport" :disabled="loadingExport"
                 depressed
                 class="mx-0"
                 small
                 color="green"
-                @click="exportDangKy"
+                @click="exportExcel"
                 style="float: right"
                 >
                 <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
                 &nbsp;
-                <span class="white--text">Xuất danh sách</span>
+                <span class="white--text">Xuất danh sách thí sinh</span>
               </v-btn>
-            </v-col> -->
+            </v-col>
           </v-row>
           <v-row class="my-0 py-0 pt-3 mx-0">
             <!-- <v-flex>
@@ -966,7 +883,7 @@
                 >
                 </v-autocomplete>
               </v-col>
-              <v-col cols="12" class="py-0">
+              <!-- <v-col cols="12" class="py-0">
                 <label>Nội dung thi phụ trách <span class="red--text">(*)</span></label>
                 <v-autocomplete
                   class="flex input-form"
@@ -987,7 +904,7 @@
                     <span>{{data.item.noiDungThi}}</span>
                   </template>
                 </v-autocomplete>
-              </v-col>
+              </v-col> -->
             </v-layout>
           </v-form>
         </v-card-text>
@@ -1217,16 +1134,140 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--  -->
+    <v-dialog
+      max-width="1200"
+      v-model="dialogDsThiSinh"
+      persistent
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="primary" class="px-3"
+        >
+          <v-toolbar-title>Danh sách thí sinh không tham dự thi</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <v-btn
+              small
+              icon
+              dark
+              @click="dialogDsThiSinh = false"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card-text class="mt-5 px-2">
+          <v-data-table
+            :headers="headersDanhSachThiSinh"
+            :items="danhSachThiSinhXoa"
+            :items-per-page="100"
+            page.sync="1"
+            hide-default-footer
+            class="table-base mt-2"
+            no-data-text="Không có"
+            loading-text="Đang tải... "
+          >
+            <template v-slot:item.index="{ item, index }">
+              <div>{{ index + 1 }}</div>
+            </template>
+            <template v-slot:item.gioiTinh="{ item, index }">
+              <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions class="justify-end pb-3 px-2">
+          <v-btn small color="red" class="white--text mx-0" @click="dialogDsThiSinh = false">
+            <v-icon left>
+              mdi-close
+            </v-icon>
+            Thoát
+          </v-btn>
+          <v-btn small class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="xoaThiSinhKhongThi">
+            <v-icon left>
+              mdi-content-save
+            </v-icon>
+            <span>Xác nhận xóa thí sinh</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--  -->
+    <v-dialog
+      max-width="1000"
+      v-model="dialogDoiThiXoa"
+      persistent
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="primary" class="px-3"
+        >
+          <v-toolbar-title>Danh sách đội thi không có thí sinh</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <v-btn
+              small
+              icon
+              dark
+              @click="dialogDoiThiXoa = false"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card-text class="mt-5 px-2">
+          <v-card-text class="pt-0 px-2">
+            <v-data-table
+              :headers="headersDanhSachDoiThi"
+              :items="danhSachDoiThiXoa"
+              :items-per-page="500"
+              page.sync="1"
+              hide-default-footer
+              class="table-base mt-2 ds-doi-thi"
+              no-data-text="Không có"
+              loading-text="Đang tải... "
+            >
+              <template v-slot:item.index="{ item, index }">
+                <div>{{ index + 1 }}</div>
+              </template>
+            </v-data-table>
+          </v-card-text>
+          
+        </v-card-text>
+        <v-card-actions class="justify-end pb-3 px-2">
+          <v-btn small color="red" class="white--text mx-0" @click="dialogDoiThiXoa = false">
+            <v-icon left>
+              mdi-close
+            </v-icon>
+            Thoát
+          </v-btn>
+          <v-btn small class="mr-0" color="primary" :loading="loading" :disabled="loading" @click="xoaDoiThiKhongThiSinh">
+            <v-icon left>
+              mdi-content-save
+            </v-icon>
+            <span>Xác nhận xóa đội thi</span>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--  -->
   </v-card>
 </template>
 
 <script>
+import Vue from 'vue'
 import Pagination from './Pagination.vue'
 import toastr from 'toastr'
 import docxtemplater from 'docxtemplater'
 import PizZip from "pizzip";
 import PizZipUtils from "pizzip/utils/index.js";
 import { saveAs } from "file-saver";
+import axios from 'axios'
+
+import VueQrcode from '@chenfengyuan/vue-qrcode'
+Vue.component(VueQrcode.name, VueQrcode)
 
 toastr.options = {
   'closeButton': true,
@@ -1244,6 +1285,10 @@ export default {
     props: ['type', 'id'],
     data() {
       return {
+        dialogDoiThiXoa: false,
+        danhSachDoiThiXoa: [],
+        dialogDsThiSinh: false,
+        danhSachThiSinhXoa: [],
         doanThiUpdate: '',
         toChucUpdate: '',
         emailToChucUpdate: '',
@@ -1497,6 +1542,22 @@ export default {
         soDoiThiThamDu: 0,
         soKhoiThiThamDu: 0,
         loadingExport: false,
+        headersDanhSachDoiThi: [
+          {
+              sortable: false,
+              text: 'STT',
+              align: 'center',
+              value: 'index',
+              width: 50
+          },
+          {
+              sortable: false,
+              text: 'Tên đội thi',
+              align: 'left',
+              value: 'tenGoi',
+              class: 'th-center py-2'
+          }
+        ],
       }
     },
     created () {
@@ -1564,59 +1625,56 @@ export default {
       }
     },
     methods: {
-      exportDaanhSachThi () {
-        
-      },
       inTheThiSinh(item){
-        loadFile("http://dangky.olp.vn/docs/The_thi_sinh_OLP-PROCON.docx", function(
-        error,
-        content
-      ) {
-        if (error) {
-          throw error;
-        }
-        const zip = new PizZip(content);
-        const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-        doc.setData({
-          ten_ts: item.hoTen
-        });
-        try {
-          doc.render();
-        } catch (error) {
-          function replaceErrors(key, value) {
-            if (value instanceof Error) {
-              return Object.getOwnPropertyNames(value).reduce(function(
-                error,
-                key
-              ) {
-                error[key] = value[key];
-                return error;
-              },
-              {});
+        loadFile(window.location.origin + "/docs/The_thi_sinh_OLP-PROCON.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+          doc.setData({
+            ten_ts: item.hoTen
+          });
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
             }
-            return value;
+            console.log(JSON.stringify({ error: error }, replaceErrors));
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
           }
-          console.log(JSON.stringify({ error: error }, replaceErrors));
-          if (error.properties && error.properties.errors instanceof Array) {
-            const errorMessages = error.properties.errors
-              .map(function(error) {
-                return error.properties.explanation;
-              })
-              .join("\n");
-            console.log("errorMessages", errorMessages);
-          }
-          throw error;
-        }
-        const out = doc.getZip().generate({
-          type: "blob",
-          mimeType:
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "Thẻ thí sinh " + item.hoTen + ".docx");
         });
-        saveAs(out, "Thẻ thí sinh " + item.hoTen + ".docx");
-      });
       }, 
       inTheHuanLuyenVien(item){
-        loadFile("http://dangky.olp.vn/docs/The_truong_pho_doan.docx", function(
+        loadFile(window.location.origin + "/docs/The_truong_pho_doan.docx", function(
         error,
         content
       ) {
@@ -2059,6 +2117,13 @@ export default {
                           thisinhdk['Đội thi'] = doiThi.tenGoi
                         }
                       }
+                    } else {
+                      let dsthi = vm.danhSachDangKyThi.find(function (item) {
+                        return item.khoiThiId == exits.id && item.thiSinhId == thisinhdk.id
+                      })
+                      if (dsthi) {
+                        thisinhdk['danhSachThiId'] = dsthi.danhSachThiId
+                      }
                     }
                     thisinhArr.push(thisinhdk)
                   }
@@ -2146,12 +2211,13 @@ export default {
         let filter = {
           collectionName: 'doithis',
           data: {
-            doanThiId: vm.thongTinDoanThi.id,
+            doanThiId: vm.doanThiUpdate ? vm.doanThiUpdate : vm.thongTinDoanThi.id,
             cuocThiId: vm.id,
             page: 1,
             size: 10000
           }
         }
+        console.log('filtergetDanhSachDoiThi', filter)
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           response.forEach(element => {
             element['doiThiId'] = element.id
@@ -2586,7 +2652,7 @@ export default {
         vm.dialogAddHlv = true
         setTimeout(function () {
           vm.thongTinHlv = Object.assign({}, item)
-          vm.noiDungDuThiHlv = vm.thongTinHlv.noiDungThi && vm.thongTinHlv.noiDungThi.length ? vm.thongTinHlv.noiDungThi : ''
+          // vm.noiDungDuThiHlv = vm.thongTinHlv.noiDungThi && vm.thongTinHlv.noiDungThi.length ? vm.thongTinHlv.noiDungThi : ''
           vm.$refs.formAddHlv.resetValidation()
         }, 100)
       },
@@ -2605,15 +2671,19 @@ export default {
           return
         }
         if (vm.$refs.formAddHlv.validate()) {
-          if (!vm.noiDungDuThiHlv.length) {
-            toastr.error('Vui lòng chọn nội dung thi phụ trách')
-            return
+          // if (!vm.noiDungDuThiHlv.length) {
+          //   toastr.error('Vui lòng chọn nội dung thi phụ trách')
+          //   return
+          // }
+          let khoiThiIds = ''
+          try {
+            khoiThiIds = Array.from(vm.noiDungDuThiHlv, function (item) {
+              return item.id
+            }).toString()
+          } catch (error) {
           }
-          let khoiThiIds = Array.from(vm.noiDungDuThiHlv, function (item) {
-            return item.id
-          }).toString()
           vm.thongTinHlv.doanThiId = vm.thongTinDoanThi.id
-          vm.thongTinHlv.khoiThiId = khoiThiIds
+          vm.thongTinHlv.khoiThiId = khoiThiIds ? khoiThiIds : ''
           let filter = {
             collectionName: 'cuocthis',
             collectionId: vm.id,
@@ -2862,30 +2932,369 @@ export default {
           vm.soDoiThiThamDu = data.length
         }).catch(function () {})
       },
-      exportDangKy () {
+      exportExcel() {
         let vm = this
         if (vm.loadingExport) {
           return
         }
         vm.loadingExport = true
-        let dataSearch = {
-          "baoCao_maBaoCao": vm.chiTietBaoCao.maBaoCao,
-          "pageable":{
-            "orderFields":"baoCao_maBaoCao",
-            "orderTypes":"asc",
-            "page": 0,
-            "size": 10000
+        let dataPost = {}
+        let param = {
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          params: {},
+          responseType: 'blob'
+        }
+        axios.post('/api/doanthis/' + vm.thongTinDoanThi.id + '/export', dataPost, param).then(function (response) {
+          vm.loadingExport = false
+          let a = document.createElement('a')
+          document.body.appendChild(a)
+          a.style = 'display: none'
+          let url = window.URL.createObjectURL(response.data)
+          a.href = url
+          a.download = 'DanhSachThiSinh.xlsx'
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }).catch(xhr => {
+          vm.loadingExport = false
+        })
+      },
+      exportDangKy () {
+        let vm = this
+        let doanThi = vm.thongTinDoanThi.tenGoi
+        let diaChi = vm.thongTinToChuc.diaChiHoatDong
+        let truongDoan = ''
+        let phoDoan = ''
+        let emailTruongDoan = ''
+        let emailPhoDoan = ''
+        let soDienThoaiTruongDoan = ''
+        let soDienThoaiPhoDoan = ''
+        if (vm.danhSachHlv.length) {
+          let tp = vm.danhSachHlv.find(function (item) {
+            return item.truongPhoDoan == 1
+          })
+          if (tp) {
+            truongDoan = tp.hoTen
+            emailTruongDoan = tp.email
+            soDienThoaiTruongDoan = tp.soDienThoai
+          }
+          let pd = vm.danhSachHlv.find(function (item) {
+            return item.truongPhoDoan == 2
+          })
+          if (pd) {
+            phoDoan = pd.hoTen
+            emailPhoDoan = pd.email
+            soDienThoaiPhoDoan = pd.soDienThoai
           }
         }
-        let filter = {
-          maBaoCao: vm.chiTietBaoCao.maBaoCao,
-          url: '/v1/datasharing/thanhphanbaocao/detail/export',
-          data: dataSearch
+        let dsthi1 = [].concat(vm.danhSachKhoiThi)
+        let sortItems = function (items) {
+          function compare(a, b) {
+            if (a.countThiSinh > b.countThiSinh)
+              return -1
+            if (a.countThiSinh < b.countThiSinh)
+              return 1
+            return 0
+          }
+          return items.sort(compare)
         }
-        vm.$store.dispatch('exportDanhSachDangKy', filter).then(function (response) {
-          vm.loadingExport = false
+        dsthi1 = sortItems(dsthi1)
+        dsthi1.forEach(element => {
+            if (element.thiTapThe && element.thiSinhs && element.thiSinhs.length) {
+                let doiThiArr = []
+                element.thiSinhs.forEach(element => {
+                    let doiThiIndex = doiThiArr.findIndex(function (item) {
+                        return item.tenDoi == element["Đội thi"]
+                    })
+                    if (doiThiIndex >= 0) {
+                        doiThiArr[doiThiIndex]['thiSinhs'].push(element)
+                    } else {
+                        doiThiArr.push(
+                            {
+                                tenDoi: element["Đội thi"],
+                                thiSinhs: [element]
+                            }
+                        )
+                    }
+                });
+                element['doiThis'] = doiThiArr
+            }
+        });
+        console.log('dsthi1', dsthi1)
+        let dataExport = []
+        let stt = 0
+        dsthi1.forEach(element => {
+            let khoiThi = {
+                "index": "",
+                "hoTen": element.tenGoi,
+                "doiTuongThi": "",
+                "email": "",
+                "soDienThoai": "",
+                "nganhDaoTao": "",
+                "ngaySinh": "",
+                "nam": "",
+                "nu": "",
+                "k1": "",
+                "k2": "",
+                "k3": "",
+                "k4": "",
+                "k5": "",
+                "k6": "",
+                "k7": "",
+                "k8": ""
+            }
+            dataExport.push(khoiThi)
+            if (element.thiTapThe && element.doiThis && element.doiThis.length) {
+                element.doiThis.forEach(elementDt => {
+                    stt += 1
+                    dataExport.push(
+                        {
+                            "index": stt,
+                            "hoTen": elementDt.tenDoi,
+                            "doiTuongThi": "",
+                            "email": "",
+                            "soDienThoai": "",
+                            "nganhDaoTao": "",
+                            "ngaySinh": "",
+                            "nam": '',
+                            "nu": '',
+                            "k1": "",
+                            "k2": "",
+                            "k3": "",
+                            "k4": "",
+                            "k5": "",
+                            "k6": "",
+                            "k7": "",
+                            "k8": ""
+                        }
+                    )
+                    elementDt.thiSinhs.forEach(elementTs => {
+                        dataExport.push(
+                            {
+                                "index": "",
+                                "hoTen": elementTs.hoTen,
+                                "doiTuongThi": elementTs.doiTuongThi ? elementTs.doiTuongThi : '',
+                                "email": elementTs.email ? elementTs.email : '',
+                                "soDienThoai": elementTs.soDienThoai ? elementTs.soDienThoai : '',
+                                "nganhDaoTao": elementTs.nganhDaoTao ? elementTs.nganhDaoTao : '',
+                                "ngaySinh": elementTs.ngaySinh ? elementTs.ngaySinh : '',
+                                "nam": elementTs.gioiTinh == 0 ? 'X' : '',
+                                "nu": elementTs.gioiTinh == 1 ? 'X' : '',
+                                "k1": element.tenGoi == 'Khối siêu CUP' ? 'X' : '',
+                                "k2": element.tenGoi == 'Khối chuyên tin' ? 'X' : '',
+                                "k3": element.tenGoi == 'Khối không chuyên tin' ? 'X' : '',
+                                "k4": element.tenGoi == 'Khối ICPC không chuyên tin' ? 'X' : '',
+                                "k5": element.tenGoi == 'Khối phần mềm nguồn mở' ? 'X' : '',
+                                "k6": element.tenGoi == 'Khối cao đẳng' ? 'X' : '',
+                                "k7": element.tenGoi == 'Khối PROCON' ? 'X' : '',
+                                "k8": element.tenGoi == 'Khối ICPC chuyên tin' ? 'X' : ''
+                            }
+                        )
+                    })
+                });
+            } else {
+                if (element.thiSinhs && element.thiSinhs.length) {
+                    element.thiSinhs.forEach(elementTs => {
+                        stt += 1
+                        dataExport.push(
+                            {
+                                "index": stt,
+                                "hoTen": elementTs.hoTen,
+                                "doiTuongThi": elementTs.doiTuongThi ? elementTs.doiTuongThi : '',
+                                "email": elementTs.email ? elementTs.email : '',
+                                "soDienThoai": elementTs.soDienThoai ? elementTs.soDienThoai : '',
+                                "nganhDaoTao": elementTs.nganhDaoTao ? elementTs.nganhDaoTao : '',
+                                "ngaySinh": elementTs.ngaySinh ? elementTs.ngaySinh : '',
+                                "nam": elementTs.gioiTinh == 0 ? 'X' : '',
+                                "nu": elementTs.gioiTinh == 1 ? 'X' : '',
+                                "k1": element.tenGoi == 'Khối siêu CUP' ? 'X' : '',
+                                "k2": element.tenGoi == 'Khối chuyên tin' ? 'X' : '',
+                                "k3": element.tenGoi == 'Khối không chuyên tin' ? 'X' : '',
+                                "k4": element.tenGoi == 'Khối ICPC không chuyên tin' ? 'X' : '',
+                                "k5": element.tenGoi == 'Khối phần mềm nguồn mở' ? 'X' : '',
+                                "k6": element.tenGoi == 'Khối cao đẳng' ? 'X' : '',
+                                "k7": element.tenGoi == 'Khối PROCON' ? 'X' : '',
+                                "k8": element.tenGoi == 'Khối ICPC chuyên tin' ? 'X' : ''
+                            }
+                        )
+                    });
+                }
+            }
+        });
+        
+        let dataDoc = {
+          "doanThi": doanThi,
+          "diaChi": diaChi,
+          "truongDoan": truongDoan,
+          "soDienThoaiTruongDoan": soDienThoaiTruongDoan,
+          "emailTruongDoan": emailTruongDoan,
+          "phoDoan": phoDoan,
+          "soDienThoaiPhoDoan": soDienThoaiPhoDoan,
+          "emailPhoDoan": emailPhoDoan,
+          "dsthi": dataExport
+        }
+        console.log('dataDoc', dataDoc)
+        loadFile("http://127.0.0.1:8887/danhsachthisinh.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+          doc.setData(dataDoc);
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
+            }
+            console.log(JSON.stringify({ error: error }, replaceErrors));
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
+          }
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "DanhSachDuThi.docx");
+        });
+      },
+      showThiSinhXoa () {
+        let vm = this
+        vm.danhSachThiSinhXoa = []
+        let filter = {
+          collectionName: 'cuocthis',
+          collectionId: vm.id,
+          collectionNameChild: 'doanthis',
+          collectionChildId: vm.thongTinDoanThi.id,
+          collectionNameChild2: 'thisinhs',
+          data: {
+            page: 1,
+            size: 1000
+          }
+        }
+        vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
+          vm.danhSachThiSinhXoa = response.filter(function (item) {
+            return !item.noiDungThi || (item.noiDungThi && item.noiDungThi.length == 0)
+          })
+          if (vm.danhSachThiSinhXoa.length) {
+            vm.dialogDsThiSinh = true
+          } else {
+            toastr.success('KHÔNG CÓ THÍ SINH NÀO')
+          }
+        })
+      },
+      xoaThiSinhKhongThi () {
+        let vm = this
+        let arrDsThi = []
+        for (let index = 0; index < vm.danhSachThiSinhXoa.length; index++) {
+          let filter = {
+            collectionName: 'thisinhs',
+            id: vm.danhSachThiSinhXoa[index]['id']
+          }
+          arrDsThi.push(vm.$store.dispatch('collectionDelete', filter).then(function (result) {}))
+        }
+        vm.loading = true
+        Promise.all(arrDsThi).then(values => {
+          vm.loading = false
+          toastr.remove()
+          toastr.success('Xóa thí sinh thành công')
+          vm.dialogDsThiSinh = false
         }).catch(function () {
-          vm.loadingExport = false
+          vm.loading = false
+          toastr.remove()
+          toastr.error('Xóa thí sinh thất bại')
+        })
+      },
+      showDoiThiXoa () {
+        let vm = this
+        let filter = {
+          collectionName: 'doithis',
+          data: {
+            doanThiId: vm.doanThiUpdate ? vm.doanThiUpdate : vm.thongTinDoanThi.id,
+            cuocThiId: vm.id,
+            page: 1,
+            size: 10000
+          }
+        }
+        vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+          let dsDoiThi = response
+          if (dsDoiThi && dsDoiThi.length) {
+            let filter = {
+              collectionName: 'danhsachthis',
+              data: {
+                cuocThiId: vm.id,
+                doanThiId: vm.doanThiUpdate ? vm.doanThiUpdate : vm.thongTinDoanThi.id,
+                page: 1,
+                size: 10000
+              }
+            }
+            vm.$store.dispatch('collectionFilter', filter).then(function (response2) {
+              let dsDangKyThi = response2
+              let doiThiXoa = []
+              if (dsDangKyThi && dsDangKyThi.length) {
+                dsDoiThi.forEach(element => {
+                  let exits = dsDangKyThi.find(function (item) {
+                    return item.doiThiId == element.id
+                  })
+                  if (!exits) {
+                    doiThiXoa.push(element)
+                  }
+                });
+              }
+              if (doiThiXoa.length) {
+                vm.danhSachDoiThiXoa = doiThiXoa
+                vm.dialogDoiThiXoa = true
+              } else {
+                toastr.success('KHÔNG CÓ ĐỘI THI NÀO')
+              }
+            })
+          } else {
+            toastr.success('KHÔNG CÓ ĐỘI THI NÀO')
+          }
+        })
+      },
+      xoaDoiThiKhongThiSinh () {
+        let vm = this
+        let arrDsThi = []
+        for (let index = 0; index < vm.danhSachDoiThiXoa.length; index++) {
+          let filter = {
+            collectionName: 'doithis',
+            id: vm.danhSachDoiThiXoa[index]['id']
+          }
+          arrDsThi.push(vm.$store.dispatch('collectionDelete', filter).then(function (result) {}))
+        }
+        vm.loading = true
+        Promise.all(arrDsThi).then(values => {
+          vm.loading = false
+          toastr.remove()
+          toastr.success('Xóa đội thi thành công')
+          vm.dialogDoiThiXoa = false
+        }).catch(function () {
+          vm.loading = false
+          toastr.remove()
+          toastr.error('Xóa đội thi thất bại')
         })
       },
       checkRoleAction (role) {

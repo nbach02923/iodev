@@ -235,8 +235,9 @@
             </v-col>
             <v-spacer></v-spacer>
             <v-col cols="4" class="px-0 py-0">
-              <v-text-field
-                  class="input-form my-0"
+              <v-layout wrap>
+                <v-text-field
+                  class="input-form my-0 mr-3"
                   v-model="keywordSearchDoanThi"
                   solo
                   dense
@@ -249,6 +250,14 @@
                   <v-icon @click="getdanhSachDoanThi()" size="18" color="#2161B1">mdi-magnify</v-icon>
                 </template>
               </v-text-field>
+              <v-btn small v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" color="green" @click="exportDoanThi()"
+               :loading="loadingExport" :disabled="loadingExport" class="white--text">
+               <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
+                &nbsp;
+               <span class="white--text">Xuất danh sách Thi</span>
+               </v-btn>
+              </v-layout>
+              
             </v-col>
           </v-row>
           <v-row class="my-0 py-0 pt-3">
@@ -388,6 +397,19 @@
                 <template v-slot:item.index="{ item, index }">
                   <div>{{ (pageKetQuaCaNhan) * itemsPerPage - itemsPerPage + index + 1 }}</div>
                 </template>
+                <template v-slot:item.hangGiaiThuong="{ item, index }">
+                  <div class="mb-1 font-weight-bold" v-if="item.tenGiaiThuong">{{ item.tenGiaiThuong }}</div>
+                  <div >{{ item.hangGiaiThuong }}</div>
+                  <div v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
+                    <v-btn small color="primary" class="white--text mx-0 my-1" @click="exportBangKhen(item)">
+                      <v-icon left>
+                        mdi-certificate-outline
+                      </v-icon>
+                      In bằng khen
+                    </v-btn>
+                  </div>
+                </template>
+                
               </v-data-table>
               <!-- <pagination v-if="pageCountKetQuaCaNhan" :pageInput="pageKetQuaCaNhan - 1" :total="totalKetQuaCaNhan" :pageCount="pageCountKetQuaCaNhan" @tiny:change-page="changePageKqCaNhan"></pagination> -->
             </v-col>
@@ -437,7 +459,19 @@
             <template v-slot:item.gioiTinh="{ item, index }">
               <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
             </template>
+            <template v-slot:item.maQr="{ item, index }">
+              <div style="text-align: center">
+                <!-- <v-btn small color="primary" class="white--text mx-0" @click="exportQrCode(item)">
+                  <v-icon left>
+                    mdi-qrcode
+                  </v-icon>
+                  Mã QR thí sinh
+                </v-btn> -->
+                <qrcode :value="parseQr(item)" :options="{ width: 100 }" tag="img"></qrcode>
+              </div>
+            </template>
           </v-data-table>
+          <qrcode id="qrcode" :value="urlQr" :options="{ width: 150 }" tag="img" style="display: none;"></qrcode>
           <pagination :getAll="true" :pageInput="pageDanhSachThiSinh -1" :total="totalDanhSachThiSinh" :pageCount="pageCountDanhSachThiSinh" @tiny:change-page="changePageDanhSachThiSinh"></pagination>
         </v-card-text>
         <v-card-actions class="justify-end pb-3 px-2">
@@ -567,12 +601,27 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import $ from 'jquery'
 import Pagination from './Pagination.vue'
+import axios from 'axios'
 import toastr from 'toastr'
+import docxtemplater from 'docxtemplater'
+import PizZip from "pizzip";
+import PizZipUtils from "pizzip/utils/index.js";
+import { saveAs } from "file-saver";
+
 toastr.options = {
   'closeButton': true,
   'timeOut': '5000',
   "positionClass": "toast-top-center"
+}
+import VueQrcode from '@chenfengyuan/vue-qrcode'
+
+Vue.component(VueQrcode.name, VueQrcode);
+
+function loadFile(url, callback) {
+  PizZipUtils.getBinaryContent(url, callback);
 }
 export default {
     name: 'CuocThi',
@@ -582,6 +631,8 @@ export default {
     props: ['id'],
     data() {
       return {
+        urlQr: '',
+        loadingExport: false,
         readonlyForm: false,
         mauNhapForm: '',
         dataInput: '',
@@ -796,6 +847,14 @@ export default {
               value: 'datGiaiThuong',
               class: 'th-center',
               width: 200
+          },
+          {
+              sortable: false,
+              text: 'Mã QR',
+              align: 'left',
+              value: 'maQr',
+              class: 'th-center',
+              width: 120
           }
         ],
         headersDanhSachDoiThi: [
@@ -916,6 +975,9 @@ export default {
       }
     },
     methods: {
+      parseQr (thisinh) {
+        return window.location.origin + '/#/thisinh/' + thisinh.id
+      },
       getChiTietCuocThi () {
         let vm = this
         if (vm.loadingData) {
@@ -1179,6 +1241,94 @@ export default {
         }).catch(function () {
           vm.loadingDataDanhSachHlv = false
         })
+      },
+      exportDoanThi() {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let dataPost = {}
+        let param = {
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          params: {},
+          responseType: 'blob'
+        }
+        axios.post('/api/cuocthis/' + vm.id + '/export', dataPost, param).then(function (response) {
+          vm.loadingExport = false
+          let a = document.createElement('a')
+          document.body.appendChild(a)
+          a.style = 'display: none'
+          let url = window.URL.createObjectURL(response.data)
+          a.href = url
+          a.download = 'DanhSachDangKyThi.xlsx'
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }).catch(xhr => {
+          vm.loadingExport = false
+        })
+      },
+      exportQrCode (item) {
+        let vm = this
+        vm.urlQr = window.location.origin + '/#/thisinh/' + item.id
+        setTimeout(function () {
+          let linkSource = $('#qrcode').attr('src');;
+          let downloadLink = document.createElement("a");
+          downloadLink.href = linkSource;
+          downloadLink.download = String(item.hoTen).replace(/ /g, "") + "-" + item.ngaySinh;
+          downloadLink.click();
+        }, 200)
+      },
+      exportBangKhen (item) {
+        loadFile(window.location.origin + "/docs/BangKhen.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+          doc.setData({
+            Ten_giai: item.tenGiaiThuong ? item.tenGiaiThuong : '',
+            Ten_khoithi: item['Nội dung thi'] ? item['Nội dung thi'] : '',
+            Ten_thi_sinh: item.tenThiSinh ? item.tenThiSinh : '',
+          });
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
+            }
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
+          }
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "BangKhen-" + String(item.tenThiSinh).replace(/ /g, "") + ".docx");
+        });
       },
       changePageDanhSachThiSinh (config) {
         let vm = this
