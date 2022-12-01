@@ -2,6 +2,7 @@ package vn.iodev.contestmanagementsystem.helper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,15 +19,21 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiCaNhanMau1;
+import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiTapTheMau1;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyMau1;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyMau2;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
@@ -36,14 +43,21 @@ import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangCuocThi;
 import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangToChuc;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
+import vn.iodev.contestmanagementsystem.utils.DatetimeUtil;
 import vn.iodev.contestmanagementsystem.utils.StringPatternUtil;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Shape;
 import org.apache.poi.ss.usermodel.Sheet;
 
 @Slf4j
@@ -1339,5 +1353,616 @@ public class ExcelHelper {
 
 		return targetPath.toFile();
 
+	}
+	
+	
+	public static File exportDanhSachDangKyKhoiThiCaNhanMau1(String templateFilePath, String outputPath, int fc, int lc, int fr,
+			int lr, int looprow, HashMap<String, Object> data) {
+
+		Workbook workbook = null;
+
+		FileInputStream fis = null;
+
+		FileOutputStream fos = null;
+
+		Path targetPath = null;
+
+		try {
+
+			Path sourcePath = Paths.get(templateFilePath);
+
+			// init target report
+			targetPath = Paths.get(outputPath);
+
+			// copy source to target
+			targetPath = Files.copy(sourcePath, targetPath);
+
+			fis = new FileInputStream(targetPath.toFile());
+
+			workbook = new XSSFWorkbook(fis);
+
+			// close fis after init workbook
+			fis.close();
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Row row = null;
+
+			// int dataSize = 0;
+
+			for (int r = fr; r < lr; r++) {
+
+				row = sheet.getRow(r);
+
+				if (row != null) {
+
+					for (int c = fc; c < lc; c++) {
+
+						Cell cell = row.getCell(c);
+
+						if (cell != null) {
+							if (cell.getCellComment() != null) {
+								cell.removeCellComment();
+							}
+
+							String cellValue = cell.getStringCellValue();
+
+							List<String> cellPatterns = new ArrayList<>();
+
+							if (!ObjectUtils.isEmpty(cellValue)) {
+								cellPatterns = StringPatternUtil.getMatcher(cellValue, DanhSachDangKyKhoiThiCaNhanMau1.dataPattern);
+							}
+
+							for (String cellPattern : cellPatterns) {
+								if (data.containsKey(cellPattern)) {
+									cellValue = cellValue.replace(cellPattern, String.valueOf(data.get(cellPattern)));
+								} else {
+									cellValue = cellValue.replace(cellPattern, "");
+								}
+							}
+							
+							cell.setCellValue(cellValue);
+
+						}
+					}
+				}
+			}
+			
+			row = sheet.getRow(looprow);
+			
+			List<HashMap<String, Object>> dataRows = (List<HashMap<String, Object>>) data.get("$loop$");
+			
+			sheet.shiftRows(looprow, lr, dataRows.size() - 1);
+			
+			List<CellStyle> cellStyles = new ArrayList<CellStyle>();
+			
+			for(int c = fc; c <= lc; c++) {
+				Cell tmpCell = row.getCell(c);
+				CellStyle tmpCellStyle = tmpCell.getCellStyle();
+				cellStyles.add(tmpCellStyle);
+			}
+			
+			if (row != null && dataRows != null && !dataRows.isEmpty()) {
+			
+				Row newRow = null;
+
+				int dataRowCount = 0;
+
+				for (int i = looprow; i <= looprow + (dataRows.size() - 1); i++) {
+
+					HashMap<String, Object> dataRow = dataRows.get(dataRowCount);
+
+					// new row insert
+					
+					newRow = sheet.createRow(i);
+					
+					newRow.setHeight(row.getHeight()); // create cell end set style
+					
+					//CellStyle cellStyle = workbook.createCellStyle();
+					
+					Cell newCell = null;
+
+					for (int column = fc; column <= lc; column++) {
+						
+						//cellStyle.cloneStyleFrom(cellStyles.get(column));
+						
+						newCell = newRow.createCell(column);
+						
+						newCell.setCellStyle(cellStyles.get(column));	
+
+						if (column == fc) {
+							XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
+							//XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, column, i, column, i);
+							ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, column, i, column, i);
+							XSSFComment comment = drawing.createCellComment(anchor);
+							comment.setString(String.valueOf(dataRow.get(DanhSachDangKyKhoiThiCaNhanMau1.id)));
+							newCell.setCellComment(comment);
+						}
+						
+						String cellPattern = DanhSachDangKyKhoiThiCaNhanMau1.colMap.get(column);
+						
+						String value = "";
+
+						if (dataRow.containsKey(cellPattern)) {
+							value = String.valueOf(dataRow.get(cellPattern));
+						}
+
+						newCell.setCellValue(value);
+					}
+					
+					dataRowCount++;
+				}
+				
+			}
+
+			fos = new FileOutputStream(targetPath.toFile());
+
+			workbook.write(fos);
+
+			fos.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+		} finally {
+			try {
+
+				if (workbook != null) {
+					workbook.close();
+				}
+				if (fis != null) {
+					fis.close();
+				}
+
+				if (fos != null) {
+					fos.close();
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+
+		return targetPath.toFile();
+
+	}
+	
+	public static File exportDanhSachDangKyKhoiThiTapTheMau1(String templateFilePath, String outputPath, int fc, int lc, int fr,
+			int lr, int looprow, HashMap<String, Object> data) {
+
+		Workbook workbook = null;
+
+		FileInputStream fis = null;
+
+		FileOutputStream fos = null;
+
+		Path targetPath = null;
+
+		try {
+
+			Path sourcePath = Paths.get(templateFilePath);
+
+			// init target report
+			targetPath = Paths.get(outputPath);
+
+			// copy source to target
+			targetPath = Files.copy(sourcePath, targetPath);
+
+			fis = new FileInputStream(targetPath.toFile());
+
+			workbook = new XSSFWorkbook(fis);
+
+			// close fis after init workbook
+			fis.close();
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Row row = null;
+
+			// int dataSize = 0;
+
+			for (int r = fr; r < lr; r++) {
+
+				row = sheet.getRow(r);
+
+				if (row != null) {
+
+					for (int c = fc; c < lc; c++) {
+
+						Cell cell = row.getCell(c);
+
+						if (cell != null) {
+							if (cell.getCellComment() != null) {
+								cell.removeCellComment();
+							}
+
+							String cellValue = cell.getStringCellValue();
+
+							List<String> cellPatterns = new ArrayList<>();
+
+							if (!ObjectUtils.isEmpty(cellValue)) {
+								cellPatterns = StringPatternUtil.getMatcher(cellValue, DanhSachDangKyKhoiThiTapTheMau1.dataPattern);
+							}
+
+							for (String cellPattern : cellPatterns) {
+								if (data.containsKey(cellPattern)) {
+									cellValue = cellValue.replace(cellPattern, String.valueOf(data.get(cellPattern)));
+								} else {
+									cellValue = cellValue.replace(cellPattern, "");
+								}
+							}
+							
+							cell.setCellValue(cellValue);
+
+						}
+					}
+				}
+			}
+			
+			row = sheet.getRow(looprow);
+			
+			List<HashMap<String, Object>> dataRows = (List<HashMap<String, Object>>) data.get("$loop$");
+			
+			sheet.shiftRows(looprow, lr, dataRows.size() - 1);
+			
+			List<CellStyle> cellStyles = new ArrayList<CellStyle>();
+			
+			for(int c = fc; c <= lc; c++) {
+				Cell tmpCell = row.getCell(c);
+				CellStyle tmpCellStyle = tmpCell.getCellStyle();
+				cellStyles.add(tmpCellStyle);
+			}
+			
+			if (row != null && dataRows != null && !dataRows.isEmpty()) {
+			
+				Row newRow = null;
+
+				int dataRowCount = 0;
+				
+				for (int i = looprow; i <= looprow + (dataRows.size() - 1); i++) {
+
+					HashMap<String, Object> dataRow = dataRows.get(dataRowCount);
+
+					// new row insert
+					
+					newRow = sheet.createRow(i);
+					
+					newRow.setHeight(row.getHeight()); // create cell end set style
+
+					Cell newCell = null;
+
+					for (int column = fc; column <= lc; column++) {
+						
+						newCell = newRow.createCell(column);
+						
+						newCell.setCellStyle(cellStyles.get(column));	
+						
+						if (column == fc) {
+							XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
+							
+							//XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, column, i, column, i);
+							ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, column, i, column, i);
+							XSSFComment comment = drawing.createCellComment(anchor);
+							comment.setString(String.valueOf(dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.id)));
+							newCell.setCellComment(comment);
+						}
+						
+						String cellPattern = DanhSachDangKyKhoiThiTapTheMau1.colMap.get(column);
+						
+						String value = "";
+
+						if (dataRow.containsKey(cellPattern)) {
+							value = String.valueOf(dataRow.get(cellPattern));
+						}
+
+						newCell.setCellValue(value);
+					}
+					dataRowCount++;
+				}
+			}
+
+			fos = new FileOutputStream(targetPath.toFile());
+
+			workbook.write(fos);
+
+			fos.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+		} finally {
+			try {
+
+				if (workbook != null) {
+					workbook.close();
+				}
+				if (fis != null) {
+					fis.close();
+				}
+
+				if (fos != null) {
+					fos.close();
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+
+		return targetPath.toFile();
+
+	}
+	
+	public static List<HashMap<String, Object>> getDanhSachThiKhoiThiCaNhanMau1Data(InputStream is, Integer fc,
+			Integer lc, Integer fr) {
+		try {
+			Workbook workbook = new XSSFWorkbook(is);
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Iterator<Row> rows = sheet.iterator();
+
+			List<HashMap<String, Object>> data = new ArrayList<>();
+
+			int rowNumber = 0;
+
+			while (rows.hasNext()) {
+				Row currentRow = rows.next();
+
+				if (rowNumber < fr) {
+					rowNumber++;
+					continue;
+				}
+				Long id = null;
+				String hoTen = "";
+				String soBaoDanh = "";
+				String ngayThangNamSinh = "";
+				String tenDoan = "";
+				Integer thuHang = null;
+				String giaiThuong = "";
+				for (int i = fc; i <= lc; i++) {
+
+					Cell currentCell = currentRow.getCell(i);
+					switch (i) {
+					case 0:
+						if (currentCell != null) {
+							Comment comment = currentCell.getCellComment();
+							if(comment != null && !ObjectUtils.isEmpty(comment.getString())) {
+								String tmp = comment.getString().getString();
+								if(!ObjectUtils.isEmpty(tmp)) {
+									id = Long.parseLong(tmp);
+								}
+							}
+						}
+						break;
+
+					case 1:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							hoTen = currentCell.getStringCellValue();
+						}
+						break;
+
+					case 2:
+						if (currentCell != null) {
+							if(currentCell.getCellType().compareTo(CellType.NUMERIC)  == 0) {
+								Integer tmp = (int)currentCell.getNumericCellValue();
+								soBaoDanh = String.valueOf(tmp);
+							}else {
+								soBaoDanh = currentCell.getStringCellValue();
+							}
+						
+						}
+						break;
+
+					case 3:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							ngayThangNamSinh = currentCell.getStringCellValue();
+						}
+						break;
+					case 4:
+
+						break;
+
+					case 5:
+
+						break;
+
+					case 6:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							tenDoan = currentCell.getStringCellValue();
+						}
+						break;
+					case 7:
+						if (currentCell != null) {
+							if(currentCell.getCellType().compareTo(CellType.NUMERIC)  == 0) {
+								Integer tmp = (int)currentCell.getNumericCellValue();
+								thuHang = tmp;
+							}else {
+								String tmp = currentCell.getStringCellValue();
+								if (!ObjectUtils.isEmpty(tmp)) {
+									thuHang = Integer.parseInt(tmp);
+								}
+							}
+						}
+
+						break;
+
+					case 8:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							giaiThuong = currentCell.getStringCellValue();
+						}
+						break;
+					default:
+						break;
+					}
+				}
+
+				HashMap<String, Object> dataRow = new HashMap<String, Object>();
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.id, id);
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.hoTen, hoTen);
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.soBaoDanh, soBaoDanh);
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.ngayThangNamSinh,
+						DatetimeUtil.stringToDate(ngayThangNamSinh, DatetimeUtil._VN_DATE_FORMAT));
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.tenDoan, tenDoan);
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.thuHang, thuHang);
+				dataRow.put(DanhSachDangKyKhoiThiCaNhanMau1.giaiThuong, giaiThuong);
+
+				data.add(dataRow);
+			}
+
+			workbook.close();
+
+			return data;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+		}
+	}
+	
+	/*
+	public static void main(String[] args) {
+		File file = new File("");
+		try {
+			InputStream targetStream = new FileInputStream(file);
+			getDanhSachThiKhoiThiCaNhanMau1Data(targetStream, 0, 9, 8);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	*/
+	public static List<HashMap<String, Object>> getDanhSachDangKyKhoiThiTapTheMau1Data(InputStream is, Integer fc,
+			Integer lc, Integer fr) {
+		
+		try {
+			Workbook workbook = new XSSFWorkbook(is);
+
+			Sheet sheet = workbook.getSheetAt(0);
+
+			Iterator<Row> rows = sheet.iterator();
+
+			List<HashMap<String, Object>> data = new ArrayList<>();
+
+			int rowNumber = 0;
+
+			while (rows.hasNext()) {
+				Row currentRow = rows.next();
+				
+				if (rowNumber < fr) {
+					rowNumber++;
+					continue;
+				}
+				Long id = null;
+				String tenDoi = "";
+				String hoTen = "";
+				String soBaoDanh = "";
+				String ngayThangNamSinh = "";
+				String tenDoan = "";
+				Integer thuHang = null;
+				String giaiThuong = "";
+				for (int i = fc; i <= lc; i++) {
+
+					Cell currentCell = currentRow.getCell(i);
+
+					switch (i) {
+					case 0:
+						if (currentCell != null) {
+							Comment comment = currentCell.getCellComment();
+							if(comment != null && !ObjectUtils.isEmpty(comment.getString())) {
+								String tmp = comment.getString().getString();
+								if(!ObjectUtils.isEmpty(tmp)) {
+									id = Long.parseLong(tmp);
+								}
+							}
+						}
+						
+						break;
+
+					case 1:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							tenDoi = currentCell.getStringCellValue();
+						}
+						break;
+
+					case 2:
+						if (currentCell != null) {
+							if(currentCell.getCellType().compareTo(CellType.NUMERIC)  == 0) {
+								Integer tmp = (int)currentCell.getNumericCellValue();
+								soBaoDanh = String.valueOf(tmp);
+							}else {
+								soBaoDanh = currentCell.getStringCellValue();
+							}
+						
+						}
+						break;
+
+					case 3:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							hoTen = currentCell.getStringCellValue();
+						}
+						break;
+					case 4:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							ngayThangNamSinh = currentCell.getStringCellValue();
+						}
+						break;
+
+					case 5:
+
+						break;
+
+					case 6:
+
+						break;
+					case 7:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							tenDoan = currentCell.getStringCellValue();
+						}
+
+						break;
+
+					case 8:
+						if (currentCell != null) {
+							if(currentCell.getCellType().compareTo(CellType.NUMERIC)  == 0) {
+								Integer tmp = (int)currentCell.getNumericCellValue();
+								thuHang = tmp;
+							}else {
+								String tmp = currentCell.getStringCellValue();
+								if (!ObjectUtils.isEmpty(tmp)) {
+									thuHang = Integer.parseInt(tmp);
+								}
+							}
+						}
+
+						break;
+					case 9:
+						if (currentCell != null && currentCell.getCellType() == CellType.STRING) {
+							giaiThuong = currentCell.getStringCellValue();
+						}
+						break;
+					default:
+						break;
+					}
+				}
+
+				HashMap<String, Object> dataRow = new HashMap<String, Object>();
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.id, id);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.tenDoi, tenDoi);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.hoTen, hoTen);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.soBaoDanh, soBaoDanh);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.ngayThangNamSinh,
+						DatetimeUtil.stringToDate(ngayThangNamSinh, DatetimeUtil._VN_DATE_FORMAT));
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.tenDoan, tenDoan);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.thuHang, thuHang);
+				dataRow.put(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong, giaiThuong);
+
+				data.add(dataRow);
+			}
+
+			workbook.close();
+
+			return data;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+		}
 	}
 }

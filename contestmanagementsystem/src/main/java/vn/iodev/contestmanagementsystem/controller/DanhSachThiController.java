@@ -72,16 +72,16 @@ public class DanhSachThiController {
     VaiTroChecker vaiTroChecker;
 
     @GetMapping("/danhsachthis")
-    public List<DanhSachThi> getAllDanhSachThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doiThiId) {
+    public List<DanhSachThi> getAllDanhSachThis(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "15") int size, @RequestParam(required = false) String cuocThiId, @RequestParam(required = false) String khoiThiId, @RequestParam(required = false) String doiThiId,  @RequestParam(required = false) String doanThiId) {
         log.info("API GET /danhsachthis");
 
         Pageable paging = PageRequest.of(page - 1, size);
         Optional<CuocThi> cuocThiData = cuocThiRepository.findById(cuocThiId);
         if (cuocThiData.isPresent()) {
-            return danhSachThiRepository.findDanhSachThiByMultipleConditions(cuocThiData.get(), khoiThiId, doiThiId, paging);
+            return danhSachThiRepository.findDanhSachThiByMultipleConditions(cuocThiData.get(), khoiThiId, doiThiId, doanThiId, paging);
         }
         else {
-            return danhSachThiRepository.findDanhSachThiByMultipleConditions(null, khoiThiId, doiThiId, paging);
+            return danhSachThiRepository.findDanhSachThiByMultipleConditions(null, khoiThiId, doiThiId, doanThiId, paging);
         }
     }
 
@@ -173,12 +173,40 @@ public class DanhSachThiController {
             validateRelationConstraint(danhSachThi);
             DanhSachThiValidator.getInstance().validate(danhSachThi);
 
+            /*
             DanhSachThi danhSachThiMoi = cuocThiRepository.findById(cuocThiId).map(cuocThi -> {
                 danhSachThi.setCuocThi(cuocThi);
+                Optional<ThiSinh> thiSinhOpt = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+                
+                if(thiSinhOpt.isPresent()) {
+                	danhSachThi.setDoanThiId(thiSinhOpt.get().getDoanThiId());
+                }
+                
                 return danhSachThiRepository.save(danhSachThi);
             }).orElseThrow(() -> new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId));
 
             return new ResponseEntity<>(danhSachThiMoi, HttpStatus.CREATED);
+            */
+            
+            Optional<CuocThi> cuocThiOpt = cuocThiRepository.findById(cuocThiId);
+            
+            if(!cuocThiOpt.isPresent()) {
+            	throw new ResourceNotFoundException("Not found CuocThi with id = " + cuocThiId);
+            }
+            
+            danhSachThi.setCuocThi(cuocThiOpt.get());
+            
+            
+            Optional<ThiSinh> thiSinhOpt = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+            
+            if(thiSinhOpt.isPresent()) {
+            	danhSachThi.setDoanThiId(thiSinhOpt.get().getDoanThiId());
+            }
+            
+            danhSachThi =  danhSachThiRepository.save(danhSachThi);
+            
+            return new ResponseEntity<>(danhSachThi, HttpStatus.CREATED);
+            
         } catch (Exception e) {
             log.debug("API POST /cuocthis/{cuocThiId}/danhsachthis", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -251,6 +279,14 @@ public class DanhSachThiController {
                 if (danhSachThi.getHangGiaiThuong() != null) {
                     _danhSachThi.setHangGiaiThuong(danhSachThi.getHangGiaiThuong());
                 }
+                
+                Optional<ThiSinh> thiSinhOpt = thiSinhRepository.findById(_danhSachThi.getThiSinhId());
+                
+                if(thiSinhOpt.isPresent()) {
+                	_danhSachThi.setDoanThiId(thiSinhOpt.get().getDoanThiId());
+                }
+                
+                
                 _danhSachThi.setThoiGianCapNhat(System.currentTimeMillis());
                 
                 return new ResponseEntity<>(danhSachThiRepository.save(_danhSachThi), HttpStatus.OK);

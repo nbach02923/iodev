@@ -99,6 +99,36 @@ public class ExcelService {
 	@Value("${io.report.danhsachdangkymau2.looprow}")
 	
 	private Integer danhsachdangkymau2_looprow;
+	
+	
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.name}")
+	private String danhsachdangkykhoithicanhanmau1Name;
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.fc}")
+	private Integer danhsachdangkykhoithicanhanmau1_fc;
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.lc}")
+	private Integer danhsachdangkykhoithicanhanmau1_lc;
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.fr}")
+	private Integer danhsachdangkykhoithicanhanmau1_fr;
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.lr}")
+	private Integer danhsachdangkykhoithicanhanmau1_lr;
+	@Value("${io.report.danhsachdangkykhoithicanhanmau1.looprow}")
+	
+	private Integer danhsachdangkykhoithicanhanmau1_looprow;
+	
+	
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.name}")
+	private String danhsachdangkykhoithitapthemau1Name;
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.fc}")
+	private Integer danhsachdangkykhoithitapthemau1_fc;
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.lc}")
+	private Integer danhsachdangkykhoithitapthemau1_lc;
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.fr}")
+	private Integer danhsachdangkykhoithitapthemau1_fr;
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.lr}")
+	private Integer danhsachdangkykhoithitapthemau1_lr;
+	@Value("${io.report.danhsachdangkykhoithitapthemau1.looprow}")
+	
+	private Integer danhsachdangkykhoithitapthemau1_looprow;
 
 
     public void importDoanThi(MultipartFile file) {
@@ -401,6 +431,8 @@ public class ExcelService {
 							if (oldDstData.isPresent()) {
 								danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
 							}
+							
+							danhSachThi.setDoanThiId(thiSinhMoi.getDoanThiId());
 
 							danhSachThiRepository.save(danhSachThi);
 						}
@@ -452,6 +484,8 @@ public class ExcelService {
 							if (oldDstData.isPresent()) {
 								danhSachThi.setDanhSachThiId(oldDstData.get().getDanhSachThiId());
 							}
+							
+							danhSachThi.setDoanThiId(thiSinhMoi.getDoanThiId());
 
 							danhSachThiRepository.save(danhSachThi);
 						}
@@ -588,4 +622,86 @@ public class ExcelService {
     	
     	return ExcelHelper.exportDanhSachDangKyMau2(templateFilePath, outputPath, danhsachdangkymau2_fc, danhsachdangkymau2_lc, danhsachdangkymau2_fr, danhsachdangkymau2_lr, danhsachdangkymau2_looprow,  data);
     }
+    
+    public File exportDanhSachDangKyKhoiThiCaNhanMau1(String cuocThiId, String khoiThiId) {
+    	
+    	String homeDir = System.getProperty("user.dir");
+    	
+    	String templateFilePath = homeDir + "/" + templateFolderName + "/" + danhsachdangkykhoithicanhanmau1Name;
+    	
+    	String outputPath = homeDir + "/" + exportFolderName + "/" + System.currentTimeMillis() + "_danhsachdangkykhoithicanhanmau1.xlsx";
+    	
+    	log.info("homeDir:{}", homeDir);
+    	
+    	log.info("templateFilePath:{}", templateFilePath);
+    	
+    	log.info("outputPath:{}", outputPath);
+    	
+    	HashMap<String, Object> data = baoCaoLocalServiceImpl.getDanhSachDangKyKhoiThiCaNhanMau1(cuocThiId, khoiThiId);
+    	
+    	if(data == null) {
+    		return null;
+    	}
+    	
+    	log.info("data size:{}", data.size());
+    	
+    	return ExcelHelper.exportDanhSachDangKyKhoiThiCaNhanMau1(templateFilePath, outputPath, danhsachdangkykhoithicanhanmau1_fc, danhsachdangkykhoithicanhanmau1_lc, danhsachdangkykhoithicanhanmau1_fr, danhsachdangkykhoithicanhanmau1_lr, danhsachdangkykhoithicanhanmau1_looprow,  data);
+    }
+    
+    public File exportDanhSachDangKyKhoiThiTapTheMau1(String cuocThiId, String khoiThiId) {
+    	
+    	String homeDir = System.getProperty("user.dir");
+    	
+    	String templateFilePath = homeDir + "/" + templateFolderName + "/" + danhsachdangkykhoithitapthemau1Name;
+    	
+    	String outputPath = homeDir + "/" + exportFolderName + "/" + System.currentTimeMillis() + "_danhsachdangkykhoithitapthemau1.xlsx";
+    	
+    	log.info("homeDir:{}", homeDir);
+    	
+    	log.info("templateFilePath:{}", templateFilePath);
+    	
+    	log.info("outputPath:{}", outputPath);
+    	
+    	HashMap<String, Object> data = baoCaoLocalServiceImpl.getDanhSachDangKyKhoiThiTapTheMau1(cuocThiId, khoiThiId);
+    	
+    	if(data == null) {
+    		return null;
+    	}
+    	
+    	log.info("data size:{}", data.size());
+    	
+    	return ExcelHelper.exportDanhSachDangKyKhoiThiTapTheMau1(templateFilePath, outputPath, danhsachdangkykhoithitapthemau1_fc, danhsachdangkykhoithitapthemau1_lc, danhsachdangkykhoithitapthemau1_fr, danhsachdangkykhoithitapthemau1_lr, danhsachdangkykhoithitapthemau1_looprow,  data);
+    }
+    
+    public void importDanhSachDangKyKhoiThiCaNhanMau1(MultipartFile multipartFile) {
+		try {
+			List<HashMap<String, Object>> data = ExcelHelper.getDanhSachThiKhoiThiCaNhanMau1Data(
+					multipartFile.getInputStream(), danhsachdangkykhoithicanhanmau1_fc, danhsachdangkykhoithicanhanmau1_lc,
+					danhsachdangkykhoithicanhanmau1_looprow);
+			System.out.println("=============================================>>>>>1 data size" + data.size());
+			baoCaoLocalServiceImpl.updateDanhSachDangKyKhoiThiCaNhanMau1(data);
+			
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
+    
+	public void importDanhSachDangKyKhoiThiTapTheMau1(MultipartFile multipartFile) {
+		try {
+			List<HashMap<String, Object>> data = ExcelHelper.getDanhSachDangKyKhoiThiTapTheMau1Data(
+					multipartFile.getInputStream(), danhsachdangkykhoithitapthemau1_fc, danhsachdangkykhoithitapthemau1_lc,
+					danhsachdangkykhoithitapthemau1_looprow);
+			System.out.println("=============================================>>>>>2 data size" + data.size());
+			baoCaoLocalServiceImpl.updateDanhSachDangKyKhoiThiTapTheMau1(data);
+			
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("fail to store excel data: " + e.getMessage());
+		}
+	}
 }

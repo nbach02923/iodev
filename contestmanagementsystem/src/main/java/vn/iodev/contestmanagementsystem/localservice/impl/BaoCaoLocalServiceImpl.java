@@ -1,6 +1,7 @@
 package vn.iodev.contestmanagementsystem.localservice.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,9 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiCaNhanMau1;
+import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiTapTheMau1;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyMau1;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyMau2;
 import vn.iodev.contestmanagementsystem.model.CuocThi;
+import vn.iodev.contestmanagementsystem.model.DanhMuc;
+import vn.iodev.contestmanagementsystem.model.DanhMucId;
 import vn.iodev.contestmanagementsystem.model.DanhSachThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.DoiThi;
@@ -21,6 +26,7 @@ import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
+import vn.iodev.contestmanagementsystem.repository.DanhMucRepository;
 import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoiThiRepository;
@@ -53,6 +59,9 @@ public class BaoCaoLocalServiceImpl {
 	@Autowired
 	private DoiThiRepository doiThiRepository;
 
+	@Autowired
+	private DanhMucRepository danhMucRepository;
+
 	public HashMap<String, Object> getDanhSachDangKyMau1(String doanThiId) {
 
 		HashMap<String, Object> data = new HashMap<>();
@@ -77,7 +86,8 @@ public class BaoCaoLocalServiceImpl {
 
 		CuocThi cuocThi = cuocThiOpt.get();
 
-		List<HuanLuyenVien> huanLuyenViens = huanLuyenVienRepository.findByCuocThiId(cuocThi.getId());
+		List<HuanLuyenVien> huanLuyenViens = huanLuyenVienRepository.findByCuocThiIdAndDoanThiId(cuocThi.getId(),
+				doanThiId);
 
 		data.put(DanhSachDangKyMau1.tenCuocThi, cuocThi.getTenGoi());
 
@@ -109,7 +119,7 @@ public class BaoCaoLocalServiceImpl {
 			}
 		}
 
-		List<DanhSachThi> danhSachThis = danhSachThiRepository.findByCuocThiId(cuocThi.getId());
+		List<DanhSachThi> danhSachThis = danhSachThiRepository.findByCuocThiIdAndDoanThiId(cuocThi.getId(), doanThiId);
 
 		List<HashMap<String, Object>> danhSachDangKy = new ArrayList<HashMap<String, Object>>();
 
@@ -150,16 +160,20 @@ public class BaoCaoLocalServiceImpl {
 
 				Optional<KhoiThi> khoiThiOpt = khoiThiRepository.findById(danhSachThi.getKhoiThiId());
 
-				if (ObjectUtils.isEmpty(danhSachThi.getDoiThiId())) {
-					log.info("doiThiId is null at danhSachThi:{}", danhSachThi.getDanhSachThiId());
-					continue;
+				/*
+				 * if (ObjectUtils.isEmpty(danhSachThi.getDoiThiId())) {
+				 * log.info("doiThiId is null at danhSachThi:{}",
+				 * danhSachThi.getDanhSachThiId()); continue; }
+				 */
+
+				DoiThi doiThi = null;
+
+				if (!ObjectUtils.isEmpty(danhSachThi.getDoiThiId())) {
+					Optional<DoiThi> doiThiOpt = doiThiRepository.findById(danhSachThi.getDoiThiId());
+					doiThi = doiThiOpt.isPresent() ? doiThiOpt.get() : null;
 				}
 
-				Optional<DoiThi> doiThiOpt = doiThiRepository.findById(danhSachThi.getDoiThiId());
-
 				KhoiThi khoiThi = khoiThiOpt.isPresent() ? khoiThiOpt.get() : null;
-
-				DoiThi doiThi = doiThiOpt.isPresent() ? doiThiOpt.get() : null;
 
 				String lienHe = thiSinh.getEmail();
 
@@ -178,20 +192,36 @@ public class BaoCaoLocalServiceImpl {
 
 				String tenKhoi = khoiThi != null ? khoiThi.getTenGoi().toLowerCase() : "";
 
-				if (tenKhoi.contains("phần mềm nguồn mở")) {
-					pmnm = "X";
-				} else if (tenKhoi.contains("procon")) {
+				String maKhoi = (khoiThi != null && !ObjectUtils.isEmpty(khoiThi.getMaKhoi())) ? khoiThi.getMaKhoi()
+						: "";
+
+				switch (maKhoi) {
+				case "PROCON":
 					procon = "X";
-				} else if (tenKhoi.contains("cao đẳng")) {
-					caoDang = "X";
-				} else if (tenKhoi.contains("icpc chuyên tin")) {
+					break;
+				case "PMNM":
+					pmnm = "X";
+					break;
+				case "ICPC-CT":
 					icpcChuyenTin = "X";
-				} else if (tenKhoi.contains("icpc không chuyên tin")) {
+					break;
+				case "ICPC-KC":
 					icpcKhongChuyen = "X";
-				} else if (tenKhoi.contains("không chuyên tin") && !tenKhoi.contains("icpc")) {
-					khongChuyenTin = "X";
-				} else if (tenKhoi.contains("chuyên tin") && !tenKhoi.contains("icpc") && !tenKhoi.contains("không")) {
+					break;
+				case "OLP-CUP":
+
+					break;
+				case "OLP-CT":
 					chuyenTin = "X";
+					break;
+				case "OLP-KC":
+					khongChuyenTin = "X";
+					break;
+				case "OLP-CĐ":
+					caoDang = "X";
+					break;
+				default:
+					break;
 				}
 
 				if (doiThi == null) {
@@ -338,7 +368,7 @@ public class BaoCaoLocalServiceImpl {
 
 							if (khoiThiMap.containsKey(khoiThiId)) {
 								KhoiThi khoiThi = khoiThiMap.get(khoiThiId);
-								if(khoiThi.getMaKhoi() != null) {
+								if (khoiThi.getMaKhoi() != null) {
 									switch (khoiThi.getMaKhoi()) {
 									case "PROCON":
 										procon = tenDoi;
@@ -369,7 +399,7 @@ public class BaoCaoLocalServiceImpl {
 										break;
 									}
 								}
-								
+
 							}
 
 						}
@@ -390,6 +420,372 @@ public class BaoCaoLocalServiceImpl {
 
 		return data;
 
+	}
+
+	public HashMap<String, Object> getDanhSachDangKyKhoiThiCaNhanMau1(String cuocThiId, String khoiThiId) {
+		Optional<CuocThi> cuocThiOpt = cuocThiRepository.findById(cuocThiId);
+		if (!cuocThiOpt.isPresent()) {
+			return null;
+		}
+
+		Optional<KhoiThi> khoiThiOpt = khoiThiRepository.findById(khoiThiId);
+
+		if (!khoiThiOpt.isPresent() || khoiThiOpt.get().getThiTapThe() == true) {
+			return null;
+		}
+
+		CuocThi cuocThi = cuocThiOpt.get();
+
+		List<DoanThi> doanThis = doanThiRepository.findByCuocThiId(cuocThiId);
+
+		List<HashMap<String, Object>> dataRows = new ArrayList<HashMap<String, Object>>();
+
+		HashMap<String, Object> data = new HashMap<String, Object>();
+
+		data.put(DanhSachDangKyKhoiThiCaNhanMau1.tenCuocThi, cuocThi.getTenGoi());
+		
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.tenKhoi, khoiThiOpt.get().getTenGoi());
+
+		data.put(DanhSachDangKyKhoiThiCaNhanMau1.ngayBatDau,
+				DatetimeUtil.dateToString(cuocThi.getNgayBatDau(), DatetimeUtil._VN_DATE_FORMAT));
+
+		data.put(DanhSachDangKyKhoiThiCaNhanMau1.ngayKetThuc,
+				DatetimeUtil.dateToString(cuocThi.getNgayKetThuc(), DatetimeUtil._VN_DATE_FORMAT));
+
+		data.put(DanhSachDangKyKhoiThiCaNhanMau1.diaDiemToChuc, cuocThi.getDiaDiemToChuc());
+
+		if (doanThis != null) {
+			int thiSinhCount = 1;
+			for (DoanThi doanThi : doanThis) {
+				List<DanhSachThi> danhSachThis = danhSachThiRepository
+						.findByCuocThiIdAndDoanThiIdAndKhoiThiId(cuocThiId, doanThi.getId(), khoiThiId);
+
+				
+				if (danhSachThis != null) {
+					for (DanhSachThi danhSachThi : danhSachThis) {
+						if (ObjectUtils.isEmpty(danhSachThi.getThiSinhId())) {
+							log.info("thiSinhId is null at danhSachThi:{}", danhSachThi.getDanhSachThiId());
+							continue;
+						}
+
+						Optional<ThiSinh> thiSinhOpt = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+
+						if (!thiSinhOpt.isPresent()) {
+							log.info("not found ThiSinh with thiSinhId:{}", danhSachThi.getThiSinhId());
+							continue;
+						}
+
+						ThiSinh thiSinh = thiSinhOpt.get();
+						String soBaoDanh = danhSachThi.getSoBaoDanh();
+						String hoTen = thiSinh.getHoTen();
+
+						String ngayThangNamSinh = DatetimeUtil.dateToString(thiSinh.getNgaySinh(),
+								DatetimeUtil._VN_DATE_FORMAT);
+
+						String tenDoanThi = doanThi.getTenGoi();
+						String gioiTinhNam = (thiSinh.getGioiTinh() != null && thiSinh.getGioiTinh() == 0) ? "X" : "";
+						String gioiTinhNu = (thiSinh.getGioiTinh() != null && thiSinh.getGioiTinh() == 1) ? "X" : "";
+						Integer thuHang = danhSachThi.getThuTuXepHang();
+						// String hangGiaiThuong = danhSachThi.getHangGiaiThuong();
+						String tenGiaiThuong = danhSachThi.getTenGiaiThuong();
+
+						HashMap<String, Object> dataRow = createDanhSachDangKyKhoiThiCaNhanMau1(danhSachThi.getDanhSachThiId(), thiSinhCount, hoTen,
+								soBaoDanh, ngayThangNamSinh, gioiTinhNam, gioiTinhNu, tenDoanThi, thuHang,
+								tenGiaiThuong);
+
+						dataRows.add(dataRow);
+						
+						thiSinhCount++;
+					}
+				}
+			}
+			data.put(DanhSachDangKyKhoiThiCaNhanMau1.loop, dataRows);
+		}
+
+		return data;
+
+	}
+
+	public HashMap<String, Object> getDanhSachDangKyKhoiThiTapTheMau1(String cuocThiId, String khoiThiId) {
+		Optional<CuocThi> cuocThiOpt = cuocThiRepository.findById(cuocThiId);
+		if (!cuocThiOpt.isPresent()) {
+			return null;
+		}
+
+		Optional<KhoiThi> khoiThiOpt = khoiThiRepository.findById(khoiThiId);
+
+		if (!khoiThiOpt.isPresent() || !khoiThiOpt.get().getThiTapThe() == true) {
+			return null;
+		}
+
+		CuocThi cuocThi = cuocThiOpt.get();
+
+		List<DoanThi> doanThis = doanThiRepository.findByCuocThiId(cuocThiId);
+
+		List<HashMap<String, Object>> dataRows = new ArrayList<HashMap<String, Object>>();
+
+		HashMap<String, Object> data = new HashMap<String, Object>();
+
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.tenCuocThi, cuocThi.getTenGoi());
+		
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.tenKhoi, khoiThiOpt.get().getTenGoi());
+
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.ngayBatDau,
+				DatetimeUtil.dateToString(cuocThi.getNgayBatDau(), DatetimeUtil._VN_DATE_FORMAT));
+
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.ngayKetThuc,
+				DatetimeUtil.dateToString(cuocThi.getNgayKetThuc(), DatetimeUtil._VN_DATE_FORMAT));
+
+		data.put(DanhSachDangKyKhoiThiTapTheMau1.diaDiemToChuc, cuocThi.getDiaDiemToChuc());
+
+		if (doanThis != null) {
+			int doanThiCount = 1;
+			for (DoanThi doanThi : doanThis) {
+				
+				String tenDoanThi = doanThi.getTenGoi();
+				
+				List<DoiThi> doiThis = doiThiRepository.findByCuocThiIdAndKhoiThiIdAndDoanThiId(cuocThiId, khoiThiId,
+						doanThi.getId());
+				boolean hasDanhSachThi = false;
+				if (doiThis != null) {
+					for (DoiThi doiThi : doiThis) {
+						
+						String tenDoi = doiThi.getTenGoi();
+						
+						List<DanhSachThi> danhSachThis = danhSachThiRepository
+								.findByCuocThiIdAndKhoiThiIdAndDoiThiId(cuocThiId, khoiThiId, doiThi.getId());
+
+						if (danhSachThis != null) {
+							for (DanhSachThi danhSachThi : danhSachThis) {
+								if (ObjectUtils.isEmpty(danhSachThi.getThiSinhId())) {
+									log.info("thiSinhId is null at danhSachThi:{}", danhSachThi.getDanhSachThiId());
+									continue;
+								}
+
+								Optional<ThiSinh> thiSinhOpt = thiSinhRepository.findById(danhSachThi.getThiSinhId());
+
+								if (!thiSinhOpt.isPresent()) {
+									log.info("not found ThiSinh with thiSinhId:{}", danhSachThi.getThiSinhId());
+									continue;
+								}
+
+								ThiSinh thiSinh = thiSinhOpt.get();
+								
+								String soBaoDanh = danhSachThi.getSoBaoDanh();
+								
+								String hoTen = thiSinh.getHoTen();
+
+								String ngayThangNamSinh = DatetimeUtil.dateToString(thiSinh.getNgaySinh(),
+										DatetimeUtil._VN_DATE_FORMAT);
+
+								String gioiTinhNam = (thiSinh.getGioiTinh() != null && thiSinh.getGioiTinh() == 0) ? "X"
+										: "";
+								String gioiTinhNu = (thiSinh.getGioiTinh() != null && thiSinh.getGioiTinh() == 1) ? "X"
+										: "";
+								Integer thuHang = danhSachThi.getThuTuXepHang();
+								
+								String giaiThuong = danhSachThi.getHangGiaiThuong();
+
+								HashMap<String, Object> dataRow = createDanhSachDangKyKhoiThiTapTheMau1(danhSachThi.getDanhSachThiId(), doanThiCount,
+										tenDoi, soBaoDanh, hoTen, ngayThangNamSinh, gioiTinhNam, gioiTinhNu, tenDoanThi,
+										thuHang, giaiThuong);
+
+								dataRows.add(dataRow);
+								
+								hasDanhSachThi = true;
+							}
+						}
+
+						
+					}
+					if(hasDanhSachThi) {
+						doanThiCount++;
+					}
+					
+				}
+			}
+			
+			data.put(DanhSachDangKyKhoiThiTapTheMau1.loop, dataRows);
+		}
+		
+		return data;
+	}
+	
+	
+	public void updateDanhSachDangKyKhoiThiCaNhanMau1(List<HashMap<String, Object>> data) {
+		if (data != null) {
+			List<DanhSachThi> danhSachThis = new ArrayList<DanhSachThi>();
+
+			for (HashMap<String, Object> dataRow : data) {
+				Long id = (Long)dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.id);
+				String hoTen = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.hoTen);
+				String soBaoDanh = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.soBaoDanh);
+				Date ngayThangNamSinh = (Date) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.ngayThangNamSinh);
+				String tenDoan = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.tenDoan);
+				Integer thuHang = (Integer) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.thuHang);
+				String giaiThuong = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong);
+				System.out.println("=============================================>>>>>1 " + id + "|" + soBaoDanh + "|" + giaiThuong + "|" + thuHang);
+				if (!ObjectUtils.isEmpty(id)) {
+					Optional<DanhSachThi> danhSachThiOpt = danhSachThiRepository.findById(id);
+					if(danhSachThiOpt.isPresent()) {
+						DanhSachThi danhSachThi = danhSachThiOpt.get();
+						//TODO validate
+						
+						danhSachThi.setSoBaoDanh(soBaoDanh);
+						danhSachThi.setThuTuXepHang(thuHang);
+						danhSachThi.setHangGiaiThuong(giaiThuong);
+						danhSachThis.add(danhSachThi);
+						
+						if(!ObjectUtils.isEmpty(giaiThuong)) {
+							Optional<DanhMuc> danhMucOpt = danhMucRepository.findById(new DanhMucId("C_HangGiaiThuong", giaiThuong));
+							if(danhMucOpt.isPresent()) {
+								danhSachThi.setTenGiaiThuong(danhMucOpt.get().getGiaTri());
+							}
+						}
+						
+						
+					}
+				}
+			}
+			
+			if(danhSachThis != null && !danhSachThis.isEmpty()) {
+				danhSachThiRepository.saveAll(danhSachThis);
+			}
+		}
+	}
+	
+	public void updateDanhSachDangKyKhoiThiTapTheMau1(List<HashMap<String, Object>> data) {
+		if (data != null) {
+			List<DanhSachThi> danhSachThis = new ArrayList<DanhSachThi>();
+			List<DoiThi> doiThis = new ArrayList<DoiThi>();
+			
+			for (HashMap<String, Object> dataRow : data) {
+				Long id = (Long)dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.id);
+				String tenDoi = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.tenDoi);
+				String hoTen = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.hoTen);
+				String soBaoDanh = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.soBaoDanh);
+				Date ngayThangNamSinh = (Date) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.ngayThangNamSinh);
+				String tenDoan = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.tenDoan);
+				Integer thuHang = (Integer) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.thuHang);
+				String giaiThuong = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong);
+				System.out.println("=============================================>>>>>2 " + id + "|" + soBaoDanh + "|" + giaiThuong + "|" + thuHang);
+				if (!ObjectUtils.isEmpty(id)) {
+					Optional<DanhSachThi> danhSachThiOpt = danhSachThiRepository.findById(id);
+					if(danhSachThiOpt.isPresent()) {
+						DanhSachThi danhSachThi = danhSachThiOpt.get();
+						//TODO validate
+						
+						danhSachThi.setSoBaoDanhDoi(soBaoDanh);
+						danhSachThi.setThuTuXepHang(thuHang);
+						danhSachThi.setHangGiaiThuong(giaiThuong);
+						danhSachThis.add(danhSachThi);
+						if(!ObjectUtils.isEmpty(giaiThuong)) {
+							Optional<DanhMuc> danhMucOpt = danhMucRepository.findById(new DanhMucId("C_HangGiaiThuong", giaiThuong));
+							if(danhMucOpt.isPresent()) {
+								danhSachThi.setTenGiaiThuong(danhMucOpt.get().getGiaTri());
+							}
+						}
+						
+						Optional<DoiThi> doiThiOpt = doiThiRepository.findById(danhSachThi.getDoiThiId());
+						
+						if(doiThiOpt.isPresent()) {
+							DoiThi doiThi = doiThiOpt.get();
+							doiThi.setHangGiaiThuong(giaiThuong);
+							doiThi.setThuTuXepHang(thuHang);
+							if(!doiThis.contains(doiThi)) {
+								doiThis.add(doiThi);
+							}
+						}
+					}
+				}
+			}
+			
+			if(danhSachThis != null && !danhSachThis.isEmpty()) {
+				danhSachThiRepository.saveAll(danhSachThis);
+			}
+			
+			if(doiThis != null && !doiThis.isEmpty()) {
+				doiThiRepository.saveAll(doiThis);
+			}
+		}
+	}
+
+	private HashMap<String, Object> createDanhSachDangKyKhoiThiTapTheMau1(Long id, Integer thuTu, String tenDoi, 
+			String soBaoDanh, String hoTen, String ngayThangNamSinh, String gioiTinhNam, String gioiTinhNu, String tenDoanThi,
+			Integer thuHang, String giaiThuong) {
+		HashMap<String, Object> map = new HashMap<>();
+		
+		map.put(DanhSachDangKyKhoiThiTapTheMau1.id, id);
+
+		if (!ObjectUtils.isEmpty(thuTu)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.thuTu, thuTu);
+		}
+		if (!ObjectUtils.isEmpty(tenDoi)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.tenDoi, tenDoi);
+		}
+		if (!ObjectUtils.isEmpty(soBaoDanh)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.soBaoDanh, soBaoDanh);
+		}
+		if (!ObjectUtils.isEmpty(hoTen)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.hoTen, hoTen);
+		}
+		if (!ObjectUtils.isEmpty(ngayThangNamSinh)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.ngayThangNamSinh, ngayThangNamSinh);
+		}
+		if (!ObjectUtils.isEmpty(gioiTinhNam)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.gioiTinhNam, gioiTinhNam);
+		}
+		if (!ObjectUtils.isEmpty(gioiTinhNu)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.gioiTinhNu, gioiTinhNu);
+		}
+		if (!ObjectUtils.isEmpty(tenDoanThi)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.tenDoanThi, tenDoanThi);
+		}
+		if (!ObjectUtils.isEmpty(thuHang)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.thuHang, thuHang);
+		}
+		if (!ObjectUtils.isEmpty(giaiThuong)) {
+			map.put(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong, giaiThuong);
+		}
+		
+		return map;
+	}
+
+	private HashMap<String, Object> createDanhSachDangKyKhoiThiCaNhanMau1(Long id, Integer thuTu, String hoTen, String soBaoDanh,
+			String ngayThangNamSinh, String gioiTinhNam, String gioiTinhNu, String tenDoanThi, Integer thuHang,
+			String giaiThuong) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(DanhSachDangKyKhoiThiCaNhanMau1.id, id);
+		if (!ObjectUtils.isEmpty(thuTu)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.thuTu, thuTu);
+		}
+
+		if (!ObjectUtils.isEmpty(hoTen)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.hoTen, hoTen);
+		}
+		if (!ObjectUtils.isEmpty(soBaoDanh)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.soBaoDanh, soBaoDanh);
+		}
+		if (!ObjectUtils.isEmpty(ngayThangNamSinh)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.ngayThangNamSinh, ngayThangNamSinh);
+		}
+		if (!ObjectUtils.isEmpty(gioiTinhNam)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.gioiTinhNam, gioiTinhNam);
+		}
+		if (!ObjectUtils.isEmpty(gioiTinhNu)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.gioiTinhNu, gioiTinhNu);
+		}
+		if (!ObjectUtils.isEmpty(tenDoanThi)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.tenDoanThi, tenDoanThi);
+		}
+		if (!ObjectUtils.isEmpty(thuHang)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.thuHang, thuHang);
+		}
+		if (!ObjectUtils.isEmpty(giaiThuong)) {
+			map.put(DanhSachDangKyKhoiThiCaNhanMau1.giaiThuong, giaiThuong);
+		}
+
+		return map;
 	}
 
 	private HashMap<String, Object> createDataRowDanhSachDangKyMau1(Integer thuTu, String hoTen, String namThu,

@@ -61,12 +61,21 @@ public class DanhSachThi {
 
     @Column(name = "hangGiaiThuong", nullable = true)
     private String hangGiaiThuong;
+    
+    @Column(name = "tenGiaiThuong", nullable = true)
+    private String tenGiaiThuong;
 
     @Column(name = "thoiGianTao")
     private long thoiGianTao;
 
     @Column(name = "thoiGianCapNhat")
     private long thoiGianCapNhat;
+    
+    @Column(name = "doanThiId")
+    private String doanThiId;
+    
+    @Column(name = "soBaoDanhDoi")
+    private String soBaoDanhDoi;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cuocThiId", nullable = false)

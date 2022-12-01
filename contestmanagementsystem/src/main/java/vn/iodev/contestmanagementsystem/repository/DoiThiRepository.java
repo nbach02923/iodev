@@ -26,4 +26,5 @@ public interface DoiThiRepository extends JpaRepository<DoiThi, String> {
     void deleteByCuocThiId(String cuocThiId);
     List<DoiThi> findByCuocThiIdAndDoanThiId(String cuocThiId, String doanThiId);
     List<DoiThi> findByCuocThiIdAndKhoiThiId(String cuocThiId, String khoiThiId);
+    List<DoiThi> findByCuocThiIdAndKhoiThiIdAndDoanThiId(String cuocThiId, String khoiThiId, String doanThiId);
 }

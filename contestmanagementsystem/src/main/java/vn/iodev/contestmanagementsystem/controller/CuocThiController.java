@@ -641,8 +641,10 @@ public class CuocThiController {
                         if (giaiThuong.isPresent()) {
                             row.setTenGiaiThuong(giaiThuong.get().getGiaTri());
                         }
+                        
+                        lstKetquas.add(row);
                     }
-                    lstKetquas.add(row);
+                   
                 }
             }
         }
@@ -691,16 +693,18 @@ public class CuocThiController {
                         if (giaiThuong.isPresent()) {
                             row.setTenGiaiThuong(giaiThuong.get().getGiaTri());
                         }
-                    }
-                    List<DanhSachThi> thiSinhTrongDois = danhSachThiRepository.getDanhSachThiCuaDoiThi(cuocThiData.get(), khoiThiId, dst.getDoiThiId());
-                    List<ThiSinh> lstThiSinh = new ArrayList<>();
-                    for (DanhSachThi tstd : thiSinhTrongDois) {
-                        if (mapThiSinhs.containsKey(tstd.getThiSinhId())) {
-                            lstThiSinh.add(mapThiSinhs.get(tstd.getThiSinhId()));
+                        
+                        List<DanhSachThi> thiSinhTrongDois = danhSachThiRepository.getDanhSachThiCuaDoiThi(cuocThiData.get(), khoiThiId, dst.getDoiThiId());
+                        List<ThiSinh> lstThiSinh = new ArrayList<>();
+                        for (DanhSachThi tstd : thiSinhTrongDois) {
+                            if (mapThiSinhs.containsKey(tstd.getThiSinhId())) {
+                                lstThiSinh.add(mapThiSinhs.get(tstd.getThiSinhId()));
+                            }
                         }
+                        row.setThiSinh(lstThiSinh);
+                        lstKetquas.add(row);
                     }
-                    row.setThiSinh(lstThiSinh);
-                    lstKetquas.add(row);
+                   
 
                     mapDoiThis.remove(dst.getDoiThiId());
                 }
@@ -863,4 +867,93 @@ public class CuocThiController {
 		}
 
 	}
+    
+    @PostMapping("/cuocthis/{cuocThiId}/khoithis/{khoiThiId}/export")
+  	public ResponseEntity<?> exportDanhSachThiTheoKhoiThi(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("khoiThiId") String khoiThiId) {
+  		log.info("API POST /cuocthis/{cuocThiId}/khoithis/{khoiThiId}/export");
+  		
+  		Optional<KhoiThi> khoiThiOpt = khoiThiRepository.findById(khoiThiId);
+  		
+  		if(!khoiThiOpt.isPresent()) {
+  			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+  		}
+  		
+  		KhoiThi khoiThi = khoiThiOpt.get();
+  		
+  		File file = null;
+  		
+  		if(khoiThi.getThiTapThe()) {
+  			file = fileService.exportDanhSachDangKyKhoiThiTapTheMau1(cuocThiId, khoiThiId);
+  		}else {
+  			file = fileService.exportDanhSachDangKyKhoiThiCaNhanMau1(cuocThiId, khoiThiId);
+  		}
+
+  		if (file == null) {
+  			return ResponseEntity.noContent().build();
+  		}
+
+  		Resource resource = null;
+  		try {
+  			resource = new UrlResource(file.toURI());
+  			return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/octet-stream"))
+  					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+  					.body(resource);
+  		} catch (MalformedURLException e) {
+  			log.error(e.getMessage());
+  			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+  		}
+  	}
+    
+    
+    @PostMapping("/cuocthis/khoithicanhan/import")
+    public ResponseEntity<ImportResponse> importUpdateDuLieuCuocThiCaNhan(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/khoithicanhan/import");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        
+        long size = multipartFile.getSize();
+        
+        String message = "";
+
+        if (ExcelHelper.hasExcelFormat(multipartFile)) {
+           
+            fileService.importDanhSachDangKyKhoiThiCaNhanMau1(multipartFile);
+
+            message = "Import contest data successfully: " + multipartFile.getOriginalFilename();
+            
+            return ResponseEntity.status(HttpStatus.OK).body(new ImportResponse(fileName, size, message));
+        }
+
+        message = "Please import an excel file!";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ImportResponse(fileName, size, message));
+    }
+
+    @PostMapping("/cuocthis/khoithitapthe/import")
+    public ResponseEntity<ImportResponse> importUpdateDuLieuCuocThiTapThe(@RequestParam("file") MultipartFile multipartFile, @RequestParam("fileType") String fileType, @RequestHeader("vaiTros") String vaiTros) {
+        log.info("API POST /cuocthis/khoithitapthe/import");
+        if (!vaiTroChecker.hasVaiTroQuanTriHeThong(vaiTros)) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        
+        long size = multipartFile.getSize();
+        
+        String message = "";
+
+        if (ExcelHelper.hasExcelFormat(multipartFile)) {
+           
+            fileService.importDanhSachDangKyKhoiThiTapTheMau1(multipartFile);
+
+            message = "Import contest data successfully: " + multipartFile.getOriginalFilename();
+            
+            return ResponseEntity.status(HttpStatus.OK).body(new ImportResponse(fileName, size, message));
+        }
+
+        message = "Please import an excel file!";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ImportResponse(fileName, size, message));
+    }
 }
