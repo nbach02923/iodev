@@ -1,5 +1,6 @@
 package vn.iodev.contestmanagementsystem.helper;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +28,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
 import lombok.extern.slf4j.Slf4j;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiCaNhanMau1;
 import vn.iodev.contestmanagementsystem.exportdata.DanhSachDangKyKhoiThiTapTheMau1;
@@ -44,21 +50,25 @@ import vn.iodev.contestmanagementsystem.model.LoaiTinhTrangToChuc;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.payload.ToChucResponse;
 import vn.iodev.contestmanagementsystem.utils.DatetimeUtil;
+import vn.iodev.contestmanagementsystem.utils.ImageUtil;
 import vn.iodev.contestmanagementsystem.utils.StringPatternUtil;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Shape;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 
 @Slf4j
 public class ExcelHelper {
@@ -1817,18 +1827,30 @@ public class ExcelHelper {
 		}
 	}
 	
-	/*
+	
 	public static void main(String[] args) {
+		/*
 		File file = new File("");
 		try {
 			InputStream targetStream = new FileInputStream(file);
 			getDanhSachThiKhoiThiCaNhanMau1Data(targetStream, 0, 9, 8);
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
+		List<HashMap<String, Object>> data = new ArrayList<HashMap<String,Object>>();
+		for(int i = 0; i < 11; i++) {
+			HashMap<String, Object>  dataRow = new HashMap<String, Object>();
+			dataRow.put("content", "http//dangky.olp.vn/thisinh/" + i);
+			dataRow.put("hoTen", "Nguyen Van A" + i);
+			dataRow.put("maTruong", "ABC" + i);
+			data.add(dataRow);
+		}
+		exportDanhSachThiSinhQRCode("D:\\test.xlsx", data);
 	}
-	*/
+	
 	public static List<HashMap<String, Object>> getDanhSachDangKyKhoiThiTapTheMau1Data(InputStream is, Integer fc,
 			Integer lc, Integer fr) {
 		
@@ -1964,5 +1986,128 @@ public class ExcelHelper {
 			e.printStackTrace();
 			throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
 		}
+	}
+	
+	
+	
+	public static File exportDanhSachThiSinhQRCode(String outputPath, List<HashMap<String, Object>> data) {
+
+		Workbook workbook = null;
+
+		FileOutputStream fos = null;
+
+		try {
+			workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("QRCode");
+			sheet.setColumnWidth(0, 19 * 256);
+			sheet.setColumnWidth(1, 50 * 256);
+			sheet.setColumnWidth(2, 19 * 256);
+			sheet.setColumnWidth(3, 50 * 256);
+			XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
+			
+			CellStyle cellStyle = workbook.createCellStyle();
+
+			Font font = workbook.createFont();
+			font.setBold(true);
+			font.setFontHeightInPoints((short) 30);
+			cellStyle.setFont(font);
+			cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+			cellStyle.setWrapText(true);
+			
+			if (data != null) {
+				int size = data.size() % 2 == 0 ? data.size()/2 : data.size()/2 + 1;
+				
+				for(int i = 0; i < size; i++) {
+					int idx1 = i * 2;
+					int idx2 = i * 2 + 1;
+					
+					HashMap<String, Object> dataRow1 = data.get(idx1);
+					
+					HashMap<String, Object> dataRow2 = null;
+					
+					if(idx2 <= data.size() - 1) {
+						dataRow2 = data.get(idx2);
+					}
+					
+					Row row = sheet.createRow(i);
+					row.setHeight((short) (8 * 256));
+					Cell cell0 = row.createCell(0);
+					Cell cell1 = row.createCell(1);
+					cell1.setCellStyle(cellStyle);
+					
+					Cell cell2 = row.createCell(2);
+					Cell cell3 = row.createCell(3);
+					cell3.setCellStyle(cellStyle);
+					
+					ClientAnchor anchor = drawing.createAnchor(0, 0, 128, 128, 0, i, 0, i);
+					anchor.setAnchorType(AnchorType.MOVE_AND_RESIZE);
+
+					String content = (String) dataRow1.get("content");
+					String hoTen = (String) dataRow1.get("hoTen");
+					String maTruong = (String) dataRow1.get("maTruong");
+
+					QRCodeWriter barcodeWriter = new QRCodeWriter();
+					BitMatrix bitMatrix = barcodeWriter.encode(content, BarcodeFormat.QR_CODE, 128, 128);
+					BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+					byte[] bytes = ImageUtil.toByteArray(bufferedImage, "jpeg");
+
+					int pictureIndex = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_JPEG);
+					Picture pict = drawing.createPicture(anchor, pictureIndex);
+					pict.resize();
+					cell1.setCellValue((hoTen + "\n" + maTruong).toUpperCase());
+					
+					if(dataRow2 != null) {
+						anchor = drawing.createAnchor(0, 0, 128, 128, 2, i, 2, i);
+						anchor.setAnchorType(AnchorType.MOVE_AND_RESIZE);
+
+						content = (String) dataRow2.get("content");
+						hoTen = (String) dataRow2.get("hoTen");
+						maTruong = (String) dataRow2.get("maTruong");
+
+						barcodeWriter = new QRCodeWriter();
+						bitMatrix = barcodeWriter.encode(content, BarcodeFormat.QR_CODE, 128, 128);
+						bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+						bytes = ImageUtil.toByteArray(bufferedImage, "jpeg");
+
+						pictureIndex = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_JPEG);
+						pict = drawing.createPicture(anchor, pictureIndex);
+						pict.resize();
+						cell3.setCellValue((hoTen + "\n" + maTruong).toUpperCase());
+					}
+					
+				}
+				
+			}
+
+			File file = new File(outputPath);
+
+			fos = new FileOutputStream(new File(outputPath));
+
+			workbook.write(fos);
+
+			fos.close();
+
+			return file;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+			return null;
+		} finally {
+			try {
+
+				if (workbook != null) {
+					workbook.close();
+				}
+
+				if (fos != null) {
+					fos.close();
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+
 	}
 }
