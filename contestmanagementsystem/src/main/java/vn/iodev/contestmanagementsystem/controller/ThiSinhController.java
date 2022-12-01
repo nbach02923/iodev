@@ -1,5 +1,7 @@
 package vn.iodev.contestmanagementsystem.controller;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,9 +9,13 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +39,7 @@ import vn.iodev.contestmanagementsystem.localservice.impl.ThiSinhLocalServiceImp
 import vn.iodev.contestmanagementsystem.model.CuocThi;
 import vn.iodev.contestmanagementsystem.model.DoanThi;
 import vn.iodev.contestmanagementsystem.model.ImportResponse;
+import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DoanThiRepository;
@@ -327,4 +334,26 @@ public class ThiSinhController {
         thiSinhRepository.deleteByCuocThiId(cuocThiId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    
+    @PostMapping("/thisinhs/{cuocThiId}/doanthis/{doanThiId}/export")
+  	public ResponseEntity<?> exportDanhSachThiTheoKhoiThi(@PathVariable("cuocThiId") String cuocThiId, @PathVariable("doanThiId") String doanThiId) {
+  		log.info("API POST/thisinhs/{cuocThiId}/doanthis/{doanThiId}/export");
+  		
+  		File file = fileService.exportDanhSachThiSinhTrongDoanWithQRCode(cuocThiId, doanThiId);
+  		  	
+  		if (file == null) {
+  			return ResponseEntity.noContent().build();
+  		}
+
+  		Resource resource = null;
+  		try {
+  			resource = new UrlResource(file.toURI());
+  			return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/octet-stream"))
+  					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+  					.body(resource);
+  		} catch (MalformedURLException e) {
+  			log.error(e.getMessage());
+  			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+  		}
+  	}
 }

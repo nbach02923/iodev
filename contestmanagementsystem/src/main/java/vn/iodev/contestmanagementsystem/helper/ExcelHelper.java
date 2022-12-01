@@ -63,6 +63,7 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
@@ -1827,9 +1828,9 @@ public class ExcelHelper {
 		}
 	}
 	
-	
+	/*
 	public static void main(String[] args) {
-		/*
+		
 		File file = new File("");
 		try {
 			InputStream targetStream = new FileInputStream(file);
@@ -1839,7 +1840,7 @@ public class ExcelHelper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		*/
+		
 		List<HashMap<String, Object>> data = new ArrayList<HashMap<String,Object>>();
 		for(int i = 0; i < 11; i++) {
 			HashMap<String, Object>  dataRow = new HashMap<String, Object>();
@@ -1850,6 +1851,8 @@ public class ExcelHelper {
 		}
 		exportDanhSachThiSinhQRCode("D:\\test.xlsx", data);
 	}
+
+	*/
 	
 	public static List<HashMap<String, Object>> getDanhSachDangKyKhoiThiTapTheMau1Data(InputStream is, Integer fc,
 			Integer lc, Integer fr) {
@@ -2010,9 +2013,10 @@ public class ExcelHelper {
 
 			Font font = workbook.createFont();
 			font.setBold(true);
-			font.setFontHeightInPoints((short) 30);
+			font.setFontHeightInPoints((short) 26);
 			cellStyle.setFont(font);
 			cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+			cellStyle.setAlignment(HorizontalAlignment.CENTER);
 			cellStyle.setWrapText(true);
 			
 			if (data != null) {
@@ -2044,8 +2048,7 @@ public class ExcelHelper {
 					anchor.setAnchorType(AnchorType.MOVE_AND_RESIZE);
 
 					String content = (String) dataRow1.get("content");
-					String hoTen = (String) dataRow1.get("hoTen");
-					String maTruong = (String) dataRow1.get("maTruong");
+					String info = (String) dataRow1.get("info");
 
 					QRCodeWriter barcodeWriter = new QRCodeWriter();
 					BitMatrix bitMatrix = barcodeWriter.encode(content, BarcodeFormat.QR_CODE, 128, 128);
@@ -2055,16 +2058,15 @@ public class ExcelHelper {
 					int pictureIndex = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_JPEG);
 					Picture pict = drawing.createPicture(anchor, pictureIndex);
 					pict.resize();
-					cell1.setCellValue((hoTen + "\n" + maTruong).toUpperCase());
+					cell1.setCellValue(info.toUpperCase());
 					
 					if(dataRow2 != null) {
 						anchor = drawing.createAnchor(0, 0, 128, 128, 2, i, 2, i);
 						anchor.setAnchorType(AnchorType.MOVE_AND_RESIZE);
 
 						content = (String) dataRow2.get("content");
-						hoTen = (String) dataRow2.get("hoTen");
-						maTruong = (String) dataRow2.get("maTruong");
-
+						info = (String) dataRow2.get("info");
+	
 						barcodeWriter = new QRCodeWriter();
 						bitMatrix = barcodeWriter.encode(content, BarcodeFormat.QR_CODE, 128, 128);
 						bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
@@ -2073,7 +2075,7 @@ public class ExcelHelper {
 						pictureIndex = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_JPEG);
 						pict = drawing.createPicture(anchor, pictureIndex);
 						pict.resize();
-						cell3.setCellValue((hoTen + "\n" + maTruong).toUpperCase());
+						cell3.setCellValue(info.toUpperCase());
 					}
 					
 				}

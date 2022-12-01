@@ -25,6 +25,7 @@ import vn.iodev.contestmanagementsystem.model.DoiThi;
 import vn.iodev.contestmanagementsystem.model.HuanLuyenVien;
 import vn.iodev.contestmanagementsystem.model.KhoiThi;
 import vn.iodev.contestmanagementsystem.model.ThiSinh;
+import vn.iodev.contestmanagementsystem.payload.ThongKeResponse;
 import vn.iodev.contestmanagementsystem.repository.CuocThiRepository;
 import vn.iodev.contestmanagementsystem.repository.DanhMucRepository;
 import vn.iodev.contestmanagementsystem.repository.DanhSachThiRepository;
@@ -611,6 +612,31 @@ public class BaoCaoLocalServiceImpl {
 		return data;
 	}
 	
+	public List<HashMap<String, Object>> getDanhSachThiSinhTrongDoan(String cuocThiId, String doanThiId, String dataLink){
+		List<HashMap<String, Object>> data = new ArrayList<HashMap<String,Object>>();
+		List<ThiSinh> thiSinhs = thiSinhRepository.findByCuocThiIdAndDoanThiId(cuocThiId, doanThiId);
+		Optional<DoanThi> doanThiOpt = doanThiRepository.findById(doanThiId);
+		
+		if(!doanThiOpt.isPresent()) {
+			return data;
+		}
+		
+		String maDoanThi = doanThiOpt.get().getMaDoanThi();
+		
+		if(thiSinhs != null) {
+			for(ThiSinh thiSinh : thiSinhs) {
+				String id = thiSinh.getId();
+				String hoTen = thiSinh.getHoTen();
+				String content = dataLink.replace("{id}", id);
+				HashMap<String, Object> dataRow = new HashMap<String, Object>();
+				dataRow.put("content", content);
+				dataRow.put("info", hoTen + "\n" + maDoanThi);
+				data.add(dataRow);
+			}
+		}
+		return data;
+	}
+	
 	
 	public void updateDanhSachDangKyKhoiThiCaNhanMau1(List<HashMap<String, Object>> data) {
 		if (data != null) {
@@ -624,7 +650,7 @@ public class BaoCaoLocalServiceImpl {
 				String tenDoan = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.tenDoan);
 				Integer thuHang = (Integer) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.thuHang);
 				String giaiThuong = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong);
-				System.out.println("=============================================>>>>>1 " + id + "|" + soBaoDanh + "|" + giaiThuong + "|" + thuHang);
+				
 				if (!ObjectUtils.isEmpty(id)) {
 					Optional<DanhSachThi> danhSachThiOpt = danhSachThiRepository.findById(id);
 					if(danhSachThiOpt.isPresent()) {
@@ -668,7 +694,7 @@ public class BaoCaoLocalServiceImpl {
 				String tenDoan = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.tenDoan);
 				Integer thuHang = (Integer) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.thuHang);
 				String giaiThuong = (String) dataRow.get(DanhSachDangKyKhoiThiTapTheMau1.giaiThuong);
-				System.out.println("=============================================>>>>>2 " + id + "|" + soBaoDanh + "|" + giaiThuong + "|" + thuHang);
+				
 				if (!ObjectUtils.isEmpty(id)) {
 					Optional<DanhSachThi> danhSachThiOpt = danhSachThiRepository.findById(id);
 					if(danhSachThiOpt.isPresent()) {

@@ -112,7 +112,6 @@ public class ExcelService {
 	@Value("${io.report.danhsachdangkykhoithicanhanmau1.lr}")
 	private Integer danhsachdangkykhoithicanhanmau1_lr;
 	@Value("${io.report.danhsachdangkykhoithicanhanmau1.looprow}")
-	
 	private Integer danhsachdangkykhoithicanhanmau1_looprow;
 	
 	
@@ -127,9 +126,10 @@ public class ExcelService {
 	@Value("${io.report.danhsachdangkykhoithitapthemau1.lr}")
 	private Integer danhsachdangkykhoithitapthemau1_lr;
 	@Value("${io.report.danhsachdangkykhoithitapthemau1.looprow}")
-	
 	private Integer danhsachdangkykhoithitapthemau1_looprow;
 
+	@Value("${io.report.thisinh.qrcode.datalink}")
+	private String dataLink;
 
     public void importDoanThi(MultipartFile file) {
         try {
@@ -678,7 +678,7 @@ public class ExcelService {
 			List<HashMap<String, Object>> data = ExcelHelper.getDanhSachThiKhoiThiCaNhanMau1Data(
 					multipartFile.getInputStream(), danhsachdangkykhoithicanhanmau1_fc, danhsachdangkykhoithicanhanmau1_lc,
 					danhsachdangkykhoithicanhanmau1_looprow);
-			System.out.println("=============================================>>>>>1 data size" + data.size());
+			System.out.println("data size" + data.size());
 			baoCaoLocalServiceImpl.updateDanhSachDangKyKhoiThiCaNhanMau1(data);
 			
 		} catch (IOException e) {
@@ -694,7 +694,7 @@ public class ExcelService {
 			List<HashMap<String, Object>> data = ExcelHelper.getDanhSachDangKyKhoiThiTapTheMau1Data(
 					multipartFile.getInputStream(), danhsachdangkykhoithitapthemau1_fc, danhsachdangkykhoithitapthemau1_lc,
 					danhsachdangkykhoithitapthemau1_looprow);
-			System.out.println("=============================================>>>>>2 data size" + data.size());
+			System.out.println("data size" + data.size());
 			baoCaoLocalServiceImpl.updateDanhSachDangKyKhoiThiTapTheMau1(data);
 			
 		} catch (IOException e) {
@@ -704,4 +704,25 @@ public class ExcelService {
 			throw new RuntimeException("fail to store excel data: " + e.getMessage());
 		}
 	}
+	
+	public File exportDanhSachThiSinhTrongDoanWithQRCode(String cuocThiId, String doanThiId) {
+    	
+    	String homeDir = System.getProperty("user.dir");
+    	
+    	String outputPath = homeDir + "/" + exportFolderName + "/" + System.currentTimeMillis() + "danhsanhthisinhtrongdoan.xlsx";
+    	
+    	log.info("homeDir:{}", homeDir);
+
+    	log.info("outputPath:{}", outputPath);
+    	
+    	List<HashMap<String, Object>> data = baoCaoLocalServiceImpl.getDanhSachThiSinhTrongDoan(cuocThiId, doanThiId, dataLink);
+    	
+    	if(data == null) {
+    		return null;
+    	}
+    	
+    	log.info("data size:{}", data.size());
+    	
+    	return ExcelHelper.exportDanhSachThiSinhQRCode(outputPath, data);
+    }
 }
