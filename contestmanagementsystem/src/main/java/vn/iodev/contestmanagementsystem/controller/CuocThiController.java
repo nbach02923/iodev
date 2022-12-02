@@ -781,10 +781,12 @@ public class CuocThiController {
             
                 List<KhoiThi> noiDungThi = khoiThiRepository.findByIdIn(khoiThiIds);
                 row.setNoiDungThi(noiDungThi);
-
-                if (noiDungThi.size() > 0) {
-                    lstKetquas.add(row);
-                }
+                
+                //if (noiDungThi.size() > 0) {
+                //    lstKetquas.add(row);
+                //}
+                
+                lstKetquas.add(row);
             }
         }
         return ResponseEntity.ok().body(lstKetquas);
