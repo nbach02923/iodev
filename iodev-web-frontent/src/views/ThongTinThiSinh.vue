@@ -59,15 +59,19 @@
                     class="table-noidung  mt-2 mb-5"
                     :headers="headersDanhSachNoiDung"
                     :items="danhSachNoiDung"
-                    :items-per-page="10"
+                    :items-per-page="100"
                     item-key="id"
                     hide-default-footer
                     no-data-text="Không có"
                     loading-text="Đang tải... "
                   >
-                    <!-- <template v-slot:item.truongPhoDoan="{ item, index }">
-                      <div>{{ item.truongPhoDoan == 1 ? 'Trưởng đoàn' : ( item.truongPhoDoan == 2 ? 'Phó đoàn' : 'Huấn luyện viên')}}</div>
-                    </template> -->
+                    <template v-slot:item.soBaoDanh="{ item, index }">
+                      <div>{{ item.thiTapThe ? item.soBaoDanhDoi : item.soBaoDanh}}</div>
+                    </template>
+                    <template v-slot:item.giaiThuong="{ item, index }">
+                      <div style="font-weight: 600;" class="mb-1">{{ item.tenGiaiThuong ? item.tenGiaiThuong : ''}}</div>
+                      <div>{{ item.hangGiaiThuong ? item.hangGiaiThuong : ''}}</div>
+                    </template>
                   </v-data-table>
               </div>
           </v-col>
@@ -121,28 +125,28 @@ export default {
         headersDanhSachNoiDung: [
           {
             sortable: false,
-            text: 'Khối thi',
+            text: 'Khối thi:',
             align: 'left',
             value: 'tenGoi',
             class: 'th-center py-2'
           },
           {
             sortable: false,
-            text: 'Đội thi',
+            text: 'Đội thi:',
             align: 'left',
             value: 'tenDoiThi',
             class: 'th-center py-2'
           },
           {
             sortable: false,
-            text: 'Số báo danh',
+            text: 'Số báo danh:',
             align: 'left',
             value: 'soBaoDanh',
             class: 'th-center'
           },
           {
             sortable: false,
-            text: 'Giải thưởng',
+            text: 'Giải thưởng:',
             align: 'left',
             value: 'giaiThuong',
             class: 'th-center'
@@ -204,30 +208,61 @@ export default {
                 thiSinhId: vm.id
               }
             }
-            vm.$store.dispatch('collectionFilterLevel3', filter).then(function (response) {
-              vm.danhSachNoiDung = response.find(function (item) {
+            vm.$store.dispatch('collectionFilterLevel3', filter).then(function (responseKt) {
+              let danhSachKhoiThi = responseKt.find(function (item) {
                 return item.id == vm.id
               }).noiDungThi
-              console.log('khoiThiList', vm.danhSachNoiDung)
+              let filter = {
+                collectionName: 'danhsachthis',
+                data: {
+                  cuocThiId: response.cuocThiId,
+                  doanThiId: vm.thongTinThiSinh.doanThiId,
+                  thiSinhId: vm.id,
+                  page: 1,
+                  size: 100
+                }
+              }
+              vm.$store.dispatch('collectionFilter', filter).then(function (responseDst) {
+                let ds = responseDst.filter(function (item) {
+                  return item.thiSinhId == vm.id
+                })
+                
+                let filter = {
+                  collectionName: 'doithis',
+                  data: {
+                    cuocThiId: response.cuocThiId,
+                    doanThiId: vm.thongTinThiSinh.doanThiId,
+                  }
+                }
+                vm.$store.dispatch('collectionFilter', filter).then(function (response) {
+                  ds.forEach(element => {
+                    let dt = response.find(function (item) {
+                      return item.id == element.doiThiId
+                    })
+                    if (dt) {
+                      element.tenDoiThi = dt.tenGoi
+                    }
+                  });
+                  danhSachKhoiThi.forEach(function (element) {
+                    let dsthi = ds.find(function (item) {
+                      return item.khoiThiId == element.id
+                    })
+                    if (dsthi) {
+                      element['tenDoiThi'] = dsthi['tenDoiThi']
+                      element['soBaoDanh'] = dsthi['soBaoDanh']
+                      element['soBaoDanhDoi'] = dsthi['soBaoDanhDoi']
+                      element['tenGiaiThuong'] = dsthi['tenGiaiThuong']
+                      element['hangGiaiThuong'] = dsthi['hangGiaiThuong']
+                    }
+                  })
+                  vm.danhSachNoiDung = danhSachKhoiThi
+                  console.log('khoiThiList', vm.danhSachNoiDung)
+                })
+              })
             })
             // 
           })
           //
-          
-          // 
-
-          // let filter = {
-          //   collectionName: 'cuocthis',
-          //   collectionId: vm.id,
-          //   collectionChildName: 'danhsachthis',
-          //   data: {
-          //     "thiSinhId": thiDinhId,
-          //     "khoiThiId": khoiThi['id']
-          //   }
-          // }
-          // vm.$store.dispatch('collectionCreateChild', filter).then(function () {
-
-          // })
         }).catch(function () {
         })
       },
@@ -274,5 +309,11 @@ export default {
   .table-noidung .v-data-table__mobile-row {
     min-height: 36px !important;
   }
+}
+.table-noidung .v-data-table__mobile-row {
+      border-bottom: 1px dotted #dedede;
+}
+.table-noidung  .v-data-table__wrapper .v-data-table__mobile-table-row {
+    border: 1px solid #dedede;
 }
 </style>
