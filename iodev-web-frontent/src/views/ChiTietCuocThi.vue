@@ -245,17 +245,17 @@
                   hide-details="auto"
                   @keyup.enter="getdanhSachDoanThi()"
                   clearable
-              >
-                <template v-slot:append>
-                  <v-icon @click="getdanhSachDoanThi()" size="18" color="#2161B1">mdi-magnify</v-icon>
-                </template>
-              </v-text-field>
-              <v-btn small v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" color="green" @click="exportDoanThi()"
-               :loading="loadingExport" :disabled="loadingExport" class="white--text">
-               <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
-                &nbsp;
-               <span class="white--text">Xuất danh sách Thi</span>
-               </v-btn>
+                >
+                  <template v-slot:append>
+                    <v-icon @click="getdanhSachDoanThi()" size="18" color="#2161B1">mdi-magnify</v-icon>
+                  </template>
+                </v-text-field>
+                <v-btn small v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" color="green" @click="exportDoanThi()"
+                :loading="loadingExport" :disabled="loadingExport" class="white--text">
+                <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
+                  &nbsp;
+                <span class="white--text">Xuất danh sách Thi</span>
+                </v-btn>
               </v-layout>
               
             </v-col>
@@ -279,10 +279,40 @@
                       <div>{{itemNd.text}}</div>
                       <div style="font-weight: normal !important;">
                         (<span v-if="danhSachKhoiThi[indexNd] && danhSachKhoiThi[indexNd]['soDoi']">Số đội: {{danhSachKhoiThi[indexNd]['soDoi']}},</span>
-                        <span> Số thí sinh: {{danhSachKhoiThi[indexNd]['soThiSinh']}}</span>)
+                        <span> Số thí sinh: {{danhSachKhoiThi[indexNd] ? danhSachKhoiThi[indexNd]['soThiSinh'] : 0}}</span>)
+                        <div class="mt-2" v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
+                          <v-tooltip top>
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-btn icon dark small color="primary" class="mr-2" v-bind="attrs" v-on="on" @click="exportKhoiThi(danhSachKhoiThi[indexNd]['id'], danhSachKhoiThi[indexNd]['maKhoi'])">
+                                <v-icon dark>
+                                  mdi-file-export-outline
+                                </v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Xuất danh sách</span>
+                          </v-tooltip>
+                          <v-tooltip top>
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-btn icon dark small color="green" v-bind="attrs" v-on="on" @click="pickFileImport(danhSachKhoiThi[indexNd])">
+                                <v-icon dark>
+                                  mdi-file-import-outline
+                                </v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Import danh sách</span>
+                          </v-tooltip>
+                        </div>
                       </div>
                     </v-flex>
                   </v-layout>
+                </template>
+                <template v-slot:header.soThiSinh="{ header }">
+                  <div>Số thí sinh</div>
+                  <div style="font-weight: normal !important;">(Tổng số: {{soThiSinhThamDu}})</div>
+                </template>
+                <template v-slot:header.soHuanLuyenVien="{ header }">
+                  <div>Số huấn luyện viên</div>
+                  <div style="font-weight: normal !important;">(Tổng số: {{soHuanLuyenVienThamDu}})</div>
                 </template>
                 <template v-slot:item.index="{ item, index }">
                   <div>{{ (pageTongHopDangKy) * itemsPerPage - itemsPerPage + index + 1 }}</div>
@@ -370,6 +400,24 @@
                 <template v-slot:item.thiSinh="{ item, index }">
                   <p class="mb-1" v-for="(item2, index2) in item.thiSinh" :key="index2">- {{ item2.hoTen }}</p>
                 </template>
+                <template v-slot:item.hangGiaiThuong="{ item, index }">
+                  <div class="mb-1 font-weight-bold" v-if="item.tenGiaiThuong">{{ item.tenGiaiThuong }}</div>
+                  <div >{{ item.hangGiaiThuong }}</div>
+                  <div v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
+                    <v-btn small color="primary" class="white--text mx-0 my-1 mr-2" @click="exportChungNhanLoai(item)">
+                      <v-icon left>
+                        mdi-certificate-outline
+                      </v-icon>
+                      In chứng nhận
+                    </v-btn>
+                    <v-btn small color="primary" class="white--text mx-0 my-1" @click="exportBangKhen(item, 'tapthe')">
+                      <v-icon left>
+                        mdi-certificate-outline
+                      </v-icon>
+                      In bằng khen
+                    </v-btn>
+                  </div>
+                </template>
               </v-data-table>
               <!-- <pagination v-if="pageCountKetQuaDongDoi" :pageInput="pageKetQuaDongDoi - 1" :total="totalKetQuaDongDoi" :pageCount="pageCountKetQuaDongDoi" @tiny:change-page="changePageKqDongDoi"></pagination> -->
             </v-col>
@@ -401,7 +449,13 @@
                   <div class="mb-1 font-weight-bold" v-if="item.tenGiaiThuong">{{ item.tenGiaiThuong }}</div>
                   <div >{{ item.hangGiaiThuong }}</div>
                   <div v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
-                    <v-btn small color="primary" class="white--text mx-0 my-1" @click="exportBangKhen(item)">
+                    <v-btn small color="primary" class="white--text mx-0 my-1 mr-2" @click="exportChungNhanCaNhan(item)">
+                      <v-icon left>
+                        mdi-certificate-outline
+                      </v-icon>
+                      In chứng nhận
+                    </v-btn>
+                    <v-btn small color="primary" class="white--text mx-0 my-1" @click="exportBangKhen(item, 'canhan')">
                       <v-icon left>
                         mdi-certificate-outline
                       </v-icon>
@@ -567,10 +621,10 @@
         <v-card-text class="mt-5 px-2">
           <v-card-text class="pt-0 px-2">
             <v-data-table
-              :headers="headersDanhSachThiSinh"
+              :headers="headersDanhSachDoiThi"
               :items="danhSachThiSinh"
-              :items-per-page="itemsPerPageDanhSachThiSinh"
-              :page.sync="pageDanhSachThiSinh"
+              :items-per-page="1000"
+              page.sync="1"
               hide-default-footer
               class="table-base mt-2 ds-doi-thi"
               no-data-text="Không có"
@@ -578,7 +632,7 @@
               group-by="Đội thi"
             >
               <template v-slot:item.index="{ item, index }">
-                <div>{{ (pageDanhSachThiSinh) * itemsPerPageDanhSachThiSinh - itemsPerPageDanhSachThiSinh + index + 1 }}</div>
+                <div>{{ index + 1 }}</div>
               </template>
               <template v-slot:item.gioiTinh="{ item, index }">
                 <div>{{ item.gioiTinh == 0 ? 'Nam' : 'Nữ'}}</div>
@@ -597,6 +651,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <input v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" type="file" id="fileImportKhoiThi" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @input="importKhoiThi($event)" style="display:none">
   </v-card>
 </template>
 
@@ -725,7 +781,7 @@ export default {
               align: 'center',
               value: 'hangGiaiThuong',
               class: 'th-center',
-              width: 200
+              width: 320
           }
         ],
         loadingDataKetQuaCaNhan: false,
@@ -769,7 +825,7 @@ export default {
               align: 'center',
               value: 'hangGiaiThuong',
               class: 'th-center',
-              width: 200
+              width: 320
           }
         ],
         loadingDataKetQuaDongDoi: false,
@@ -826,20 +882,6 @@ export default {
               value: 'nganhDaoTao',
               class: 'th-center py-2'
           },
-          // {
-          //     sortable: false,
-          //     text: 'Số điện thoại',
-          //     align: 'left',
-          //     value: 'soDienThoai',
-          //     class: 'th-center py-2'
-          // },
-          // {
-          //     sortable: false,
-          //     text: 'Email',
-          //     align: 'left',
-          //     value: 'email',
-          //     class: 'th-center py-2'
-          // },
           {
               sortable: false,
               text: 'Giải thưởng',
@@ -867,10 +909,46 @@ export default {
           },
           {
               sortable: false,
-              text: 'Tên đội thi',
+              text: 'Tên thí sinh',
               align: 'left',
-              value: 'tenGoi',
+              value: 'hoTen',
               class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Giới tính',
+              align: 'left',
+              value: 'gioiTinh',
+              class: 'th-center'
+          },
+          {
+              sortable: false,
+              text: 'Ngày sinh',
+              align: 'left',
+              value: 'ngaySinh',
+              class: 'th-center'
+          },
+          {
+              sortable: false,
+              text: 'Đối tượng thi',
+              align: 'left',
+              value: 'doiTuongThi',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Ngành đào tạo',
+              align: 'left',
+              value: 'nganhDaoTao',
+              class: 'th-center py-2'
+          },
+          {
+              sortable: false,
+              text: 'Giải thưởng',
+              align: 'left',
+              value: 'datGiaiThuong',
+              class: 'th-center',
+              width: 200
           }
         ],
         dialogDsThiSinh: false,
@@ -930,10 +1008,12 @@ export default {
         pageCountDanhSachHlv: 0,
         itemsPerPageDanhSachHlv: 15,
         soThiSinhThamDu: 0,
+        soHuanLuyenVienThamDu: 0,
         soDoanThiThamDu: 0,
         soDoiThiThamDu: 0,
         keywordSearchDoanThi: '',
-        danhSachKhoiThi: []
+        danhSachKhoiThi: [],
+        khoiThiImport: ''
       }
     },
     created () {
@@ -941,8 +1021,7 @@ export default {
       vm.getChiTietCuocThi()
       vm.getdanhSachDoanThi()
       vm.getDanhSachKhoiThi()
-      // vm.getDanhSachDoiThi()
-      vm.getDanhSachThiSinh()
+      // vm.getDanhSachThiSinh()
       if (vm.checkRoleAction('VAITRO_QUANTRIHETHONG')) {
         vm.headersTongHopDangKy.push(
           {
@@ -970,8 +1049,7 @@ export default {
         vm.getChiTietCuocThi()
         vm.getdanhSachDoanThi()
         vm.getDanhSachKhoiThi()
-        // vm.getDanhSachDoiThi()
-        vm.getDanhSachThiSinh()
+        // vm.getDanhSachThiSinh()
       }
     },
     methods: {
@@ -1045,9 +1123,11 @@ export default {
           vm.loadingDataTongHopDangKy = false
 
           let soThiSinh = 0
+          let soHlv = 0
           let soDoiThi = 0
           vm.danhSachTongHopDangKy.forEach(function (item) {
             soThiSinh += item.soThiSinh
+            soHlv += item.soHuanLuyenVien
             item.noiDungThi.forEach(function (el) {
               if (el.soDoi && el.soThiSinh) {
                 soDoiThi += el.soDoi
@@ -1056,6 +1136,7 @@ export default {
           })
           vm.soDoiThiThamDu = soDoiThi
           vm.soThiSinhThamDu = soThiSinh
+          vm.soHuanLuyenVienThamDu = soHlv
           // console.log('danhSachTongHopDangKy', vm.danhSachTongHopDangKy)
           // 
           let filter = {
@@ -1270,6 +1351,66 @@ export default {
           vm.loadingExport = false
         })
       },
+      exportKhoiThi (khoiThiId, maKhoi) {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let dataPost = {}
+        let param = {
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          params: {},
+          responseType: 'blob'
+        }
+        axios.post('/api/cuocthis/' + vm.id + '/khoithis/'+ khoiThiId + '/export', dataPost, param).then(function (response) {
+          vm.loadingExport = false
+          let a = document.createElement('a')
+          document.body.appendChild(a)
+          a.style = 'display: none'
+          let url = window.URL.createObjectURL(response.data)
+          a.href = url
+          a.download = 'DanhSachThiSinh-' + maKhoi + '.xlsx'
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }).catch(xhr => {
+          vm.loadingExport = false
+        })
+      },
+      pickFileImport (khoiThi) {
+        let vm = this
+        vm.khoiThiImport = khoiThi
+        console.log('vm.khoiThiImport', vm.khoiThiImport)
+        document.getElementById('fileImportKhoiThi').value = ''
+        document.getElementById('fileImportKhoiThi').click()
+      },
+      importKhoiThi () {
+        let vm = this
+        if (vm.loadingImport) {
+          return
+        }
+        vm.loadingImport = true
+        let filesx = $('#fileImportKhoiThi')[0].files
+        let file = filesx[0]
+
+        let dataPost = new FormData()
+        dataPost.append("file", file)
+        dataPost.append("fileType", "xlsx")
+        let url = !vm.khoiThiImport.thiTapThe ? '/api/cuocthis/khoithicanhan/import' : '/api/cuocthis/khoithitapthe/import'
+        axios.post(url, dataPost, param).then(function (response) {
+          vm.loadingImport = false
+          toastr.success('Import danh sách thành công')
+          vm.getChiTietCuocThi()
+          vm.getdanhSachDoanThi()
+          vm.getDanhSachKhoiThi()
+          vm.getDanhSachThiSinh()
+        }).catch(xhr => {
+          vm.loadingImport = false
+          toastr.error('Import danh sách thất bại')
+        })
+      },
       exportQrCode (item) {
         let vm = this
         vm.urlQr = window.location.origin + '/#/thisinh/' + item.id
@@ -1281,7 +1422,7 @@ export default {
           downloadLink.click();
         }, 200)
       },
-      exportBangKhen (item) {
+      exportBangKhen (item, type) {
         loadFile(window.location.origin + "/docs/BangKhen.docx", function(
           error,
           content
@@ -1291,11 +1432,20 @@ export default {
           }
           const zip = new PizZip(content);
           const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-          doc.setData({
-            Ten_giai: item.tenGiaiThuong ? item.tenGiaiThuong : '',
-            Ten_khoithi: item['Nội dung thi'] ? item['Nội dung thi'] : '',
-            Ten_thi_sinh: item.tenThiSinh ? item.tenThiSinh : '',
-          });
+          if (type == 'canhan') {
+            doc.setData({
+              Ten_giai: item.tenGiaiThuong ? item.tenGiaiThuong : '',
+              Ten_khoithi: item['Nội dung thi'] ? item['Nội dung thi'] : '',
+              Ten_thi_sinh: item.tenThiSinh ? item.tenThiSinh : '',
+            });
+          } else {
+            doc.setData({
+              Ten_giai: item.tenGiaiThuong ? item.tenGiaiThuong : '',
+              Ten_khoithi: item['Nội dung thi'] ? item['Nội dung thi'] : '',
+              Ten_thi_sinh: item.tenDoiThi ? item.tenDoiThi : '',
+            });
+          }
+          
           try {
             doc.render();
           } catch (error) {
@@ -1327,7 +1477,175 @@ export default {
             mimeType:
               "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           });
-          saveAs(out, "BangKhen-" + String(item.tenThiSinh).replace(/ /g, "") + ".docx");
+          let tenFile = type == 'canhan' ? item.tenThiSinh : item.tenDoiThi
+          saveAs(out, "BangKhen-" + String(tenFile).replace(/ /g, "") + ".docx");
+        });
+      },
+      exportChungNhanCaNhan (thisinh) {
+        loadFile(window.location.origin + "/docs/chungnhan_canhan.docx", function(
+        // loadFile("http://127.0.0.1:8887/chungnhan_canhan.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+          doc.setData({
+            Ten_Doan_thi: thisinh.tenDoanThi ? thisinh.tenDoanThi : '',
+            Ten_TS: thisinh.tenThiSinh ? thisinh.tenThiSinh : '',
+          });
+          
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
+            }
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
+          }
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "ChungNhan-" + String(thisinh.tenThiSinh).replace(/ /g, "") + ".docx");
+        });
+      },
+      exportChungNhanLoai (doithi) {
+        let vm = this
+        if (doithi['Nội dung thi'].toLowerCase().indexOf('procon') >= 0) {
+          vm.exportChungNhanProcon(doithi)
+        } else {
+          vm.exportChungNhanTapThe(doithi)
+        }
+      },
+      exportChungNhanTapThe (doithi) {
+        loadFile(window.location.origin + "/docs/chungnhan_pmnm.docx", function(
+        // loadFile("http://127.0.0.1:8887/chungnhan_pmnm.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+          doc.setData({
+            Hang_giai_thuong: doithi.hangGiaiThuong ? doithi.hangGiaiThuong : '',
+            Ten_doi_thi: doithi.tenDoiThi ? doithi.tenDoiThi : '',
+            Ten_thi_sinh_1: doithi.thiSinh[0] ? doithi.thiSinh[0]['hoTen'] : '',
+            Ten_thi_sinh_2: doithi.thiSinh[1] ? doithi.thiSinh[1]['hoTen'] : '',
+            Ten_thi_sinh_3: doithi.thiSinh[2] ? doithi.thiSinh[2]['hoTen'] : ''
+          });
+          
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
+            }
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
+          }
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "ChungNhan-" + String(doithi.tenDoiThi).replace(/ /g, "") + ".docx");
+        });
+      },
+      exportChungNhanProcon (doithi) {
+        loadFile(window.location.origin + "/docs/chungnhan_procon.docx", function(
+        // loadFile("http://127.0.0.1:8887/chungnhan_procon.docx", function(
+          error,
+          content
+        ) {
+          if (error) {
+            throw error;
+          }
+          const zip = new PizZip(content);
+          const doc = new docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+          doc.setData({
+            Hang_giai_thuong: doithi.hangGiaiThuong ? doithi.hangGiaiThuong : '',
+            Ten_doi_thi: doithi.tenDoiThi ? doithi.tenDoiThi : '',
+            Ten_thi_sinh_1: doithi.thiSinh[0] ? doithi.thiSinh[0]['hoTen'] : '',
+            Ten_thi_sinh_2: doithi.thiSinh[1] ? doithi.thiSinh[1]['hoTen'] : '',
+            Ten_thi_sinh_3: doithi.thiSinh[2] ? doithi.thiSinh[2]['hoTen'] : ''
+          });
+          
+          try {
+            doc.render();
+          } catch (error) {
+            function replaceErrors(key, value) {
+              if (value instanceof Error) {
+                return Object.getOwnPropertyNames(value).reduce(function(
+                  error,
+                  key
+                ) {
+                  error[key] = value[key];
+                  return error;
+                },
+                {});
+              }
+              return value;
+            }
+            if (error.properties && error.properties.errors instanceof Array) {
+              const errorMessages = error.properties.errors
+                .map(function(error) {
+                  return error.properties.explanation;
+                })
+                .join("\n");
+              console.log("errorMessages", errorMessages);
+            }
+            throw error;
+          }
+          const out = doc.getZip().generate({
+            type: "blob",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          });
+          saveAs(out, "ChungNhan-" + String(doithi.tenDoiThi).replace(/ /g, "") + ".docx");
         });
       },
       changePageDanhSachThiSinh (config) {
@@ -1548,7 +1866,7 @@ export default {
     padding-left: 0px !important;
     padding-right: 0px !important;
   }
-  .table-kq td button:nth-child(2) {
+  .table-kq .v-row-group__header td button:nth-child(2) {
     display: none !important;
   }
   .table-kq .v-row-group__header {

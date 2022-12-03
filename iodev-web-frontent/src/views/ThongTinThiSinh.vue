@@ -275,29 +275,4 @@ export default {
     min-height: 36px !important;
   }
 }
-
-
-table {  
-    font-family: arial, sans-serif;  
-    border-collapse: collapse;  
-    width: 100%;  
-}  
-
-td {  
-    border: 1px solid #dddddd;  
-    text-align: left;  
-    padding: 8px;  
-} 
-th{
-    border: 1px solid #dddddd;  
-    text-align: left;  
-    padding: 8px;  
-    background-color: #111;  
-    color:white;
-}
-
-tr:nth-child(odd) {  
-    background-color: #dddddd;  
-}
-
 </style>

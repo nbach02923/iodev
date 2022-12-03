@@ -176,10 +176,10 @@
               <div class="triangle-header"></div>
             </v-col>
             <v-spacer></v-spacer>
-            <v-col v-if="isSigned" class="d-flex align-center py-0 px-0" style="max-width: 205px;height: 30px;">
+            <v-col v-if="isSigned" class="d-flex align-center py-0 px-0" style="max-width: 390px;height: 30px;">
               <v-btn :loading="loadingExport" :disabled="loadingExport"
                 depressed
-                class="mx-0"
+                class="mx-0 mr-3"
                 small
                 color="green"
                 @click="exportExcel"
@@ -188,6 +188,19 @@
                 <v-icon size="18" class="white--text">mdi-file-excel-outline</v-icon>
                 &nbsp;
                 <span class="white--text">Xuất danh sách thí sinh</span>
+              </v-btn>
+
+              <v-btn :loading="loadingExport" :disabled="loadingExport"
+                depressed
+                class="mx-0"
+                small
+                color="green"
+                @click="exportQrCode"
+                style="float: right"
+                >
+                <v-icon size="18" class="white--text">mdi-qrcode</v-icon>
+                &nbsp;
+                <span class="white--text">Xuất mã QR thí sinh</span>
               </v-btn>
             </v-col>
           </v-row>
@@ -313,8 +326,8 @@
                       <div>{{ item.email}}</div>
                     </template>
                     <template v-slot:item.action="{ item }">
-                      <div v-if="chiTietCuocThi.tinhTrang == 1">
-                        <v-tooltip top>
+                      <div v-if="isSigned">
+                        <v-tooltip top v-if="chiTietCuocThi.tinhTrang == 1 || checkRoleAction('VAITRO_QUANTRIHETHONG')">
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn small @click.stop="showEditThiSinh(item)" color="#2161b1" text icon class="mr-3" v-bind="attrs" v-on="on">
                               <v-icon size="22">mdi-pencil</v-icon>
@@ -323,7 +336,7 @@
                           <span>Sửa thông tin thí sinh</span>
                         </v-tooltip>
 
-                        <v-tooltip top>
+                        <v-tooltip top v-if="chiTietCuocThi.tinhTrang == 1 || checkRoleAction('VAITRO_QUANTRIHETHONG')">
                           <template v-slot:activator="{ on, attrs }">
                             <v-btn small @click.stop="deleteThiSinh(item)" color="red" text icon class="" v-bind="attrs" v-on="on">
                               <v-icon size="22">mdi-delete</v-icon>
@@ -332,7 +345,7 @@
                           <span>Xóa đăng ký</span>
                         </v-tooltip>
 
-                        <v-tooltip top>
+                        <v-tooltip top v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')">
                           <template v-slot:activator="{on, attrs}">
                           <v-btn small @click.stop="inTheThiSinh(item)" text icon class="" v-bind="attrs" v-on="on">
                             <v-icon size="22">mdi-printer</v-icon>
@@ -3179,6 +3192,34 @@ export default {
           });
           saveAs(out, "DanhSachDuThi.docx");
         });
+      },
+      exportQrCode () {
+        let vm = this
+        if (vm.loadingExport) {
+          return
+        }
+        vm.loadingExport = true
+        let dataPost = {}
+        let param = {
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          params: {},
+          responseType: 'blob'
+        }
+        axios.post('/api/thisinhs/' + vm.id + '/doanthis/' + vm.thongTinDoanThi.id + '/export', dataPost, param).then(function (response) {
+          vm.loadingExport = false
+          let a = document.createElement('a')
+          document.body.appendChild(a)
+          a.style = 'display: none'
+          let url = window.URL.createObjectURL(response.data)
+          a.href = url
+          a.download = 'QrCodeThiSinh.xlsx'
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }).catch(xhr => {
+          vm.loadingExport = false
+        })
       },
       showThiSinhXoa () {
         let vm = this
