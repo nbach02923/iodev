@@ -1667,14 +1667,14 @@ export default {
               }
               return value;
             }
-            console.log(JSON.stringify({ error: error }, replaceErrors));
+            //console.log(JSON.stringify({ error: error }, replaceErrors));
             if (error.properties && error.properties.errors instanceof Array) {
               const errorMessages = error.properties.errors
                 .map(function(error) {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }
@@ -1715,14 +1715,14 @@ export default {
             }
             return value;
           }
-          console.log(JSON.stringify({ error: error }, replaceErrors));
+          //console.log(JSON.stringify({ error: error }, replaceErrors));
           if (error.properties && error.properties.errors instanceof Array) {
             const errorMessages = error.properties.errors
               .map(function(error) {
                 return error.properties.explanation;
               })
               .join("\n");
-            console.log("errorMessages", errorMessages);
+            //console.log("errorMessages", errorMessages);
           }
           throw error;
         }
@@ -1891,7 +1891,7 @@ export default {
           "nganhDaoTao": item.thiSinhSuggest.nganhDaoTao,
           "datGiaiThuong": item.thiSinhSuggest.datGiaiThuong
         }
-        console.log('vm.thongTinThiSinh', thongTinThiSinh)
+        //console.log('vm.thongTinThiSinh', thongTinThiSinh)
         if (vm.loading) {
           return
         }
@@ -1940,7 +1940,7 @@ export default {
           "nganhDaoTao": vm.thiSinhSuggested.nganhDaoTao,
           "datGiaiThuong": vm.thiSinhSuggested.datGiaiThuong
         }
-        console.log('vm.thongTinThiSinh', thongTinThiSinh)
+        //console.log('vm.thongTinThiSinh', thongTinThiSinh)
         if (vm.loading || !vm.doiThiSelected) {
           return
         }
@@ -2147,8 +2147,8 @@ export default {
           })
           
           // 
-          console.log('danhSachThiSinh5555', vm.danhSachThiSinh)
-          console.log('danhSachKhoiThi5555', vm.danhSachKhoiThi)
+          //console.log('danhSachThiSinh5555', vm.danhSachThiSinh)
+          //console.log('danhSachKhoiThi5555', vm.danhSachKhoiThi)
         }).catch(function () {
           vm.loadingDataDanhSachThiSinh = false
         })
@@ -2230,7 +2230,7 @@ export default {
             size: 10000
           }
         }
-        console.log('filtergetDanhSachDoiThi', filter)
+        //console.log('filtergetDanhSachDoiThi', filter)
         vm.$store.dispatch('collectionFilter', filter).then(function (response) {
           response.forEach(element => {
             element['doiThiId'] = element.id
@@ -2257,7 +2257,7 @@ export default {
             })
           }
           // 
-          console.log('danhSachDoiThi2', vm.danhSachDoiThi)
+          //console.log('danhSachDoiThi2', vm.danhSachDoiThi)
         }).catch(function () {
         })
       },
@@ -2467,7 +2467,7 @@ export default {
             // }
             vm.thongTinThiSinh.ngaySinh = vm.formatDateInput(vm.ngaySinhCreate)
             vm.thongTinThiSinh.doanThiId = vm.thongTinDoanThi.id
-            console.log('thongTinThiSinh', vm.thongTinThiSinh)
+            //console.log('thongTinThiSinh', vm.thongTinThiSinh)
             let filter = {
               collectionName: 'cuocthis',
               collectionId: vm.id,
@@ -2678,8 +2678,8 @@ export default {
           }
         } catch (error) {
         }
-        console.log('vm.thongTinHlv', vm.thongTinHlv)
-        console.log('noiDungThi', vm.noiDungDuThiHlv)
+        //console.log('vm.thongTinHlv', vm.thongTinHlv)
+        //console.log('noiDungThi', vm.noiDungDuThiHlv)
         if (vm.loading) {
           return
         }
@@ -2762,8 +2762,8 @@ export default {
             no: 'Không'
           },
           callback: () => {
-            console.log('danhSachThi', danhSachThi)
-            console.log('danhSachThi2', item)
+            //console.log('danhSachThi', danhSachThi)
+            //console.log('danhSachThi2', item)
             // -----------------
             let filter = {
               collectionName: 'danhsachthis',
@@ -3034,7 +3034,7 @@ export default {
                 element['doiThis'] = doiThiArr
             }
         });
-        console.log('dsthi1', dsthi1)
+        //console.log('dsthi1', dsthi1)
         let dataExport = []
         let stt = 0
         dsthi1.forEach(element => {
@@ -3147,7 +3147,7 @@ export default {
           "emailPhoDoan": emailPhoDoan,
           "dsthi": dataExport
         }
-        console.log('dataDoc', dataDoc)
+        //console.log('dataDoc', dataDoc)
         loadFile("http://127.0.0.1:8887/danhsachthisinh.docx", function(
           error,
           content
@@ -3174,14 +3174,14 @@ export default {
               }
               return value;
             }
-            console.log(JSON.stringify({ error: error }, replaceErrors));
+            //console.log(JSON.stringify({ error: error }, replaceErrors));
             if (error.properties && error.properties.errors instanceof Array) {
               const errorMessages = error.properties.errors
                 .map(function(error) {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }

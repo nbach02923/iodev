@@ -34,7 +34,7 @@ export default {
     // if (router.path === '/') {
     //   this.$router.push({ path: '/dang-nhap' })
     // }
-    console.log('router', router)
+    //console.log('router', router)
     let searchParams = window.location.href.split("?")[1]
     if (searchParams) {
       let email = decodeURIComponent(String(vm.getSearchParams(searchParams, "email")))

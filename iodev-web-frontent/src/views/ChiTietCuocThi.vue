@@ -1117,7 +1117,7 @@ export default {
                   class: 'th-center py-2'
                 }
               })
-              // console.log('headerNoiDung', vm.headerNoiDung)
+              //console.log('headerNoiDung', vm.headerNoiDung)
             }
           }
           vm.loadingDataTongHopDangKy = false
@@ -1382,7 +1382,7 @@ export default {
       pickFileImport (khoiThi) {
         let vm = this
         vm.khoiThiImport = khoiThi
-        console.log('vm.khoiThiImport', vm.khoiThiImport)
+        //console.log('vm.khoiThiImport', vm.khoiThiImport)
         document.getElementById('fileImportKhoiThi').value = ''
         document.getElementById('fileImportKhoiThi').click()
       },
@@ -1468,7 +1468,7 @@ export default {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }
@@ -1483,7 +1483,6 @@ export default {
       },
       exportChungNhanCaNhan (thisinh) {
         loadFile(window.location.origin + "/docs/chungnhan_canhan.docx", function(
-        // loadFile("http://127.0.0.1:8887/chungnhan_canhan.docx", function(
           error,
           content
         ) {
@@ -1520,7 +1519,7 @@ export default {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }
@@ -1542,7 +1541,6 @@ export default {
       },
       exportChungNhanTapThe (doithi) {
         loadFile(window.location.origin + "/docs/chungnhan_pmnm.docx", function(
-        // loadFile("http://127.0.0.1:8887/chungnhan_pmnm.docx", function(
           error,
           content
         ) {
@@ -1582,7 +1580,7 @@ export default {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }
@@ -1636,7 +1634,7 @@ export default {
                   return error.properties.explanation;
                 })
                 .join("\n");
-              console.log("errorMessages", errorMessages);
+              //console.log("errorMessages", errorMessages);
             }
             throw error;
           }
