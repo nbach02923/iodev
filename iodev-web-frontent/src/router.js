@@ -46,6 +46,12 @@ export default new Router({
           name: 'ThongTinToChuc',
           component: () => import('@/views/ThongTinToChuc'),
           props: true
+        },
+        {
+          path: '/thisinh/:id',
+          name: 'ThongTinThiSinh',
+          component: () => import('@/views/ThongTinThiSinh'),
+          props: true
         }
       ],
     },

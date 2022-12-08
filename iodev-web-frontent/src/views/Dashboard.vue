@@ -133,6 +133,22 @@
             </v-col>
           </v-row>
           <v-row class="my-0 mb-3">
+            <!-- <v-col v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" cols="12" class="py-0" style="text-align: right;">
+              <v-btn small class="mr-3"
+                color="primary"
+                @click="pickFileImport('canhan')"
+              >
+                <v-icon size="18" >mdi-import</v-icon>&nbsp;
+                Import khối cá nhân
+              </v-btn>
+              <v-btn small class=""
+                color="primary"
+                @click="pickFileImport('tapthe')"
+              >
+                <v-icon size="18" >mdi-import</v-icon>&nbsp;
+                Import khối tập thể
+              </v-btn>
+            </v-col> -->
             <v-col cols="12" class="pt-0">
               <v-data-table
                 :headers="headers"
@@ -199,6 +215,7 @@
         <!--  -->
       </div>
     </v-container>
+    <input v-if="checkRoleAction('VAITRO_QUANTRIHETHONG')" type="file" id="fileImportKhoiThi" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @input="importKhoiThi($event)" style="display:none">
   </div>
 </template>
 
@@ -273,6 +290,8 @@
       itemsPerPage: 20,
       total: 0,
       pageCount: 0,
+      loadingImport: '',
+      typeImport: ''
     }),
     created () {
       let vm = this
@@ -401,6 +420,33 @@
           let ref = '/dang-ky-thi/' + item.id
           vm.$router.push({ path: '/dang-nhap?redirect=' + ref})
         }
+      },
+      pickFileImport (type) {
+        let vm = this
+        vm.typeImport = type
+        document.getElementById('fileImportKhoiThi').value = ''
+        document.getElementById('fileImportKhoiThi').click()
+      },
+      importKhoiThi () {
+        let vm = this
+        if (vm.loadingImport) {
+          return
+        }
+        vm.loadingImport = true
+        let filesx = $('#fileImportKhoiThi')[0].files
+        let file = filesx[0]
+
+        let dataPost = new FormData()
+        dataPost.append("file", file)
+        dataPost.append("fileType", "xlsx")
+        let url = vm.typeImport == 'canhan' ? '/api/cuocthis/khoithicanhan/import' : '/api/cuocthis/khoithitapthe/import'
+        axios.post(url, dataPost, param).then(function (response) {
+          vm.loadingImport = false
+          toastr.success('Import danh sách thành công')
+        }).catch(xhr => {
+          vm.loadingImport = false
+          toastr.error('Import danh sách thất bại')
+        })
       },
       changePage (config) {
         let vm = this

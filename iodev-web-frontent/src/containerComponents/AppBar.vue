@@ -2,7 +2,7 @@
   <v-app-bar app>
     <v-app-bar-nav-icon class="btn-visible-drawer pl-2" @click.stop="changeDrawer" style="color: #2161B1;"></v-app-bar-nav-icon>
     <div id="header-app">
-      <header id="banner" class="px-5">
+      <header id="banner" style="padding-right: 20px ; padding-left: 20px " >
         <div class="container layout wrap" style=""> 
           <a href="javascript:;" class="py-0 px-0"> 
             <img class="logo-banner" :src="`${publicPath}/images/logo-olp.jpg`">
@@ -22,7 +22,7 @@
           <span>Đăng nhập</span>
         </div>
       </v-btn> -->
-      <v-btn v-if="!isSigned" style="position: absolute;max-width: 300px;top: 10px;right: 10px;" class="d-inline-block"
+      <v-btn v-if="!isSigned" style="position: absolute;max-width: 300px;top: 10px;right: 10px;display: inline-block" class="btn-sign"
         color="primary"
         dark
         text
@@ -31,7 +31,7 @@
         <v-icon color="#fff" class="mr-3">mdi-login-variant</v-icon>
         <span style="color: #fff">Đăng nhập</span>
       </v-btn>
-      <div v-if="isSigned" style="position: absolute;max-width: 300px;top: 15px;right: 10px;" class="d-inline-block">
+      <div v-if="isSigned" style="position: absolute;max-width: 300px;top: 15px;right: 10px;display: inline-block" class="btn-sign">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
